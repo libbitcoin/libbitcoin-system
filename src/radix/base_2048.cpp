@@ -24,16 +24,15 @@
 #include <bitcoin/system/words/words.hpp>
 
 // base2048
-// Base 2048 is an ascii data encoding with a domain of 2048 symbols (words).
-// 2048 is 2^11 so this is a 11<=>8 bit mapping.
-// The 5 bit encoding (words) is authoritative as byte encoding is padded.
-// Invalid padding results in a decoding error.
+// Base 2048 is ascii data encoding with domain of 2048 symbols (words).
+// 2048 is 2^11 so this is 11<=>8 bit mapping.
+// 5 bit encoding (words) is authoritative as byte encoding is padded.
+// Invalid padding results in decoding error.
 
 namespace libbitcoin {
 namespace system {
 
-// Use the BIP39 dictionary set.
-// This allows the encoding to map to BIP39 in any language.
+// Use BIP39 dictionary set. Allows encoding to map to BIP39 in any language.
 static const words::mnemonic::catalogs base2048
 {
     {
@@ -126,17 +125,17 @@ base2048_chunk base2048_pack(const data_chunk& unpacked) NOEXCEPT
     while (!source.is_exhausted())
         packed.push_back(source.read_bits(11));
 
-    // Remove an element that is only padding, assumes base2048_unpack encoding.
-    // The bit writer writes zeros past end as padding.
-    // This is a ((n * 8) / 11) operation, (11 - ((n * 8) % 11)) bits are pad.
-    // This padding is in addition to that added by unpacking. When unpacked
-    // and then packed this will always result in either no pad bits or a full
-    // element of zeros that is padding. This should be apparent from the fact
-    // that the number of used bits is unchanged. Remainder indicates padding.
+    // Remove element that is only padding, assumes base2048_unpack encoding.
+    // Bit writer writes zeros past end as padding.
+    // This is ((n * 8) / 11) operation, (11 - ((n * 8) % 11)) bits are pad.
+    // This padding is in addition to that added by unpacking. When unpacked and
+    // then packed this always results in either no pad bits or full element of
+    // zeros that is padding, apparent from number of used bits being unchanged.
+    // Remainder indicates padding.
     if (!is_zero((unpacked.size() * 8) % 11))
     {
-        // If pad element is non-zero the unpacking was not base2048_unpack.
-        // So we return a failure where the condition is detected.
+        // If pad element is non-zero, unpacking was not base2048_unpack,
+        // so return failure where condition is detected.
         packed.resize(is_zero(packed.back()) ? sub1(packed.size()) : zero);
     }
 
@@ -153,8 +152,8 @@ data_chunk base2048_unpack(const base2048_chunk& packed) NOEXCEPT
 
     sink.flush();
 
-    // The bit reader reads zeros past end as padding.
-    // This is a ((n * 11) / 8) operation, so (8 - ((n * 11) % 8)) are pad.
+    // Bit reader reads zeros past end as padding.
+    // This is ((n * 11) / 8) operation, so (8 - ((n * 11) % 8)) are pad.
     ////const auto padded = (packed.size() * 11) % 8 != 0;
     return unpacked;
 }

@@ -400,9 +400,9 @@ inline void runner::build_info() const NOEXCEPT
         "\nSTL     : " << library << std::endl;
 }
 
-// Debug runtime reports go to stderr (no dialogs), and leaks are reported at
-// exit unless --detect_memory_leaks=0 (a greater value breaks on that
-// allocation number).
+// Debug runtime reports go to stderr (no dialogs),
+// leaks reported at exit unless --detect_memory_leaks=0
+// (greater value breaks on that allocation number).
 inline void runner::configure_runtime() const NOEXCEPT
 {
 #if defined(HAVE_MSC) && defined(_DEBUG)

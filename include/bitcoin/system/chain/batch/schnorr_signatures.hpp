@@ -32,8 +32,8 @@ namespace chain {
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
 /// Accumulator of captured schnorr verification rows (fixed-width AoS).
-/// Threshold rows are indistinguishable from single rows in the store (the
-/// correlate column carries only the block link); counted for reporting.
+/// Threshold rows indistinguishable from single rows in store (correlate column
+/// carries only block link); counted for reporting.
 class schnorr_signatures
 {
 public:

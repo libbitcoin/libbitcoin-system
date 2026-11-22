@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 namespace words {
 
-// Search container for a set of dictionaries with POD word lists.
+// Search container for set of dictionaries with POD word lists.
 // POD dictionaries wrapper with per dictionary O(n) search and O(1) index.
 // Search order is guaranteed, always returns first match.
 template<size_t Count, size_t Size>
@@ -60,37 +60,37 @@ public:
 
     /// Search.
 
-    /// The word corresponding to the index in the specified language.
+    /// Word corresponding to index in specified language.
     /// Empty string if language does not exist.
     std::string at(size_t index, language identifier) const NOEXCEPT;
 
     /// Empty string for any index > Size.
-    /// The word corresponding to each index in the specified language.
-    /// The words are returned in the same order as the indexes list.
+    /// Word corresponding to each index in specified language.
+    /// Words returned in same order as indexes list.
     /// Empty list if language does not exist.
     string_list at(const search& indexes, language identifier) const NOEXCEPT;
 
     /// -1 if word is not found in the specified language.
     int32_t index(const std::string& word, language identifier) const NOEXCEPT;
 
-    /// -1 for any word that is not found in the specified language.
-    /// The word index for each word that is found in the specified language.
-    /// The word indexes are returned in the same order as the words list.
+    /// -1 for any word not found in specified language.
+    /// Word index for each word found in specified language.
+    /// Word indexes returned in same order as words list.
     /// Empty list if language does not exist.
     result index(const string_list& words, language identifier) const NOEXCEPT;
 
-    /// The language that contains the specified word, or language::none.
-    /// If language::none is specified all dictionaries are searched.
-    /// If any other language is specified the search is limited to it.
-    /// Dictionary order is not preserved in the case of conflicts.
+    /// Language that contains specified word, or language::none.
+    /// If language::none specified all dictionaries are searched.
+    /// If any other language specified search is limited to it.
+    /// Dictionary order not preserved in case of conflicts.
     /// BIP39 zh_Hans and zh_Hant dictionaries have 1275 overlapping words.
     language contains(const std::string& word,
         language identifier=language::none) const NOEXCEPT;
 
-    /// The language that contains all specified words, or language::none.
-    /// If language::none is specified all dictionaries are searched.
-    /// If any other language is specified the search is limited to it.
-    /// Dictionary order is not preserved in the case of conflicts.
+    /// Language that contains all specified words, or language::none.
+    /// If language::none specified all dictionaries are searched.
+    /// If any other language specified search is limited to it.
+    /// Dictionary order not preserved in case of conflicts.
     /// BIP39 zh_Hans and zh_Hant dictionaries have 1275 overlapping words.
     language contains(const string_list& words,
         language identifier=language::none) const NOEXCEPT;
@@ -102,13 +102,13 @@ private:
     typename list::const_iterator to_dictionary(
         const std::string& name) const NOEXCEPT;
 
-    // This dictionary collection creates only one word of state for each
-    // dictionary reference, each which creates only one word of state for the
-    // dictionary language identifier. Word lists are not loaded into a vector.
-    // Dictionaries are search wrappers around a POD word list. Statically
-    // declared word list references are passed through construction here into
-    // the dictionary elements, which retain the reference. This dictionaries
-    // search wrapper is held by the owner of the word list references.
+    // Collection creates only one word of state for each dictionary reference,
+    // each of which creates only one word of state for dictionary language
+    // identifier. Word lists are not loaded into a vector. Dictionaries are
+    // search wrappers around POD word list. Statically declared word list
+    // references are passed through construction here into dictionary elements,
+    // which retain the reference. Dictionaries search wrapper is held by owner
+    // of word list references.
     const list dictionaries_;
 };
 

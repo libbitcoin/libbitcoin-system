@@ -72,8 +72,8 @@ public:
     using span_type = unsigned_exact_type<span / byte_bits>;
     using small_type = unsigned_type<m_bytes + e_bytes>;
 
-    /// A zero value implies an invalid (including zero) parameter.
-    /// Invalid if a padding bit is set. Allows non-minimal exponent encoding.
+    /// Zero value implies invalid (including zero) parameter.
+    /// Invalid if padding bit is set. Allows non-minimal exponent encoding.
     static constexpr span_type expand(small_type exponential) NOEXCEPT;
 
     /// (m * base^e) bit-encoded as [00eeeee][mmmmmmmm][mmmmmmmm][mmmmmmmm].

@@ -21,10 +21,10 @@
 
 // Field
 // ============================================================================
-// Multiplication is shift and reduce, with the addend and the reduction
-// polynomial masked by the multiplier and carry bits. Inversion is
-// exponentiation over the same multiplication, so neither the operands nor
-// the share coordinates index memory or select a branch.
+// Multiplication is shift and reduce, with addend and reduction
+// polynomial masked by multiplier and carry bits. Inversion is
+// exponentiation over same multiplication, so neither operands
+// nor share coordinates index memory or select a branch.
 
 namespace libbitcoin {
 namespace system {
@@ -44,7 +44,8 @@ multiply(uint8_t left, uint8_t right) NOEXCEPT
     for (auto bit = zero; bit < byte_bits; ++bit)
     {
         const auto low = bit_and<uint8_t>(multiplier, bit_lo<uint8_t>);
-        const auto addend = bit_and<uint8_t>(multiplicand, twos_complement(low));
+        const auto mask = twos_complement(low);
+        const auto addend = bit_and<uint8_t>(multiplicand, mask);
         product = bit_xor<uint8_t>(product, addend);
 
         const auto high = shift_right<uint8_t>(multiplicand, sub1(byte_bits));

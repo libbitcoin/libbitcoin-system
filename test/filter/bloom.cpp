@@ -1073,8 +1073,8 @@ BC_AUTO_TEST_CASE(bloom__screen__4_bits_forward__16_screens)
     auto next = bloom_t::empty;
     size_t count{};
 
-    // This exhausts the full uint32_t domain and returns exactly limit values.
-    // The count < limit condition just speeds up the test, still slow though.
+    // Exhausts full uint32_t domain and returns exactly limit values.
+    // count < limit condition speeds up test, still slow though.
     for (uint32_t finger{}; count < limit; ++finger)
     {
         const auto previous = next;
@@ -1117,8 +1117,10 @@ BC_AUTO_TEST_CASE(bloom__screen__4_bits_reverse__16_screens)
 #endif // HAVE_SLOW_TESTS
 
 // Runtime k selects the same bits as the equivalent compile time K.
-constexpr auto mixed_fixed_last = bloom<32, 8>::screen(bloom<32, 8>::screen(0b1111u, 42), 24, 8);
-constexpr auto mixed_dynamic_last = bloom<32, 8>::screen(bloom<32, 8>::screen(0b1111u, 42, 8), 24);
+constexpr auto first_fixed = bloom<32, 8>::screen(0b1111u, 42);
+constexpr auto first_dynamic = bloom<32, 8>::screen(0b1111u, 42, 8);
+constexpr auto mixed_fixed_last = bloom<32, 8>::screen(first_fixed, 24, 8);
+constexpr auto mixed_dynamic_last = bloom<32, 8>::screen(first_dynamic, 24);
 static_assert(mixed_fixed_last == mixed_dynamic_last);
 static_assert(bloom<0, 0>::is_screened(0, 42, 0));
 static_assert(bloom<1, 0>::is_screened(0, 42, 0));

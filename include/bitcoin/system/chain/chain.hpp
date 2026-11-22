@@ -63,40 +63,39 @@
 // block(header::ptr, vector(transaction::ptr)::ptr)              33 byte copy (never copied)
 
 // Wire deserialization.
-// Objects deserialized off the p2p/server protocol are not aggregated into
+// Objects deserialized off p2p/server protocol are not aggregated into
 // composites. Message objects are fully self-deserializing. However it is
-// often necessary to iterate over collections of hashes and headers using a
-// sequence of closures, where one element is passed to the closure and the
-// next passed on its completion handler until all are processed. To avoid
-// copying, each element could be deserialized into vectors of shared pointers.
-// However a shared pointer to the containing object must be passed into the
-// closure for iteration, which keeps references to its members alive. Instead
-// an element may be passed as std::ref(element), avoiding the overhead of a
-// shared pointer copy, in the case where the parent object maintains lifetime.
+// often necessary to iterate over collections of hashes and headers using
+// sequence of closures, where one element is passed to closure and next
+// passed on its completion handler until all are processed. To avoid
+// copying, each element could be deserialized into vectors of shared
+// pointers. However shared pointer to containing object must be passed
+// into closure for iteration, which keeps references to its members alive.
+// Instead element may be passed as std::ref(element), avoiding overhead of
+// shared pointer copy, where parent object maintains lifetime.
 
 // Wire serialization.
-// Objects obtained from the store in response to p2p/server queries are
+// Objects obtained from store in response to p2p/server queries are
 // deserialized in parts and aggregated. For example, inputs and outputs are
-// obtained for a transaction, and then passed into the transaction, the header
-// and transactions are obtained for a block and then passed into the block.
-// To avoid costly object copies/moves of collections, we store inputs::cptr,
-// and outputs::cptr on transaction, and transactions::cptr on block. Otherwise
-// a copy/move operation is required for at least a vector of pointers, which
-// may number in the thousands, where pointers are not used in the vector this
-// would apply to all object instances as well.
+// obtained for transaction and then passed into transaction, header and
+// transactions are obtained for block and then passed into block. To avoid
+// costly object copies/moves of collections, inputs::cptr and outputs::cptr are
+// stored on transaction, and transactions::cptr on block. Otherwise copy/move
+// operation is required for at least vector of pointers, which may number in
+// thousands, where pointers are not used in vector this would apply to all
+// object instances as well.
 
 // Consensus validation.
-// Op.data is stored as a data_ptr, allowing all push_data to be stacked with a
+// Op.data is stored as data_ptr, allowing all push_data to be stacked with
 // pointer copy. Operations are smaller than pointers, so these are copied.
 // Witnesses and scripts contain vectors of pointers and operations,
 // respectively, so these two objects are always moved as pointers. Point and
 // header contain hashes, so these are always moved as pointers. Points,
 // prevouts, outputs, inputs and transactions are much larger than pointers, so
-// these can reasonably be moved by pointer, although at a 16 byte per instance
-// storage cost. Inputs, and outputs must be created as sets and then moved
-// into a new transaction for signature hashing, so these are retained by
-// transaction as a vector::ptr. A transaction set is never added to a block
-// for validation, but transactions are retained as vector::ptr for wire
-// serialization.
+// these can reasonably be moved by pointer, although at 16 byte per instance
+// storage cost. Inputs and outputs must be created as sets and then moved into
+// new transaction for signature hashing, so these are retained by transaction
+// as vector::ptr. Transaction set is never added to block for validation, but
+// transactions are retained as vector::ptr for wire serialization.
 
 #endif

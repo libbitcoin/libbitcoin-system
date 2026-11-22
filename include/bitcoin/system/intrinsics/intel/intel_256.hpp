@@ -259,7 +259,7 @@ INLINE Word get(xint256_t a) NOEXCEPT
 }
 
 // AVX
-// Low order word to the left.
+// Low order word to left.
 template <typename xWord, if_same<xWord, xint256_t> = true>
 INLINE xint256_t set(
     uint64_t x01, uint64_t x02, uint64_t x03, uint64_t x04) NOEXCEPT
@@ -387,7 +387,7 @@ INLINE void store_aligned(xint256_t& bytes, xint256_t a) NOEXCEPT
 
 /// compare/select
 /// ---------------------------------------------------------------------------
-/// Masks are all bits set (true) or unset (false) per word.
+/// Masks all bits set (true) or unset (false) per word.
 
 // AVX2
 INLINE xint256_t andnot(xint256_t a, xint256_t b) NOEXCEPT
@@ -422,7 +422,7 @@ INLINE bool any(xint256_t a) NOEXCEPT
 }
 
 // AVX2
-// The index of the first unequal byte, or the word size if equal.
+// Index of first unequal byte, or word size if equal.
 INLINE size_t first_unequal(xint256_t a, xint256_t b) NOEXCEPT
 {
     const auto equal = _mm256_movemask_epi8(_mm256_cmpeq_epi8(a, b));
@@ -435,8 +435,8 @@ INLINE size_t first_unequal(xint256_t a, xint256_t b) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX2
-// vc++ (19.51) can encode a gather index in ymm16-31 with EVEX.P1[2] clear,
-// which is illegal without APX, so its gathers load each lane.
+// vc++ (19.51) can encode gather index in ymm16-31 with EVEX.P1[2] clear,
+// illegal without APX, so its gathers load each lane.
 INLINE xint256_t gather(const uint64_t* table, xint256_t index) NOEXCEPT
 {
 #if defined(HAVE_MSC)

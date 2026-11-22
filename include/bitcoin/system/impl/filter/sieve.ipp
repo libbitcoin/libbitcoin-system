@@ -22,15 +22,14 @@
 // [------------------sieve-----------][--------------link--------------]
 // [[select][--------screens---------]][--------------link--------------]
 
-// To minimize computation in alignment the sieve is defined as two dimensional
-// table of precomputed masks. One dimension is determined by the screen
-// selector and other is used to iterate through masks for the selected screen.
-// A single screen requires one mask, a double two, and so on. The max selector
-// value indicates that the first bit of the screen is a sentinel. This is set
-// for either terminal (all other bits set) or overflow (no other bits set).
-// If the sentinel is unset then the max screen is in used on remaining bits.
-// The seive should be terminal if and only if the link is terminal, and when
-// overflowed implies that the bucket is saturated, rendering it unscreened.
+// To minimize computation in alignment sieve is defined as two dimensional
+// table of precomputed masks. One dimension is determined by screen selector
+// and other is used to iterate through masks for selected screen. Single screen
+// requires one mask, double two, and so on. Max selector value indicates first
+// bit of screen is sentinel, set for either terminal (all other bits set) or
+// overflow (no other bits set). If sentinel is unset then max screen is in used
+// on remaining bits. Seive should be terminal if and only if link is terminal,
+// and when overflowed implies bucket is saturated, rendering it unscreened.
 
 namespace libbitcoin {
 namespace system {
@@ -220,7 +219,7 @@ consteval CLASS::masks_t CLASS::generate_masks() NOEXCEPT
     }
 
     // Unset last row high order screen bit to avoid sentinel conflict.
-    // This may result in one empty mask, and therefore a false positive.
+    // May result in one empty mask, and therefore false positive.
     for (size_t column{}; column < screens; ++column)
         set_right_into(table[off[sub1(screens)] + column], sentinel, false);
 

@@ -24,8 +24,8 @@
 #include <unordered_map>
 #include <bitcoin/system/define.hpp>
 
-// The category parameter must be namespaced. The category name must correspond
-// to the error type by the naming convention: category_t as the error type.
+// Category parameter must be namespaced. Category name must correspond to error
+// type by naming convention: category_t as error type.
 // std::hash specialization is unrelated to error registration.
 #define DECLARE_STD_ERROR_REGISTRATION(cat) \
 namespace std { \
@@ -60,12 +60,13 @@ public: \
     static bool contains(const std::error_code& ec) noexcept; \
     virtual const char* name() const noexcept; \
     virtual std::string message(int condition) const noexcept; \
-    virtual std::error_condition default_error_condition(int value) const noexcept; \
+    virtual std::error_condition default_error_condition( \
+        int value) const noexcept; \
 }; \
 api std::error_code make_error_code(cat##_t value) noexcept; \
 api std::error_condition make_error_condition(cat##_t value) noexcept
 
-// This adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires the
+// Adds equivalent() to DECLARE_ERROR_T_CODE_CATEGORY, which requires
 // corresponding DEFINE_ERROR_T_EQUIVALENCE. For use of codes with conditions.
 #define DECLARE_ERROR_T_CONDITION_CATEGORY(cat, api) \
 enum cat##_condition_t {};\
@@ -78,8 +79,10 @@ public: \
     static bool contains(const std::error_code& ec) noexcept; \
     virtual const char* name() const noexcept; \
     virtual std::string message(int condition) const noexcept; \
-    virtual std::error_condition default_error_condition(int value) const noexcept; \
-    virtual bool equivalent(const std::error_code& value, int condition) const noexcept; \
+    virtual std::error_condition default_error_condition( \
+        int value) const noexcept; \
+    virtual bool equivalent(const std::error_code& value, \
+        int condition) const noexcept; \
 }; \
 api std::error_code make_error_code(cat##_t value) noexcept; \
 api std::error_condition make_error_condition(cat##_t value) noexcept
@@ -99,7 +102,8 @@ std::string cat##_category::message(int condition) const noexcept \
     const auto message = messages.find(static_cast<cat##_t>(condition)); \
     return message == messages.cend() ? unmapped : message->second; \
 } \
-std::error_condition cat##_category::default_error_condition(int code) const noexcept \
+std::error_condition cat##_category::default_error_condition( \
+    int code) const noexcept \
 { \
     return std::error_condition(code, *this); \
 } \
@@ -116,7 +120,8 @@ std::error_condition make_error_condition(cat##_t value) noexcept \
 // Despite registration of condition, it is never evaluated without equivalence.
 // Define enumeration equivalence (if declared), return code.satisfies(condition).
 #define DEFINE_ERROR_T_EQUIVALENCE(cat, code, condition) \
-bool cat##_category::equivalent(const std::error_code& code, int condition) const noexcept
+bool cat##_category::equivalent(const std::error_code& code, \
+    int condition) const noexcept
 
 // Define enumeration mapping (always) to message text.
 #define DEFINE_ERROR_T_MESSAGE_MAP(cat) \

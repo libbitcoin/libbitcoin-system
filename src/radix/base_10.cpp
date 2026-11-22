@@ -26,24 +26,24 @@
 #include <bitcoin/system/serial/serialize.hpp>
 
 // base10
-// Base 10 is an ascii data encoding with a domain of 10 symbols (characters).
-// 10 is not a power of 2 so base10 is not a bit mapping.
-// base10 is 10^n, with power determined by the parameter 'decimal_places'.
-// Conversion range is limited to [0..2^64-1], decoded as uint64_t.
+// Base 10 is ascii data encoding with domain of 10 symbols (characters).
+// 10 is not power of 2 so base10 is not bit mapping.
+// base10 is 10^n, with power determined by parameter 'decimal_places'.
+// Conversion range limited to [0..2^64-1], decoded as uint64_t.
 // Encoding uses arabic numeral characters ['0'..'9'] and supports negative
-// powers using the '.' character delimiter. Leading zeros and trailing
-// delimiters are not emitted. Trailing zeros of a negative power are not
-// emitted. Leading zeros or delimiter are allowed. Empty string returns zero.
-// Fractional values are rounded up (away from zero). No other textual
-// encodings (e.g. "scientific notation") are supported. Integer conversion
-// depends on the serialization library, which depends on std::iostream.
+// powers using '.' character delimiter. Leading zeros and trailing delimiters
+// are not emitted. Trailing zeros of negative power are not emitted. Leading
+// zeros or delimiter are allowed. Empty string returns zero. Fractional values
+// are rounded up (away from zero). No other textual encodings (e.g. "scientific
+// notation") are supported. Integer conversion depends on serialization
+// library, which depends on std::iostream.
 
 namespace libbitcoin {
 namespace system {
 
-// Returns true if a character is one of [0-9].
-// The C standard library function 'isdigit' depends on the current locale
-// and doesn't necessarily correspond to our valid base10 encoding digits.
+// Returns true if character is one of [0-9].
+// C standard library function 'isdigit' depends on current locale and
+// doesn't necessarily correspond to our valid base10 encoding digits.
 // msvc++ 'isdigit' includes superscript characters like '²'.
 inline bool is_digit(const char character) NOEXCEPT
 {
@@ -74,8 +74,8 @@ bool decode_base10(uint64_t& out, const std::string& amount,
     auto actual_places = std::distance(point, value.cend());
     value.append(floored_subtract<size_t>(decimal_places, actual_places), '0');
 
-    // Remove digits from the end if there are too many.
-    // Value is truncated if trailing digits are non-zero.
+    // Remove digits from end if too many.
+    // Value truncated if trailing digits non-zero.
     auto truncated = false;
     if (actual_places > decimal_places)
     {

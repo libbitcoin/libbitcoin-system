@@ -414,9 +414,9 @@ BASELINE inline void hardware_check(const char* message) NOEXCEPT
 } // namespace system
 } // namespace libbitcoin
 
-/// Exit with the message before static initialization if the processor lacks a
-/// compiled extension. Use once, at file scope, in the first object linked into
-/// the executable (macOS runs initializers in link order).
+/// Exit with message before static initialization if processor lacks compiled
+/// extension. Use once, at file scope, in first object linked into executable
+/// (macOS runs initializers in link order).
 #if defined(_MSC_VER)
     #if defined(HAVE_X32)
         #define BC_HARDWARE_CHECK_SYMBOL "_bc_hardware_check_entry"

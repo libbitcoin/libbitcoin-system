@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 namespace words {
 
-// Search container for a dictionary of lexically-sorted words.
+// Search container for dictionary of lexically-sorted words.
 // POD dictionary wrapper with O(n) search and O(1) index.
 // Search order is guaranteed, always returns first match.
 template<size_t Size>
@@ -76,10 +76,10 @@ private:
     // This dictionary creates only this one word of state.
     const language identifier_;
 
-    // Arrays of words are declared statically and held by reference here.
-    // The array type is POD, so no words are copied into the array. Only
-    // this wrapper dictionary object is created for each word list, for
-    // each dictionaries object constructed by various mnemonic classes.
+    // Arrays of words are declared statically and held by reference here. Array
+    // type is POD, so no words are copied into array. Only this wrapper
+    // dictionary object is created for each word list, for each dictionaries
+    // object constructed by various mnemonic classes.
     const words& words_;
 };
 

@@ -176,8 +176,8 @@ bool bitcoin_uri::set_scheme(const std::string& scheme) NOEXCEPT
 
 bool bitcoin_uri::set_authority(const std::string& authority) NOEXCEPT
 {
-    // Using "bitcoin://" instead of "bitcoin:" is a common mistake, so we
-    // allow the authority in place of the path.
+    // Using "bitcoin://" instead of "bitcoin:" is common mistake, so allow
+    // authority in place of path.
     return set_path(authority);
 }
 

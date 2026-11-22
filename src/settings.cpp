@@ -734,20 +734,19 @@ void settings::initialize() NOEXCEPT
 
 // Computed properties.
 // ----------------------------------------------------------------------------
-// These are not used internal to system.
+// Not used internal to system.
 
 // The exact maximum amount of money (as of bip42).
 //*****************************************************************************
 // CONSENSUS: This assumes bip42 as otherwise money supply is unbounded.
 //*****************************************************************************
 //*****************************************************************************
-// CONSENSUS: The satoshi client uses a "sanity check" value that is
-// effectively based on a round but incorrect value of recursive_money,
-// which is higher than this true value. Despite comments to the contrary
-// in the satoshi code, the value could not be consensus critical unless it was
-// *less* than the true value. This is non a consensus-critical method, as the
-// consensus limit on money is stricly a function of subsidy recursion and
-// overspend constraints.
+// CONSENSUS: Satoshi client uses "sanity check" value effectively based on
+// round but incorrect value of recursive_money, which is higher than this true
+// value. Despite comments to the contrary in satoshi code, value could not be
+// consensus critical unless it was *less* than true value. This is not a
+// consensus-critical method, as consensus limit on money is strictly a function
+// of subsidy recursion and overspend constraints.
 //*****************************************************************************
 uint64_t settings::max_money() const NOEXCEPT
 {
@@ -788,7 +787,7 @@ uint32_t settings::flags() const NOEXCEPT
 
 // Computed properties.
 // ----------------------------------------------------------------------------
-// These are used by node.
+// Used by node.
 
 chain::checkpoints settings::sorted_checkpoints() const NOEXCEPT
 {
@@ -805,7 +804,7 @@ chain::checkpoint settings::top_checkpoint() const NOEXCEPT
 
 // Computed properties.
 // ----------------------------------------------------------------------------
-// These are used internal to system.
+// Used internal to system.
 
 // The lower bound for the retargeting timespan.
 uint32_t settings::minimum_timespan() const NOEXCEPT

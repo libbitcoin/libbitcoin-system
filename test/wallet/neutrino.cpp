@@ -3721,7 +3721,7 @@ BC_AUTO_TEST_CASE(neutrino__compute_header__filter_hash_out__matches)
 }
 
 // connected block
-// Expected filters are from the bip158 reference over the unmodified scripts.
+// Expected filters from bip158 reference over unmodified scripts.
 
 static const chain::header separator_header{ 1, null_hash, null_hash, 0, 0, 0 };
 

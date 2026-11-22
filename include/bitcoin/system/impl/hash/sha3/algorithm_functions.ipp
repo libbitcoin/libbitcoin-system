@@ -21,7 +21,7 @@
 
 // 3.2 Step Mappings, 3.3 KECCAK-p[b, nr]
 // ============================================================================
-// The state is a 5x5 array of 64 bit lanes, indexed as [x + 5 * y].
+// State is 5x5 array of 64 bit lanes, indexed as [x + 5 * y].
 
 namespace libbitcoin {
 namespace system {

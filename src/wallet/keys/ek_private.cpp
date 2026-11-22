@@ -50,8 +50,8 @@ ek_private ek_private::from_string(const std::string& encoded) NOEXCEPT
     // TODO: incorporate existing parser here, setting new members.
 
     encrypted_private key;
-    return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_private{ key } : ek_private{};
+    const auto valid = decode_base58(key, encoded) && verify_checksum(key);
+    return valid ? ek_private{ key } : ek_private{};
 }
 
 // Cast operators.

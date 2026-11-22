@@ -76,7 +76,8 @@ static bool address_validate(const ek_salt& salt,
     const payment_address& address) NOEXCEPT
 {
     const auto hash = address_hash(address);
-    return std::equal(hash.cbegin(), hash.cbegin() + salt.size(), salt.cbegin());
+    const auto end = hash.cbegin() + salt.size();
+    return std::equal(hash.cbegin(), end, salt.cbegin());
 }
 
 static bool address_validate(const ek_salt& salt, const ec_compressed& point,
@@ -445,9 +446,9 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& out_compressed,
     if (!parse.is_valid())
         return false;
 
-    const auto success = parse.multiplied() ?
-        decrypt_multiplied(out_secret, parse, passphrase) :
-        decrypt_secret(out_secret, parse, passphrase);
+    const auto multiplied = parse.multiplied();
+    const auto method = multiplied ? decrypt_multiplied : decrypt_secret;
+    const auto success = method(out_secret, parse, passphrase);
 
     if (success)
     {

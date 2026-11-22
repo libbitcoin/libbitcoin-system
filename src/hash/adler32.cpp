@@ -59,9 +59,9 @@ INLINE void accumulate(uint32_t& low, uint32_t& high, const uint8_t*& data,
 
 // Lanes.
 // ----------------------------------------------------------------------------
-// Each 32 bit lane sums each of its four bytes, by position, across the words
-// of a round, and the prefix sums the bytes of all preceding words. The sums
-// of a word at position j of the word contribute (bytes - j) to high.
+// Each 32 bit lane sums each of its four bytes, by position, across words of
+// round, and prefix sums bytes of all preceding words. Sums of word at position
+// j of word contribute (bytes - j) to high.
 
 template <typename xWord, size_t... Lane>
 INLINE std_array<uint32_t, sizeof...(Lane)> to_lanes(xWord value,

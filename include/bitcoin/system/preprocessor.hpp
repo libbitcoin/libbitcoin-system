@@ -41,7 +41,7 @@
 
 /// learn.microsoft.com/en-us/cpp/c-runtime-library/
 /// find-memory-leaks-using-the-crt-library
-/// _CRTDBG_MAP_ALLOC must be prior to the includes, so defined in props.
+/// _CRTDBG_MAP_ALLOC must be prior to includes, so defined in props.
 #if defined(HAVE_WINDOWS) && defined(_DEBUG) && defined(_CRTDBG_MAP_ALLOC)
     #include <stdlib.h>
     #include <crtdbg.h>
@@ -110,10 +110,9 @@
     #define BC_HELPER_DLL_LOCAL
 #endif
 
-/// Now we use the generic helper definitions above to define BC_API
-/// and BC_INTERNAL. BC_API is used for the public API symbols. It either DLL
-/// imports or DLL exports (or does nothing for static build) BC_INTERNAL is
-/// used for non-api symbols.
+/// Generic helper definitions above define BC_API and BC_INTERNAL. BC_API is
+/// for public API symbols, either DLL imports or DLL exports (or nothing for
+/// static build). BC_INTERNAL is for non-api symbols.
 #if defined BC_STATIC
     #define BC_API
     #define BC_INTERNAL
@@ -149,7 +148,7 @@
 /// Baseline code generation.
 /// ---------------------------------------------------------------------------
 
-/// Compile a function for the base instruction set of its architecture.
+/// Compile function for base instruction set of its architecture.
 /// msc does not support per function instruction set selection.
 #if (defined(HAVE_GNUC) || defined(HAVE_CLANG)) && defined(HAVE_X64)
     #define BASELINE __attribute__((target("arch=x86-64," \

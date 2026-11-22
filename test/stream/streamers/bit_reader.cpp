@@ -913,7 +913,8 @@ BC_AUTO_TEST_CASE(bit_reader__read_string__one_byte__expected)
 BC_AUTO_TEST_CASE(bit_reader__read_string__two_bytes__expected)
 {
     const std::string payload(253, 'a');
-    std::string value{
+    std::string value
+    {
         static_cast<char>(varint_two_bytes),
         static_cast<char>(0xfd), 0x00
     };
@@ -929,7 +930,8 @@ BC_AUTO_TEST_CASE(bit_reader__read_string__two_bytes__expected)
 BC_AUTO_TEST_CASE(bit_reader__read_string__four_bytes__expected)
 {
     const std::string payload(65536, 'a');
-    std::string value{
+    std::string value
+    {
         static_cast<char>(varint_four_bytes),
         static_cast<char>(0xfe), 0x00, 0x01, 0x00
     };

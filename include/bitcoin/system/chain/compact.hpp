@@ -27,20 +27,19 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// A base 256 exponential form representation of 32 byte (uint256_t) values.
-/// The zero value is used as an invalid value sentinel. Otherwise it is not
-/// possible to create an invalid compact form from 32 bytes. The compression
-/// loses all but the highest 24 (or 23) significant bits of precision. The
-/// extra bit of precision loss is the only reason for this wrapper, as opposed
-/// to a normal form base256 exponential representation. This implementation
-/// imposes a stricter, (than satoshi) yet consensus-compliant, validation of
-/// the exponential form.
+/// Base 256 exponential form representation of 32 byte (uint256_t) values. Zero
+/// value is used as invalid value sentinel. Otherwise it is not possible to
+/// create invalid compact form from 32 bytes. Compression loses all but highest
+/// 24 (or 23) significant bits of precision. Extra bit of precision loss is
+/// only reason for this wrapper, as opposed to normal form base256 exponential
+/// representation. Imposes stricter (than satoshi), yet consensus-compliant,
+/// validation of exponential form.
 
 struct compact
   : public base256e
 {
 public:
-    /// A zero value implies an invalid (including zero) parameter.
+    /// Zero value implies invalid (including zero) parameter.
     /// Non-minimal exponent encoding allowed only for mantissa sign bug.
     static constexpr span_type expand(small_type exponential) NOEXCEPT;
 

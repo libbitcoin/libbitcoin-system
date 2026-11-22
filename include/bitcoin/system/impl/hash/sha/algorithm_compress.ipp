@@ -68,7 +68,8 @@ round(auto a, auto& b, auto c, auto d, auto& e, auto wk) NOEXCEPT
     constexpr auto fn = functor<Round, decltype(a)>();
     static_assert(SHA::strength == 160);
 
-    e = /*a =*/ f::add<s>(f::add<s>(f::add<s>(f::rol<5, s>(a), fn(b, c, d)), e), wk);
+    const auto sum = f::add<s>(f::add<s>(f::rol<5, s>(a), fn(b, c, d)), e);
+    e = /*a =*/ f::add<s>(sum, wk);
     b = /*c =*/ f::rol<30, s>(b);
 }
 
@@ -82,7 +83,8 @@ round(auto a, auto b, auto c, auto& d, auto e, auto f, auto g, auto& h,
     constexpr auto s = SHA::word_bits;
     static_assert(SHA::strength != 160);
 
-    const auto t = f::add<s>(f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h), wk);
+    const auto sum = f::add<s>(f::add<s>(Sigma1(e), choice(e, f, g)), h);
+    const auto t = f::add<s>(sum, wk);
     d = /*e =*/    f::add<s>(d, t);
     h = /*a =*/    f::add<s>(f::add<s>(Sigma0(a), majority(a, b, c)), t);
 }

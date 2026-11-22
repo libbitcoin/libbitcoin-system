@@ -36,21 +36,21 @@ namespace chain {
 
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
-/// Thread-static per-block signature capture accumulators. An accumulator is
-/// populated by one block's sequential connect (single-threaded, lock-free)
-/// and bulk-committed to the corresponding store table upon its completion,
-/// deinterleaving the AoS log into the store's SoA columns. Capacity is
-/// retained across blocks (cleared, not freed) and released only by
-/// signatures::purge() once batching subsides.
+/// Thread-static per-block signature capture accumulators. Accumulator
+/// populated by one block's sequential connect (single-threaded,
+/// lock-free) and bulk-committed to corresponding store table upon its
+/// completion, deinterleaving AoS log into store's SoA columns.
+/// Capacity retained across blocks (cleared, not freed) and released
+/// only by signatures::purge() once batching subsides.
 
-/// A capture context passed into machine::interpreter. When enabled, sigops
-/// in fully-determining scripts append signature rows to this thread's
-/// accumulators and fabricate success. The caller bulk-commits the
-/// accumulators to store upon block connect completion and batch-validates
-/// at drain, correlating block failure. Appends cannot decline on store
-/// state; the only decline is the ecdsa group id domain (uint16), so the
-/// affected sigop falls through to inline verification and block validity is
-/// always fully determined (`faulted` is telemetry only).
+/// Capture context passed into machine::interpreter. When enabled, sigops in
+/// fully-determining scripts append signature rows to this thread's
+/// accumulators and fabricate success. Caller bulk-commits accumulators to
+/// store upon block connect completion and batch-validates at drain,
+/// correlating block failure. Appends cannot decline on store state; only
+/// decline is ecdsa group id domain (uint16), so affected sigop falls through
+/// to inline verification and block validity is always fully determined
+/// (`faulted` is telemetry only).
 struct BC_API signatures
 {
     /// Reporting enumeration for capture misses.
@@ -74,13 +74,13 @@ struct BC_API signatures
         const ec_signature& signature) const NOEXCEPT;
 
     /// Multisig capture: one group record, keys.size() = n, sigs.size() = m;
-    /// the store expands the band upon commit.
+    /// store expands band upon commit.
     bool multisig(const hash_digest& digest,
         const std::span<const ec_compressed>& keys,
         const std::span<const ec_signature>& sigs) const NOEXCEPT;
 
-    /// Threshold capture: open a cursor streaming rows to this thread's
-    /// schnorr accumulator (cannot decline).
+    /// Threshold capture: open cursor streaming rows
+    /// to this thread's schnorr accumulator (cannot decline).
     chain::threshold::cursor threshold(size_t rows) const NOEXCEPT;
 
     /// Default construction disables batching.

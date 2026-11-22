@@ -22,7 +22,8 @@ using namespace bc::system::options;
 
 BC_AUTO_TEST_SUITE(variables_tests)
 
-static parsed_options make(const options_description& options, std::vector<parsed_option> parsed, bool dashed=true)
+static parsed_options make(const options_description& options,
+    std::vector<parsed_option> parsed, bool dashed=true)
 {
     return { std::move(parsed), &options, dashed };
 }

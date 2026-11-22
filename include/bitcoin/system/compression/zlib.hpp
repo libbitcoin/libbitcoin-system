@@ -28,15 +28,15 @@ namespace libbitcoin {
 namespace system {
 
 /// Not thread safe.
-/// zlib (rfc1950) encoder of a stream written in parts.
+/// zlib (rfc1950) encoder of stream written in parts.
 class BC_API zlib_deflater
 {
 public:
     /// Encode data, appending completed output to out.
     void write(data_chunk& out, const data_slice& data) NOEXCEPT;
 
-    /// Encode the remainder and end the stream, appending to out, after
-    /// which another stream may be written.
+    /// Encode remainder and end stream, appending to out, after which another
+    /// stream may be written.
     void flush(data_chunk& out) NOEXCEPT;
 
 private:
@@ -48,14 +48,13 @@ private:
 };
 
 /// Not thread safe.
-/// zlib (rfc1950) decoder of a stream received in parts.
+/// zlib (rfc1950) decoder of stream received in parts.
 class BC_API zlib_inflater
 {
 public:
-    /// Decode from in, appending to out, until in is consumed, the stream
-    /// ends, or out has grown by at least limit (zero is unlimited), setting
-    /// the bytes of in consumed. False if the stream is invalid, or has a
-    /// preset dictionary.
+    /// Decode from in, appending to out, until in is consumed, stream ends, or
+    /// out has grown by at least limit (zero is unlimited), setting bytes of in
+    /// consumed. False if stream is invalid, or has preset dictionary.
     bool write(data_chunk& out, size_t& consumed, const data_slice& in,
         size_t limit=zero) NOEXCEPT;
 
@@ -80,9 +79,8 @@ private:
 /// zlib (rfc1950) stream of the deflate of the input.
 BC_API data_chunk zlib_deflate(const data_slice& in) NOEXCEPT;
 
-/// Decode of a zlib (rfc1950) stream that is the entire input. False if
-/// invalid, preset dictionary, or the output would exceed limit (zero is
-/// unlimited).
+/// Decode of zlib (rfc1950) stream that is entire input. False if invalid,
+/// preset dictionary, or output would exceed limit (zero is unlimited).
 BC_API bool zlib_inflate(data_chunk& out, const data_slice& in,
     size_t limit=zero) NOEXCEPT;
 

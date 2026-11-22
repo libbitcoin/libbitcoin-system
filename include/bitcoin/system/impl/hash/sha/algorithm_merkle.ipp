@@ -589,7 +589,7 @@ merkle_hash(digests_t& digests) NOEXCEPT
     else if constexpr (vector || native_double)
     {
         // Merkle blocks are hashed at 2 native lanes (as available), otherwise
-        // at 16/8/4 vector lanes (as available), and fall back to native or
+        // at 16/8/4 vector lanes (as available), falling back to native or
         // normal (as available) for any remaining block.
         merkle_hash_vector(digests);
     }

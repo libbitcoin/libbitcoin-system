@@ -108,7 +108,7 @@ protected:
     uint32_t fingerprint() const NOEXCEPT;
 
     /// Members.
-    /// These should be const, apart from the need to implement assignment.
+    /// These should be const, apart from need to implement assignment.
     bool valid_;
     hd_chain_code chain_;
     hd_lineage lineage_;

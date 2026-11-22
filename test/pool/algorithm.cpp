@@ -325,6 +325,41 @@ struct charged_state
     }
 };
 
+// Rows: S=0, L=1, M=2 (spends L), N=3 (spends M).
+// Inputs: 0 S spends X:0, 1 L spends Y:0, 2 M spends L:0, 3 N spends M:0.
+struct apart_state
+{
+    apart_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 4> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled }
+    };
+    std_array<link_t, 4> children{ { none, 2, 3, none } };
+    std_array<edges_t, 4> edges{ { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 } } };
+    std_array<totals_t, 4> totals
+    {
+        { { 500, 100, 0 }, { 10, 100, 0 }, { 10, 100, 0 }, { 400, 100, 0 } }
+    };
+    std_array<link_t, 4> parents{ { none, none, 1, 2 } };
+    std_array<link_t, 4> siblings{ { none, none, none, none } };
+    std_array<link_t, 4> rivals{ { none, none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
 // Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
 // 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
@@ -395,9 +430,9 @@ struct ring_state
     }
 };
 
-// Rows 0..39, each with one input, and a second where row % 7 is 3. A row
-// spends the row three before it unless row % 3 is 0. Rings: first inputs of
-// rows (0, 1) and (9, 12), second inputs of rows (3, 10, 17) and (31, 38).
+// Rows 0..39, each with one input, and a second where row % 7 is 3. Row spends
+// row three before it unless row % 3 is 0. Rings: first inputs of rows (0, 1)
+// and (9, 12), second inputs of rows (3, 10, 17) and (31, 38).
 constexpr size_t wide_rows = 40;
 constexpr size_t wide_inputs = 46;
 
@@ -671,8 +706,8 @@ static uint64_t high_arrivals(uint64_t rate) NOEXCEPT
     return rate > 500 ? 0 : 200;
 }
 
-// A table of the scenario less P, with P as the candidate (row 4, input 5
-// spending Q:0), bridged from Q.
+// Table of scenario less P, with P as candidate
+// (row 4, input 5 spending Q:0), bridged from Q.
 struct child_candidate
 {
     child_candidate() NOEXCEPT
@@ -729,7 +764,7 @@ struct child_candidate
     }
 };
 
-// The full scenario with a candidate C (row 5, input 6) spending X:0,
+// Full scenario with candidate C (row 5, input 6) spending X:0,
 // bridged from input 0.
 struct rival_candidate
 {
@@ -1813,8 +1848,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__excluded_parent__descendant_not_taken)
     BC_REQUIRE(marks[2] == mark::unmarked);
 }
 
-// The parent with both children (400) outrates Q (350), which outrates the
-// parent with one child (300).
+// Parent with both children (400) outrates Q (350),
+// which outrates parent with one child (300).
 BC_AUTO_TEST_CASE(pool_algorithm__pack__shared_parent__closure_outrates_row)
 {
     fork_state fork{};
@@ -1856,8 +1891,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__chunk_descendant__outrates_next_cluster)
     BC_REQUIRE(marks[5] == mark::unmarked);
 }
 
-// The chunk of C with P (750, each row charged alone) is outrated by E
-// (1200) and by P alone (1000), which fill the block.
+// Chunk of C with P (750, each row charged alone) is outrated by E (1200) and
+// by P alone (1000), which fill block.
 BC_AUTO_TEST_CASE(pool_algorithm__pack__sigop_charged_child__chunk_rated_by_rows)
 {
     charged_state charged{};
@@ -1957,6 +1992,49 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__second_block__rows_of_block)
     BC_REQUIRE_EQUAL(rows[0], 2u);
 }
 
+// S, then the chain L, M, N a row a block, its cluster kept and formed again.
+BC_AUTO_TEST_CASE(pool_algorithm__project__blocks_of_one_row__cluster_row_by_row)
+{
+    apart_state apart{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks.resize(4);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 0u);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 1u);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 2u);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 1u);
+    BC_REQUIRE_EQUAL(rows[0], 3u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 4u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 5'000u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[2][0].rate, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[3][0].rate, 4'000u);
+    BC_REQUIRE(out.exhausted);
+}
+
+// The chain does not fit the first budget, and is one take of the second.
+BC_AUTO_TEST_CASE(pool_algorithm__project__budget_raised_between_blocks__whole_cluster_one_take)
+{
+    apart_state apart{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks.resize(4);
+    accessor::project(rows, out, apart.columns(), { 0, 100, 100 }, 25, 20);
+    accessor::project(rows, out, apart.columns(), { 0, 1'000, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 3u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 2u);
+    BC_REQUIRE_EQUAL(out.blocks[1].size(), 1u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 1'400u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].size, 300u);
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__project__unfit_row__exhausted)
 {
     line_state line{};
@@ -1984,63 +2062,87 @@ BC_AUTO_TEST_CASE(pool_algorithm__estimate__empty_pool__zero)
 {
     projection_t projection{};
     projection.exhausted = true;
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 0u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 0u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_block__above_lowest_take)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_last_block__above_lowest_take)
 {
     const auto projection = projection_of(1);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__takes_out_of_rate_order__above_lowest_take)
 {
     projection_t projection{};
     projection.blocks = { { { 100, 50 }, { 300, 100 }, { 200, 50 } }, { { 50, 10 } } };
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__open_block__zero)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, no_arrivals), 0u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, no_arrivals), 0u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__beyond_blocks__zero)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 3, 200, no_arrivals), 0u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 3, 200, 1, no_arrivals), 0u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__low_arrivals_fill_open_block__above_arrivals)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, low_arrivals), 51u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, low_arrivals), 51u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__high_arrivals_fill_open_block__above_first_block)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, high_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, high_arrivals), 101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__no_space__maximum)
 {
     projection_t projection{};
     projection.exhausted = true;
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 0, no_arrivals), max_uint64);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 0, 1, no_arrivals), max_uint64);
+}
+
+// The tail take of 10 bytes leaves room for one byte at its rate, not for 100.
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__room_within_low_tail_take__above_tail_take)
+{
+    projection_t projection{};
+    projection.blocks = { { { 500, 990 }, { 10, 10 } }, { { 5, 1'000 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 1, no_arrivals), 11u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 10, no_arrivals), 11u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__room_over_low_tail_take__above_take_before_it)
+{
+    projection_t projection{};
+    projection.blocks = { { { 500, 990 }, { 10, 10 } }, { { 5, 1'000 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 11, no_arrivals), 501u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 100, no_arrivals), 501u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__estimate__room_over_block__maximum)
+{
+    projection_t projection{};
+    projection.blocks = { { { 500, 990 }, { 10, 10 } }, { { 5, 1'000 } } };
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 1'000, 1'001, no_arrivals), max_uint64);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__no_blocks__maximum)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 0, 200, no_arrivals), max_uint64);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 0, 200, 1, no_arrivals), max_uint64);
 }
 
 // transitions
@@ -2075,8 +2177,7 @@ static void confirm_by_columns(State& out,
     relabel(out);
 }
 
-// The boundary rows made unconfirmed and the conflicts not conflicted, by the
-// columns.
+// Boundary rows made unconfirmed and conflicts not conflicted, by columns.
 template <typename State>
 static void unconfirm_by_columns(State& out,
     const std::span<const link_t>& block,
@@ -2094,8 +2195,8 @@ static void unconfirm_by_columns(State& out,
     relabel(out);
 }
 
-// The wide table after the rows confirm with the conflicts, and then after
-// they unconfirm, by the walk and by the columns.
+// Wide table after rows confirm with conflicts, and then after they unconfirm,
+// by walk and by columns.
 static bool walks_wide_as_columns(const std::vector<link_t>& block,
     const std::vector<link_t>& conflicts) NOEXCEPT
 {
@@ -2111,9 +2212,9 @@ static bool walks_wide_as_columns(const std::vector<link_t>& block,
     return complete && same && restored && walked.cells == scanned.cells;
 }
 
-// A random table. A row has one to three inputs, each spending an earlier row
-// or none with equal odds. One in four of the first inputs that spend no row
-// starts a ring of two or three of them.
+// Random table. Row has one to three inputs, each spending earlier row or none
+// with equal odds. One in four of first inputs that spend no row starts ring of
+// two or three of them.
 struct random_state
 {
     random_state(size_t count, uint32_t seed) NOEXCEPT
@@ -2202,9 +2303,9 @@ static std::vector<link_t> random_rows(std::mt19937& generator, size_t count,
     return out;
 }
 
-// Random blocks, confirmed and half of them unconfirmed, by the walk and by
-// the columns. A walk that meets an oversized component is relabeled by the
-// columns, and at least one walk must not.
+// Random blocks, confirmed and half unconfirmed, by walk and by columns.
+// Walk that meets oversized component is relabeled by columns,
+// and at least one walk must not.
 static bool walks_random_as_columns(uint32_t seed) NOEXCEPT
 {
     constexpr size_t rows = 300;

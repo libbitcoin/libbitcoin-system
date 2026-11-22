@@ -54,7 +54,7 @@ public:
     static size_t data_codewords(uint8_t version, recovery_level level) NOEXCEPT;
 
     /// Interleaved data and error correction codewords, empty on failure.
-    /// Version is the minimum on input (zero for any) and actual on output.
+    /// Version is minimum on input (zero for any) and actual on output.
     static data_chunk encode(uint8_t& version, const std::string& value,
         recovery_level level=recovery_level::low,
         encode_mode mode=encode_mode::eight_bit,

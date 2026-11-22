@@ -66,14 +66,15 @@ BC_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
     BC_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
-// These fail on a presumably-correct out_token expectation.
-// While the out_token round trips properly, the value does not match published test vectors.
-// However the test vectors are not explicit about the salt value, which is four arbitrary bytes.
-// It is implied that the salt is the expected bitcoin address, but that is based on a value
-// generated using the salt (circular dependency). Bitcoinjs (referenced by BIP38) tests do not
-// verify the token. Casascius (referenced by BIP38) also does not implement lot/sequence. So we
-// rely on our interpretation of BIP38 for lot/sequence intermediate encoding, and the fact that
-// it round trips as expected. This feature has no valid use case, so this is largely educational.
+// These fail on presumably-correct out_token expectation. While out_token
+// round trips properly, value does not match published test vectors. However
+// test vectors are not explicit about salt value, which is four arbitrary
+// bytes. Salt implied to be expected bitcoin address, but that is based on
+// value generated using salt (circular dependency). Bitcoinjs (referenced by
+// BIP38) tests do not verify token. Casascius (referenced by BIP38) also does
+// not implement lot/sequence. So relies on own interpretation of BIP38 for
+// lot/sequence intermediate encoding, and that it round trips as expected.
+// Feature has no valid use case, so this is largely educational.
 
 // BIP38 TEST1: EC multiply, no compression, lot/sequence numbers
 BC_AUTO_TEST_CASE(encrypted__create_token_lot__test1_lot_sequence__expected)
@@ -258,7 +259,8 @@ BC_AUTO_TEST_SUITE(encrypted__decrypt1)
     ec_secret out_secret; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
-    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, passphrase))
+    BC_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, \
+        passphrase))
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
 BC_AUTO_TEST_CASE(encrypted__decrypt_private__vector_0__expected)
@@ -382,10 +384,13 @@ BC_AUTO_TEST_SUITE(encrypted__decrypt_public)
     ec_compressed out_point; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
-    BC_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
+    BC_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, \
+        passphrase)); \
     BC_REQUIRE_EQUAL(out_version, version); \
     BC_REQUIRE(!out_is_compressed); \
-    const auto derived_address = payment_address(ec_public{ out_point, out_is_compressed }, out_version).encoded()
+    const ec_public derived_public{ out_point, out_is_compressed }; \
+    const payment_address derived_payment(derived_public, out_version); \
+    const auto derived_address = derived_payment.encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
 BC_AUTO_TEST_CASE(encrypted__decrypt_public__vector_6_lot__expected)
@@ -438,7 +443,8 @@ BC_AUTO_TEST_SUITE(encrypted__create_key_pair)
 #define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
     ec_compressed out_point; \
     encrypted_private out_private; \
-    BC_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
+    BC_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, \
+        compressed))
 
 BC_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
 {
@@ -513,11 +519,13 @@ BC_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
 
 // TODO: create compressed vector(s).
 
-#define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compressed) \
+#define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, \
+    compressed) \
     ec_compressed out_point; \
     encrypted_public out_public; \
     encrypted_private out_private; \
-    BC_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
+    BC_REQUIRE(create_key_pair(out_private, out_public, out_point, token, \
+        seed, version, compressed))
 
 BC_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum__false)
 {
@@ -642,15 +650,15 @@ BC_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testnet_
     BC_REQUIRE_EQUAL(out_is_compressed, is_compressed);
     BC_REQUIRE_EQUAL(out_version, version);
 
-    // Validate the point derived from key creation against the secret-derived point.
-    // The out point is always compressed, since the user can always decompress it.
+    // Validate point derived from key creation against secret-derived point.
+    // Out point always compressed, since user can always decompress it.
     ec_compressed compressed{};
     BC_REQUIRE(secret_to_public(compressed, out_secret));
     BC_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
 }
 
-// This tests a potentially-incorrect out_token expectation. See comments above.
-// However the value round-trips as expected and there is no reference implementation.
+// Tests potentially-incorrect out_token expectation, see comments above.
+// However value round-trips as expected, and no reference implementation.
 BC_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.

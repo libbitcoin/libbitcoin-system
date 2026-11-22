@@ -172,8 +172,9 @@ static bool ecdsa_signed(const ec_secret& secret, const hash_digest& hash,
     if (mutate)
         message[0] ^= 1;
 
-    const auto& r = array_cast<uint8_t, ec_secret_size>(canonical);
-    const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(canonical);
+    constexpr auto size = ec_secret_size;
+    const auto& r = array_cast<uint8_t, size>(canonical);
+    const auto& s = array_cast<uint8_t, size, size>(canonical);
     const auto valid = ecdsa_verify(key, message, r, s);
     return valid == ecdsa::verify_signature(key, message, signature) &&
         valid == !mutate;
@@ -194,9 +195,11 @@ template <size_t Bits = zero>
 static bool schnorr_verify(const bytes& key, const data_slice& message,
     const ec_signature& signature) NOEXCEPT
 {
-    const auto& r = array_cast<uint8_t, ec_secret_size>(signature);
-    const auto& s = array_cast<uint8_t, ec_secret_size, ec_secret_size>(signature);
-    return accessor::verify_schnorr<Bits>(key, challenge(signature, key, message), r, s);
+    constexpr auto size = ec_secret_size;
+    const auto& r = array_cast<uint8_t, size>(signature);
+    const auto& s = array_cast<uint8_t, size, size>(signature);
+    const auto digest = challenge(signature, key, message);
+    return accessor::verify_schnorr<Bits>(key, digest, r, s);
 }
 
 // Local verification of a signature by the linked implementation.
@@ -481,7 +484,8 @@ static void check_ecdsa_batch()
 {
     const auto& rows = ecdsa_rows();
     data_chunk results{};
-    BC_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.digests, rows.signatures));
+    BC_CHECK(!accessor::verify_ecdsa<Word>(results, rows.keys, rows.digests,
+        rows.signatures));
     BC_CHECK_EQUAL(results, rows.expected);
 }
 
@@ -490,7 +494,8 @@ static void check_schnorr_batch()
 {
     const auto& rows = schnorr_rows();
     data_chunk results{};
-    BC_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.digests, rows.signatures));
+    BC_CHECK(!accessor::verify_schnorr<Word>(results, rows.keys, rows.digests,
+        rows.signatures));
     BC_CHECK_EQUAL(results, rows.expected);
 }
 

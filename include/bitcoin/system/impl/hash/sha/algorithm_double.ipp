@@ -30,7 +30,7 @@ namespace sha {
 
 // public
 // ----------------------------------------------------------------------------
-// These benefit from avoiding state endian transition and reusing buffer.
+// Benefit from avoiding state endian transition and reusing buffer.
 
 TEMPLATE
 template <size_t Size>

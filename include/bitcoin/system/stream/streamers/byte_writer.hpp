@@ -102,7 +102,7 @@ public:
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
     void write_string(const std::string& value) NOEXCEPT override;
 
-    /// This is only used for writing Bitcoin command command text.
+    /// Only used for writing Bitcoin command text.
     /// Write string to specified length, padded with nulls as required.
     void write_string_buffer(const std::string& value, size_t size) NOEXCEPT
         override;
@@ -135,10 +135,10 @@ public:
 protected:
     static constexpr uint8_t pad() { return 0x00; };
 
-    // The maximum addressable stream position.
-    // Should be defined on OStream::pos_type, however that is implementation
-    // defined and is not an integer domain. Could rely on std::streamsize,
-    // however this exceeds max_size_t in 32 bit, so limit to max_size_t.
+    // Maximum addressable stream position.
+    // Should be defined on OStream::pos_type, but that is implementation
+    // defined and not integer domain. Could rely on std::streamsize, but this
+    // exceeds max_size_t in 32 bit, so limit to max_size_t.
     static constexpr size_t maximum = system::maximum<size_t>;
 
     // For make_streamer<>.

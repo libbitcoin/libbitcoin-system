@@ -30,8 +30,8 @@ namespace system {
 // e = e_max   -> shift(e_max - m_bytes)  maximum    (m = high m_bytes)
 // e > e_max   -> n/a                     zero       (m = invalid value)
 
-// This expansion limits the exponent to e_bits, ensuring that there is only
-// one compressed representation for any given span of bits.
+// Expansion limits exponent to e_bits, ensuring only one compressed
+// representation for any given span of bits.
 template <size_t Base, size_t Precision, size_t Span>
 constexpr typename base2n<Base, Precision, Span>::span_type
 base2n<Base, Precision, Span>::expand(small_type exponential) NOEXCEPT
@@ -52,10 +52,10 @@ base2n<Base, Precision, Span>::expand(small_type exponential) NOEXCEPT
     return number;
 }
 
-// Only a zero value returns zero exponent and value (log(0) is undefined).
-// Any other value produces a non-zero exponent and non-zero value.
-// Where more than one representation may be possible, this compression
-// produces a normal form, with minimal exponent selection.
+// Only zero value returns zero exponent and value (log(0) is
+// undefined). Any other value produces non-zero exponent and non-zero
+// value. Where more than one representation may be possible,
+// compression produces normal form, with minimal exponent selection.
 template <size_t Base, size_t Precision, size_t Span>
 constexpr typename base2n<Base, Precision, Span>::small_type
 base2n<Base, Precision, Span>::compress(const span_type& number) NOEXCEPT

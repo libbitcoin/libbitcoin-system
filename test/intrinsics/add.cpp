@@ -61,7 +61,8 @@ static_assert(!add_carry_out(0xfe_u8, 0x00_u8, true));
 static_assert(add_carry_sum(0xffffffff_u32, 0xffffffff_u32, true) == 0xffffffff_u32);
 static_assert(add_carry_out(0xffffffff_u32, 0xffffffff_u32, true));
 
-static bool add_carry64_matches_nominal(uint64_t left, uint64_t right, bool carry) NOEXCEPT
+static bool add_carry64_matches_nominal(uint64_t left, uint64_t right,
+    bool carry) NOEXCEPT
 {
     uint64_t sum{}, nominal{};
     const auto out = add_carry64(sum, left, right, carry);

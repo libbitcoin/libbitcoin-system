@@ -29,16 +29,16 @@ namespace system {
 class BC_API tiff
 {
 public:
-    /// The image bit stream is stored at the end of the file.
-    /// This is the file offset in bytes to the start of the image data.
+    /// Image bit stream stored at end of file.
+    /// File offset in bytes to start of image data.
     static uint32_t image_offset;
 
-    /// The maximal image data size is 0xffffffff.
-    /// The last byte of each image row may contain padding.
+    /// Maximal image data size is 0xffffffff.
+    /// Last byte of each image row may contain padding.
     static size_t max_image_bytes;
 
     /// False if width parameter is inconsistent with data size.
-    /// Each row is padded to a whole byte, all rows are the same length.
+    /// Each row padded to whole byte, all rows same length.
     static bool to_image(std::ostream& out, const data_chunk& data,
         uint16_t width) NOEXCEPT;
 };

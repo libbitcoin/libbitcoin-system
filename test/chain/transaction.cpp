@@ -2289,11 +2289,13 @@ BC_AUTO_TEST_CASE(transaction__accept__output_value_overflow__spend_exceeds_valu
 // bip54 limits each transaction to 2500 accurately counted legacy sigops.
 static transaction multisig_spend(size_t count)
 {
-    const inputs ins(count, input{ point{ one_hash, 0 }, script{}, max_input_sequence });
+    const point prevout{ one_hash, 0 };
+    const inputs ins(count, input{ prevout, script{}, max_input_sequence });
     const outputs outs{ output{ 42, script{} } };
     const transaction instance{ 1, ins, outs, 0 };
+    const script multisig{ operations{ operation{ opcode::checkmultisig } } };
     for (const auto& in: *instance.inputs_ptr())
-        in->prevout = to_shared(output{ 1, script{ operations{ operation{ opcode::checkmultisig } } } });
+        in->prevout = to_shared(output{ 1, multisig });
 
     return instance;
 }
@@ -2404,8 +2406,8 @@ BC_AUTO_TEST_CASE(transaction__confirm__confirmed_double_spend__confirmed_double
     BC_REQUIRE_EQUAL(instance.confirm(ctx), error::confirmed_double_spend);
 }
 
-// The immaturity condition subsumes the unconfirmed spend condition
-// (height < prevout_height), so the more specific error is evaluated first.
+// Immaturity condition subsumes unconfirmed spend condition
+// (height < prevout_height), so more specific error is evaluated first.
 BC_AUTO_TEST_CASE(transaction__confirm__unconfirmed_spend__unconfirmed_spend)
 {
     const context ctx{ flags::no_rules, 0, 0, 100, 0, 0, 0 };
@@ -2442,7 +2444,7 @@ BC_AUTO_TEST_CASE(transaction__confirm__relative_locked_version_one__transaction
 // connect
 // ----------------------------------------------------------------------------
 
-// A witness carrying input does not connect when bip141 is inactive, so a
+// Witness carrying input does not connect when bip141 is inactive, so
 // pre-segwit block carrying witness data cannot validate.
 BC_AUTO_TEST_CASE(transaction__connect__witness_bip141_off__unexpected_witness)
 {
@@ -2871,8 +2873,8 @@ BC_AUTO_TEST_CASE(transaction__connect__coinbase__transaction_success)
     BC_REQUIRE_EQUAL(instance.connect(ctx), error::transaction_success);
 }
 
-// Taproot eliminates the one_hash return, so a single sigop without a
-// corresponding output fails the signature hash [bip341].
+// Taproot eliminates one_hash return, so single sigop without corresponding
+// output fails signature hash [bip341].
 BC_AUTO_TEST_CASE(transaction__check_signature__taproot_single_overflow__false)
 {
     const auto instance = spends_transaction();
@@ -3125,7 +3127,9 @@ BC_AUTO_TEST_CASE(transaction__connect__witness_checksig_after_executed_codesepa
 
 static transaction taproot_tx(const chunk_cptrs& stack) NOEXCEPT
 {
-    const chain::inputs ins{ input{ point{ one_hash, 0 }, script{}, chain::witness{ stack }, 0xffffffff } };
+    const point prevout{ one_hash, 0 };
+    const chain::witness spender{ stack };
+    const chain::inputs ins{ input{ prevout, script{}, spender, 0xffffffff } };
     const chain::outputs outs{ output{ 0, script{} } };
     const transaction out{ 1, ins, outs, 0 };
     out.inputs_ptr()->front()->prevout = to_shared<output>(0, script{});

@@ -99,7 +99,7 @@ private:
         const hd_lineage& lineage) NOEXCEPT;
 
     /// Members.
-    /// This should be const, apart from the need to implement assignment.
+    /// This should be const, apart from need to implement assignment.
     ec_secret secret_;
 };
 

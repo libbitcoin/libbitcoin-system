@@ -206,7 +206,7 @@ namespace ecdsa {
 
 /// ECDSA recoverable sign/recover
 /// ---------------------------------------------------------------------------
-/// It is recommended to verify a signature after signing.
+/// Recommended to verify signature after signing.
 
 /// Create a recoverable signature for use in message signing.
 BC_API bool sign_recoverable(recoverable_signature& out,
@@ -224,15 +224,15 @@ BC_API bool recover_public(ec_uncompressed& out,
 
 /// ECDSA parse/encode/canonicalize
 /// ---------------------------------------------------------------------------
-/// It is recommended to verify a signature after signing.
+/// Recommended to verify signature after signing.
 
 /// Encode an ECDSA signature as DER (strict).
 /// ec_signature is an alias for secp256k1_ecdsa_signature (private format).
 BC_API bool encode_signature(der_signature& out,
     const ec_signature& signature) NOEXCEPT;
 
-/// Parse a DER encoded signature with optional strict DER enforcement.
-/// Treat an empty DER signature as invalid, in accordance with BIP66.
+/// Parse DER encoded signature with optional strict DER enforcement.
+/// Treat empty DER signature as invalid, in accordance with BIP66.
 /// ec_signature is an alias for secp256k1_ecdsa_signature (private format).
 BC_API bool decode_signature(ec_signature& out,
     const data_slice& der_signature, bool strict) NOEXCEPT;
@@ -264,7 +264,7 @@ namespace schnorr {
 
 /// Schnorr parse/sign/verify
 /// ---------------------------------------------------------------------------
-/// It is recommended to verify a signature after signing.
+/// Recommended to verify signature after signing.
 
 /// Create Schnorr signature using a private key (simple version, no tweaks).
 BC_API bool sign(ec_signature& out, const ec_secret& secret,
@@ -288,19 +288,19 @@ namespace ellswift {
 /// ElligatorSwift create/decode/exchange (bip324)
 /// ---------------------------------------------------------------------------
 
-/// Compute the ElligatorSwift encoding of the public key for the secret.
-/// Auxiliary randomness supplements the secret as encoding entropy (the same
-/// key has many encodings), and may be null-valued.
+/// Compute ElligatorSwift encoding of public key for secret. Auxiliary
+/// randomness supplements secret as encoding entropy (same key has many
+/// encodings), and may be null-valued.
 BC_API bool create(ec_ellswift& out, const ec_secret& secret,
     const hash_digest& auxiliary) NOEXCEPT;
 
-/// Decode an ElligatorSwift encoded public key to a compressed point.
-/// Every 64 byte array is a valid encoding of some point.
+/// Decode ElligatorSwift encoded public key to compressed point.
+/// Every 64 byte array is valid encoding of some point.
 BC_API bool decode(ec_compressed& out, const ec_ellswift& key) NOEXCEPT;
 
-/// Compute the bip324 x-only Diffie-Hellman shared secret from own secret and
-/// the ElligatorSwift encoded public keys of the initiating (a) and responding
-/// (b) parties. Set responding if own secret corresponds to key_b.
+/// Compute bip324 x-only Diffie-Hellman shared secret from own secret and
+/// ElligatorSwift encoded public keys of initiating (a) and responding (b)
+/// parties. Set responding if own secret corresponds to key_b.
 BC_API bool exchange(hash_digest& out, const ec_secret& secret,
     const ec_ellswift& key_a, const ec_ellswift& key_b,
     bool responding) NOEXCEPT;

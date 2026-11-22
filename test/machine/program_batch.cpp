@@ -26,8 +26,8 @@ using namespace system::machine;
 
 // Batch capture fallbacks (protected surface).
 // ----------------------------------------------------------------------------
-// Batching is gated on the running script being an output script of a
-// batchable pattern; every other route falls through to inline verification.
+// Batching gated on running script being output script of batchable pattern;
+// every other route falls through to inline verification.
 
 using batch_accessor = interpreter_accessor<contiguous_stack>;
 
@@ -92,7 +92,11 @@ static chain::signatures batch_capture(batch_misses& misses) NOEXCEPT
     {
         true,
         [&misses](const script&) NOEXCEPT { ++misses.logged; },
-        [&misses](chain::signatures::miss kind, size_t count) NOEXCEPT { misses.kind = kind; misses.fired += count; }
+        [&misses](chain::signatures::miss kind, size_t count) NOEXCEPT
+        {
+            misses.kind = kind;
+            misses.fired += count;
+        }
     };
 }
 
@@ -520,8 +524,8 @@ BC_AUTO_TEST_CASE(program__try_batch_multisig_verification__batchable_group__cap
     rows.clear();
 }
 
-// The key path pattern is a one of one threshold, so the stack must exceed the
-// threshold minimum for the single sigop capture to be reached.
+// Key path pattern is one of one threshold, so stack must exceed threshold
+// minimum for single sigop capture to be reached.
 BC_AUTO_TEST_CASE(program__verify_schnorr_signature__batchable_script__captured)
 {
     auto& rows = chain::signatures::schnorr_rows();

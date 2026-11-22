@@ -55,7 +55,7 @@ set_key(const secret& key) NOEXCEPT
 }
 
 // private
-// The 96-bit nonce is followed by the 32-bit big-endian block counter.
+// 96-bit nonce is followed by 32-bit big-endian block counter.
 TEMPLATE
 typename CLASS::block CLASS::
 counter(const nonce& iv, uint32_t value) NOEXCEPT
@@ -72,8 +72,8 @@ void CLASS::
 authenticate(block& out, const_byte_span aad, const_byte_span cipher,
     const nonce& iv) const NOEXCEPT
 {
-    // The hash is of the aad and ciphertext, each zero padded, followed by
-    // their lengths in bits as 64-bit big-endian words.
+    // Hash is of aad and ciphertext, each zero padded, followed by their
+    // lengths in bits as 64-bit big-endian words.
     block lengths{};
     to_big<0>(lengths, to_bits<uint64_t>(aad.size()));
     to_big<8>(lengths, to_bits<uint64_t>(cipher.size()));

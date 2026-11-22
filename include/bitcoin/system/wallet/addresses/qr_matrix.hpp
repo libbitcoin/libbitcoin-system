@@ -37,7 +37,7 @@ public:
     static size_t width(uint8_t version) NOEXCEPT;
 
     /// Masked modules, row major, one byte per module (0x01 is dark).
-    /// Empty if version is invalid or codewords are not of the version.
+    /// Empty if version invalid or codewords not of version.
     static data_chunk encode(const data_chunk& codewords, uint8_t version,
         recovery_level level) NOEXCEPT;
 

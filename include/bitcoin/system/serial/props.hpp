@@ -28,10 +28,10 @@ namespace system {
 //// XML Preamble
 ////"<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 
-/// A very simple data structure for standard formats serialization.
+/// Simple data structure for standard formats serialization.
 /// XML attributes are not supported as there is no JSON analog. Stream
-/// operator overrides are not provided because a format parameter is required.
-/// Specialized types are not used for value because they must be stored in the
+/// operator overrides are not provided because format parameter is required.
+/// Specialized types are not used for value because they must be stored in
 /// children collection, which then must be able to specialize serialization.
 /// TODO: Escape sequences and JSON exponents and fractions are not supported.
 class BC_API props

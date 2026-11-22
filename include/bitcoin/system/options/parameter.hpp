@@ -71,46 +71,46 @@ public:
     static const char option_prefix_char;
 
     /// Populate with normalized parameter data.
-    /// option     The metadata of the option to test.
-    /// arguments  The list of supported positional arguments.
-    /// variables  The parsed variables, for provenance.
+    /// option     Metadata of option to test.
+    /// arguments  List of supported positional arguments.
+    /// variables  Parsed variables, for provenance.
     void initialize(const option_metadata& option,
         const argument_list& arguments,
         const variables_map& variables={}) NOEXCEPT;
 
     /// Populate with normalized parameter data, described by defaults.
-    /// option     The metadata of the option to test.
-    /// defaults   The metadata of the option bound to its default value.
-    /// arguments  The list of supported positional arguments.
-    /// variables  The parsed variables, for provenance.
+    /// option     Metadata of option to test.
+    /// defaults   Metadata of option bound to its default value.
+    /// arguments  List of supported positional arguments.
+    /// variables  Parsed variables, for provenance.
     void initialize(const option_metadata& option,
         const option_metadata& defaults, const argument_list& arguments,
         const variables_map& variables={}) NOEXCEPT;
 
-    /// Determine if the option is an argument by testing for it by name in the
-    /// positional options collection and if so return the position.
-    /// option     The metadata of the option to position.
-    /// arguments  The list of supported positional arguments.
+    /// Determine if option is argument by testing for it by name in positional
+    /// options collection and if so return position.
+    /// option     Metadata of option to position.
+    /// arguments  List of supported positional arguments.
     /// return     Relative position or -1 if not positional.
     int position(const option_metadata& option,
         const argument_list& arguments) const NOEXCEPT;
 
-    /// Get the value for the args_limit property.
-    /// position   The option's position (or -1 of arg).
-    /// arguments  The argument names list.
-    /// return     The arguments limit value for the option.
+    /// Get value for args_limit property.
+    /// position   Option's position (or -1 of arg).
+    /// arguments  Argument names list.
+    /// return     Arguments limit value for option.
     unsigned arguments_limit(int position, const option_metadata& option,
         const argument_list& arguments) const NOEXCEPT;
 
-    /// Get the option's short name character or zero.
-    /// option  The metadata of the option to test.
-    /// return  The short name character or null character.
+    /// Get option's short name character or zero.
+    /// option  Metadata of option to test.
+    /// return  Short name character or null character.
     char short_name(const option_metadata& option) const NOEXCEPT;
 
-    /// Get the option's description, with "{}" replaced by the default text of
-    /// a bound setting.
-    /// option  The metadata of the option to describe.
-    /// return  The description text.
+    /// Get option's description,
+    /// with "{}" replaced by default text of bound setting.
+    /// option  Metadata of option to describe.
+    /// return  Description text.
     std::string description(const option_metadata& option) const NOEXCEPT;
 
     /// Property declarations.

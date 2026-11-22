@@ -28,7 +28,7 @@ BC_AUTO_TEST_CASE(no_fill_allocator__construct__default__unassigned)
     constexpr auto hash_fill = hash_digest{ fill };
 
     // no_fill_allocator must be incorporated into container type.
-    // These tests depedent upon assumptions of default memory fill, so disabled.
+    // Tests depend upon assumptions of default memory fill, so disabled.
 
     ////std_vector<uint8_t, no_fill_allocator<uint8_t>> bytes(size);
     ////BC_CHECK_NE(bytes.front(), 0x00_u8);
@@ -71,7 +71,7 @@ struct noalloc_allocator
         {
             report(nullptr, count, true, true);
 
-            // This must be combined with no_fill_allocator.
+            // Must be combined with no_fill_allocator.
             // But no_fill_allocator must also bypass fill construction.
             return nullptr;
         }

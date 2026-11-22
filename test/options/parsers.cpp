@@ -44,7 +44,9 @@ struct parsers_setup_fixture
         argv.insert(argv.end(), arguments_.begin(), arguments_.end());
 
         variables_map variables{};
-        store(parse_command_line(possible_narrow_and_sign_cast<int>(argv.size()), argv.data(), options, arguments), variables);
+        const auto argc = possible_narrow_and_sign_cast<int>(argv.size());
+        store(parse_command_line(argc, argv.data(), options, arguments),
+            variables);
         return variables;
     }
 

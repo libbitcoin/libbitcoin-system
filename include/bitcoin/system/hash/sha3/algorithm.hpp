@@ -30,7 +30,7 @@
 
 // Based on:
 // FIPS PUB 202 [SHA-3 Standard: Permutation-Based Hash and Extendable-Output].
-// Keccak (pre-standard) differs only in the padding domain separation byte.
+// Keccak (pre-standard) differs only in padding domain separation byte.
 // nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf
 
 namespace libbitcoin {

@@ -288,9 +288,9 @@ bool descriptor::key_expression::derive(data_chunk& out,
                 key = key.derive_private(element);
             }
 
+            const auto child = hardened ? bit_or(index, hardened_bit) : index;
             if (wildcard && key)
-                key = key.derive_private(hardened ?
-                    bit_or(index, hardened_bit) : index);
+                key = key.derive_private(child);
 
             if (!key)
                 return false;
@@ -309,8 +309,8 @@ bool descriptor::key_expression::derive(psbt::derivation& out,
     if (!derive(out.point, index))
         return false;
 
-    // An origin provides the fingerprint and leading path elements. Without
-    // one an extended key is its own origin and a bare key its fingerprint.
+    // Origin provides fingerprint and leading path elements. Without one, an
+    // extended key is its own origin and a bare key its fingerprint.
     auto& to = out.origin;
     to.path.clear();
     if (origin.has_value())
@@ -457,8 +457,8 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
                 return false;
 
             signing item{};
-            item.script = { script::to_pay_key_hash_pattern(
-                bitcoin_short_hash(key.point)) };
+            const auto hash = bitcoin_short_hash(key.point);
+            item.script = { script::to_pay_key_hash_pattern(hash) };
             item.derivations.push_back(std::move(key));
             out.push_back(std::move(item));
             return true;
@@ -471,8 +471,8 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
                 return false;
 
             signing item{};
-            item.script = { script::to_pay_witness_key_hash_pattern(
-                bitcoin_short_hash(key.point)) };
+            const auto hash = bitcoin_short_hash(key.point);
+            item.script = { script::to_pay_witness_key_hash_pattern(hash) };
             item.derivations.push_back(std::move(key));
             out.push_back(std::move(item));
             return true;
@@ -486,8 +486,9 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
                 auto& item = inner.front();
                 item.embedded = to_shared<chain::script>(
                     std::move(item.script));
-                item.script = { script::to_pay_script_hash_pattern(
-                    bitcoin_short_hash(item.embedded->to_data(false))) };
+                const auto embedded = item.embedded->to_data(false);
+                const auto hash = bitcoin_short_hash(embedded);
+                item.script = { script::to_pay_script_hash_pattern(hash) };
                 out.push_back(std::move(item));
                 return true;
             }
@@ -503,10 +504,12 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
                 is_one(inner.size()))
             {
                 auto& item = inner.front();
-                item.witness = to_shared<chain::script>(
-                    std::move(item.script));
-                item.script = { script::to_pay_witness_script_hash_pattern(
-                    sha256_hash(item.witness->to_data(false))) };
+                item.witness = to_shared<chain::script>(std::move(item.script));
+                const auto hash = sha256_hash(item.witness->to_data(false));
+                item.script =
+                {
+                    script::to_pay_witness_script_hash_pattern(hash)
+                };
                 out.push_back(std::move(item));
                 return true;
             }
@@ -532,8 +535,10 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
             if (tree.type == function::sortedmulti)
                 std::sort(points.begin(), points.end());
 
-            item.script = { script::to_pay_multisig_pattern(tree.required,
-                points) };
+            item.script =
+            {
+                script::to_pay_multisig_pattern(tree.required, points)
+            };
             out.push_back(std::move(item));
             return true;
         }
@@ -544,19 +549,27 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
                 return false;
 
             const auto& point = key.point;
-            out.push_back({ { script::to_pay_public_key_pattern(point) },
-                {}, {}, { key } });
+            out.push_back(
+            {
+                { script::to_pay_public_key_pattern(point) }, {}, {}, { key }
+            });
             const auto hash = bitcoin_short_hash(point);
-            out.push_back({ { script::to_pay_key_hash_pattern(hash) },
-                {}, {}, { key } });
+            out.push_back(
+            {
+                { script::to_pay_key_hash_pattern(hash) }, {}, {}, { key }
+            });
             if (is_compressed_key(point))
             {
                 const auto witness = to_shared<chain::script>(
                     script::to_pay_witness_key_hash_pattern(hash));
                 out.push_back({ *witness, {}, {}, { key } });
-                out.push_back({ { script::to_pay_script_hash_pattern(
-                    bitcoin_short_hash(witness->to_data(false))) },
-                    witness, {}, { key } });
+                const auto redeem = witness->to_data(false);
+                const auto redeem_hash = bitcoin_short_hash(redeem);
+                out.push_back(
+                {
+                    { script::to_pay_script_hash_pattern(redeem_hash) },
+                    witness, {}, { key }
+                });
             }
 
             return true;
@@ -588,8 +601,9 @@ bool descriptor::derive_signings(signing::list& out, const node& tree,
             const auto output = unsafe_array_cast<uint8_t, ec_xonly_size>(
                 std::next(lifted.data()));
             out.push_back(
-                { { script::to_pay_witness_taproot_pattern(output) },
-                {}, {}, {} });
+            {
+                { script::to_pay_witness_taproot_pattern(output) }, {}, {}, {}
+            });
             return true;
         }
         case function::addr:

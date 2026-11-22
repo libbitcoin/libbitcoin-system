@@ -136,7 +136,7 @@ INLINE void decrypt(std_array<xint128_t, Count>& state,
 
 /// GF(2^128) (ghash).
 /// ---------------------------------------------------------------------------
-/// Operands are byte reflected blocks, as loaded by reflect.
+/// Operands byte reflected blocks, as loaded by reflect.
 /// [Gueron, Kounavis] Intel Carry-Less Multiplication Instruction and its
 /// Usage for Computing the GCM Mode (algorithms 2 and 4).
 

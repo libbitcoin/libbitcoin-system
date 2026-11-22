@@ -26,11 +26,11 @@ namespace libbitcoin {
 namespace system {
 
 /// Encode data as base85 (Z85).
-/// False if the input is not of base85 size (% 4).
+/// False if input is not of base85 size (% 4).
 BC_API bool encode_base85(std::string& out, const data_slice& in) NOEXCEPT;
 
 /// Attempt to decode base85 (Z85) data.
-/// False if the input contains non-base85 characters or length (% 5).
+/// False if input contains non-base85 characters or length (% 5).
 BC_API bool decode_base85(data_chunk& out, const std::string& in) NOEXCEPT;
 
 } // namespace system

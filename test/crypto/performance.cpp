@@ -50,7 +50,8 @@ static void report_ctr(const std::string& name)
     report_cipher(name, [&](const data_chunk& in, data_chunk& out) noexcept
     {
         typename Algorithm::block_t counter{};
-        Algorithm::ctr(std::span{ out }.first(in.size()), in, counter, schedule);
+        const auto first = std::span{ out }.first(in.size());
+        Algorithm::ctr(first, in, counter, schedule);
     });
 }
 
@@ -118,8 +119,8 @@ BC_AUTO_TEST_CASE(performance__ecdsa__secp256r1_secp384r1)
     report_ecdsa<secp384r1>("secp384r1");
 }
 
-// Welch's t statistic of signing time, a fixed secret against random secrets
-// (dudect), samples above the pooled percentile cropped. |t| > 4.5 is a leak.
+// Welch's t statistic of signing time, fixed secret against random secrets
+// (dudect), samples above pooled percentile cropped. |t| > 4.5 is a leak.
 template <typename Curve>
 static double sign_timing(const typename Curve::secret_t& fixed,
     size_t samples, double percentile)

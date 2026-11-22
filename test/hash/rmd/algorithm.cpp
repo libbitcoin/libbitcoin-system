@@ -257,7 +257,7 @@ struct accessor128
     }
 };
 
-// Selection on round/columns (16) boundary yields the following indexes.
+// Selection on round/columns (16) boundary yields following indexes.
 // batch1
 static_assert( 0 / k_128::columns == 0);
 static_assert(15 / k_128::columns == 0);
@@ -395,7 +395,7 @@ struct accessor160
     }
 };
 
-// Selection on round/columns (16) boundary yields the following indexes.
+// Selection on round/columns (16) boundary yields following indexes.
 // batch1
 static_assert( 0 / k_160::columns == 0);
 static_assert(15 / k_160::columns == 0);

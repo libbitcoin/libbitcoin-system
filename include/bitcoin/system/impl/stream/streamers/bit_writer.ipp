@@ -76,9 +76,9 @@ void bit_writer<OStream>::write_bits(uint64_t value, size_t bits) NOEXCEPT
 {
     bits = lesser(bc::bits<uint64_t>, bits);
 
-    // 'bits' refers to the count of the rightmost bits in 'value'.
-    // Those bits are written from left to right, completing the partial byte,
-    // then whole bytes directly, then starting the next partial byte.
+    // 'bits' is count of rightmost bits in 'value'. Bits
+    // written from left to right, completing partial byte, then
+    // whole bytes directly, then starting next partial byte.
     while (!is_zero(bits) && !is_zero(offset_))
         write_bit(get_right(value, --bits));
 

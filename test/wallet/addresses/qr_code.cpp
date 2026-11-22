@@ -285,8 +285,8 @@ BC_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_0_margin_0__empty)
 
 BC_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_0__expected)
 {
-    // Scale 1 does not expand. A single pixel image with no margin creates a
-    // one byte image with only the most significant bit set to 1.
+    // Scale 1 does not expand. Single pixel image with no margin creates one
+    // byte image with only most significant bit set to 1.
     static const data_chunk expected{ 0x80 };
 
     // This pixel state is true.
@@ -299,9 +299,9 @@ BC_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_0__expected)
 
 BC_AUTO_TEST_CASE(qr_code__to_pixels__one_pixel_scale_1_margin_1__expected)
 {
-    // Scale 1 does not expand. A single pixel image with single pixel margin
-    // creates a 9 pixel image with the 5th most significant bit set to 1,
-    // plus row padding.
+    // Scale 1 does not expand. Single pixel image with
+    // single pixel margin creates 9 pixel image with 5th
+    // most significant bit set to 1, plus row padding.
     static const data_chunk expected{ 0x00, 0x40, 0x00 };
 
     // This pixel state is true.
@@ -338,8 +338,8 @@ BC_AUTO_TEST_CASE(qr_code__to_pixels__endianness_independent__expected)
         0xfe, 0xfe
     };
 
-    // This test is mirror image with respect to bitwise endianness so it
-    // succeeds whether bits are written big endian or little endian. 
+    // Mirror image with respect to bitwise endianness, so succeeds whether
+    // bits are written big endian or little endian.
     const auto pixels = qr_code_accessor::to_pixels(data, 2, 2, 2);
 
     // Encode as base16 so that failure message is intelligible.

@@ -101,11 +101,11 @@ private:
 
     // Tethering
     // -------------------------------------------------------------------------
-    // Hash results and int/bool->chunks are saved using a shared_ptr vector.
-    // The tether is not garbage-collected (until destruct) as this is a space-
-    // time performance tradeoff. The maximum number of constructable chunks is
-    // bound by the script size limit. A standard in/out script pair tethers
-    // only one chunk, the computed hash. Mutable as this is updated by read.
+    // Hash results and int/bool->chunks saved using shared_ptr vector. Tether
+    // not garbage-collected (until destruct), as space-time performance
+    // tradeoff. Maximum number of constructable chunks bound by script size
+    // limit. Standard in/out script pair tethers only one chunk, computed hash.
+    // Mutable as updated by read.
     // -------------------------------------------------------------------------
     mutable tether<data_chunk> tether_;
 };

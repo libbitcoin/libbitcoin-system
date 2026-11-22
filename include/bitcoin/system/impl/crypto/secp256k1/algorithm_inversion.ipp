@@ -146,8 +146,8 @@ constexpr int64_t algorithm::divsteps(transition_t& t, int64_t eta,
     return eta;
 }
 
-// Adds multiples of m that make the low 62 bits of t * (d, e) zero, then
-// shifts them out, keeping d and e in (-2m, m).
+// Adds multiples of m that make low 62 bits of t * (d, e) zero, then shifts
+// them out, keeping d and e in (-2m, m).
 constexpr void algorithm::update_de(signed62_t& d, signed62_t& e,
     const transition_t& t, const modulus_t& m) NOEXCEPT
 {

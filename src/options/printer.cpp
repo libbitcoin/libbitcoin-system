@@ -156,7 +156,7 @@ static bool match_positional(bool positional, const parameter& value) NOEXCEPT
     return positioned == positional;
 }
 
-// This formats to 73 char width as: [ 20 | ' ' | 52 | '\n' ]
+// Formats to 73 char width as: [ 20 | ' ' | 52 | '\n' ]
 // GitHub code examples start horizontal scroll after 73 characters.
 std::string printer::format_parameters_table(bool positional) NOEXCEPT
 {
@@ -188,7 +188,7 @@ std::string printer::format_parameters_table(bool positional) NOEXCEPT
     return output.str();
 }
 
-// This formats to 73 char width: [ 73 | '\n' ]
+// Formats to 73 char width: [ 73 | '\n' ]
 // GitHub code examples start horizontal scroll after 73 characters.
 std::string printer::format_paragraph(const std::string& paragraph) NOEXCEPT
 {
@@ -229,7 +229,7 @@ static std::string format_setting(const parameter& value,
 }
 
 // Requires at least one period in each setting (i.e. no unnamed sections).
-// The name is the text following the last period, allowing nested sections
+// Name is text following last period, allowing nested sections
 // (e.g. "table.header.rate" is "rate" within section "table.header").
 static void split_setting_name(const parameter& value, std::string& name,
     std::string& section) NOEXCEPT
@@ -308,8 +308,8 @@ std::string printer::format_usage_parameters() NOEXCEPT
 
     for (const auto& parameter: parameters)
     {
-        // A required argument may only be preceded by required arguments.
-        // Requiredness may be in error if the metadata is inconsistent.
+        // Required argument may only be preceded by required arguments.
+        // Requiredness may be in error if metadata is inconsistent.
         const auto required = parameter.required();
 
         // Options are named and args are positional.
@@ -322,7 +322,8 @@ std::string printer::format_usage_parameters() NOEXCEPT
         const auto toggle = is_zero(parameter.args_limit());
 
         // A toggle with a short name gets mashed up in group.
-        const auto is_short = parameter.short_name() != parameter::no_short_name;
+        const auto short_name = parameter.short_name();
+        const auto is_short = short_name != parameter::no_short_name;
 
         const auto& long_name = parameter.long_name();
 
@@ -405,8 +406,8 @@ static void enqueue_name(int count, std::string& name,
     names.push_back(argument_pair(name, count));
 }
 
-// This method just gives us a copy of arguments_metadata private state.
-// It would be nice if instead that state was public.
+// Gives copy of arguments_metadata private state.
+// Would be nice if that state were public.
 void printer::generate_argument_names() NOEXCEPT
 {
     // Member values

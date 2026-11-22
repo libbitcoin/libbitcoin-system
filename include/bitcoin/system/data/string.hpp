@@ -39,8 +39,8 @@ constexpr std::string to_string(const data_slice& bytes) NOEXCEPT
 BC_API std::string join(const string_list& tokens,
     const std::string& delimiter=ascii_space) NOEXCEPT;
 
-/// Split text into tokens (whitespace default) by the specified delimiter(s).
-/// Compression (default) removes all but a last empty token (after trimming).
+/// Split text into tokens (whitespace default) by specified delimiter(s).
+/// Compression (default) removes all but last empty token (after trimming).
 BC_API string_list split(const std::string_view& text) NOEXCEPT;
 BC_API string_list split(const std::string_view& text,
     const std::string& delimiter, bool trim=true, bool compress=true) NOEXCEPT;

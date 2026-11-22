@@ -832,10 +832,10 @@ BC_AUTO_TEST_CASE(witness_address__ostream__valid__expected)
 // BIP173 vectors
 // See checksum and base_32b for related tests.
 
-// These examples of valid "bech32" require an unversioned (and empty) payload, which
-// requires exposure of bech32 internals and has no use case, so is not supported.
-// The payload length requires five more characters to be a valid address.
-// Note that the casing and character evaluations intended for testing here do in fact pass.
+// These valid "bech32" examples require unversioned (and empty) payload,
+// which requires exposure of bech32 internals and has no use case, so not
+// supported. Payload length requires five more characters to be valid
+// address. Casing and character evaluations intended for testing here pass.
 BC_AUTO_TEST_CASE(witness_address__bip173__unversioned_empty_bech32_vectors__payload_too_short)
 {
     BC_REQUIRE(witness_address::parse_address(out1, out2, out3, "A12UEL5L") == result::payload_too_short);
@@ -843,17 +843,18 @@ BC_AUTO_TEST_CASE(witness_address__bip173__unversioned_empty_bech32_vectors__pay
     BC_REQUIRE(witness_address::parse_address(out1, out2, out3, "?1ezyfcl") == result::payload_too_short);
 }
 
-// This example of valid "bech32" requires an unversioned (and empty) payload, which
-// requires exposure of bech32 internals and has no use case, so is not supported.
-// The payload length requires five more characters to be a valid address.
-// Consequently the prefix length is restricted to one less byte, satisfying the overall length constraint.
+// This valid "bech32" example requires unversioned (and empty) payload, which
+// requires exposure of bech32 internals and has no use case, so not supported.
+// Payload length requires five more characters to be valid address. So prefix
+// length restricted to one less byte, satisfying overall length constraint.
 BC_AUTO_TEST_CASE(witness_address__bip173__unversioned_empty_bech32_vectors__prefix_too_long)
 {
     BC_REQUIRE(witness_address::parse_address(out1, out2, out3, "an83characterlonghumanreadablepartthatcontainsthenumber1andtheexcludedcharactersbio1tt5tgs") == result::prefix_too_long);
 }
 
-// This example of valid "bech32" can be interepreted as versioned or otherwise.
-// The payload is greater than 71 characters, failing after successful parse of the maximum length tested here.
+// This valid "bech32" example can be interpreted as versioned or otherwise.
+// Payload greater than 71 characters, failing after successful parse of
+// maximum length tested here.
 BC_AUTO_TEST_CASE(witness_address__bip173__unversioned_bech32_vectors__payload_too_long)
 {
     BC_REQUIRE(witness_address::parse_address(out1, out2, out3, "11qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqc8247j") == result::payload_too_long);
@@ -917,9 +918,10 @@ BC_AUTO_TEST_CASE(witness_address__bip173__invalid_checksum__payload_not_base32)
 }
 
 // Checksum calculated with uppercase form of HRP.
-// This example of valid "bech32" requires an unversioned (and empty) payload, which
-// requires exposure of bech32 internals and has no use case, so is not supported.
-// The payload length is limited by one more character in an implementation that requires a version.
+// This valid "bech32" example requires unversioned (and empty)
+// payload, which requires exposure of bech32 internals and has
+// no use case, so not supported. Payload length limited by one
+// more character in implementation that requires version.
 BC_AUTO_TEST_CASE(witness_address__bip173__invalid_checksum__payload_too_short)
 {
     BC_REQUIRE(witness_address::parse_address(out1, out2, out3, "A1G7SGD8") == result::payload_too_short);

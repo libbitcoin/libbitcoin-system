@@ -43,6 +43,177 @@ static std::vector<size_t> scrambled(size_t size) NOEXCEPT
     return out;
 }
 
+static size_t drained(size_t tasks) NOEXCEPT
+{
+    std::atomic_size_t ran{};
+    {
+        thread_pool pool{ 1 };
+        for (size_t index{}; index < tasks; ++index)
+            pool.submit([&]() NOEXCEPT { ++ran; });
+    }
+
+    return ran.load();
+}
+
+template <typename Edges>
+static size_t width(const Edges& edges, size_t index) NOEXCEPT
+{
+    return to_unsigned(std::distance(edges.at(index), edges.at(add1(index))));
+}
+
+template <typename Edges>
+static size_t smallest_width(const Edges& edges) NOEXCEPT
+{
+    size_t smallest = max_size_t;
+    for (size_t index{}; index < sub1(edges.size()); ++index)
+        smallest = std::min(smallest, width(edges, index));
+
+    return smallest;
+}
+
+template <typename Edges>
+static size_t largest_width(const Edges& edges) NOEXCEPT
+{
+    size_t largest = zero;
+    for (size_t index{}; index < sub1(edges.size()); ++index)
+        largest = std::max(largest, width(edges, index));
+
+    return largest;
+}
+
+static ptrdiff_t leading_width(size_t tasks) NOEXCEPT
+{
+    return tasks == 2u ? 3 : 5;
+}
+
+static bool chunked_once_by_index(const policy& policy) NOEXCEPT
+{
+    const auto values = sequence(count);
+    const auto edges = bounds(policy, values.cbegin(), values.cend());
+    std::vector<size_t> seen(count);
+    std::vector<size_t> indexes(count);
+    chunked(policy, values.cbegin(), values.cend(),
+        [&](auto from, auto to, size_t index) NOEXCEPT
+        {
+            for (auto it = from; it != to; ++it)
+            {
+                seen.at(*it - one) += one;
+                indexes.at(*it - one) = index;
+            }
+        });
+
+    for (const auto once: seen)
+        if (once != one)
+            return false;
+
+    for (size_t index{}; index < sub1(edges.size()); ++index)
+        for (auto it = edges.at(index); it != edges.at(add1(index)); ++it)
+            if (indexes.at(*it - one) != index)
+                return false;
+
+    return true;
+}
+
+static bool for_each_serial(const policy& policy) NOEXCEPT
+{
+    const auto values = sequence(count);
+    size_t expected{};
+    std::for_each(values.cbegin(), values.cend(),
+        [&](size_t value) NOEXCEPT { expected += value; });
+
+    std::atomic_size_t sum{};
+    std::for_each(policy, values.cbegin(), values.cend(),
+        [&](size_t value) NOEXCEPT { sum += value; });
+
+    return sum.load() == expected;
+}
+
+static bool transform_unary_serial(const policy& policy) NOEXCEPT
+{
+    const auto values = sequence(count);
+    const auto square = [](size_t value) NOEXCEPT { return value * value; };
+    std::vector<size_t> expected(count);
+    std::transform(values.cbegin(), values.cend(), expected.begin(), square);
+
+    std::vector<size_t> out(count);
+    const auto end = std::transform(policy, values.cbegin(), values.cend(),
+        out.begin(), square);
+
+    return end == out.cend() && out == expected;
+}
+
+static bool transform_binary_serial(const policy& policy) NOEXCEPT
+{
+    const auto left = sequence(count);
+    const auto right = scrambled(count);
+    const auto add = [](size_t one, size_t two) NOEXCEPT { return one + two; };
+    std::vector<size_t> expected(count);
+    std::transform(left.cbegin(), left.cend(), right.cbegin(),
+        expected.begin(), add);
+
+    std::vector<size_t> out(count);
+    const auto end = std::transform(policy, left.cbegin(), left.cend(),
+        right.cbegin(), out.begin(), add);
+
+    return end == out.cend() && out == expected;
+}
+
+static bool reduce_serial(const policy& policy) NOEXCEPT
+{
+    const auto values = sequence(count);
+    const auto expected = std::reduce(values.cbegin(), values.cend(), 42_size,
+        std::plus<size_t>{});
+
+    return std::reduce(policy, values.cbegin(), values.cend(), 42_size,
+        std::plus<size_t>{}) == expected;
+}
+
+static bool transform_reduce_serial(const policy& policy) NOEXCEPT
+{
+    const auto values = sequence(count);
+    const auto square = [](size_t value) NOEXCEPT { return value * value; };
+    const auto expected = std::transform_reduce(values.cbegin(),
+        values.cend(), 42_size, std::plus<size_t>{}, square);
+
+    return std::transform_reduce(policy, values.cbegin(), values.cend(),
+        42_size, std::plus<size_t>{}, square) == expected;
+}
+
+template <typename Predicate>
+static bool all_of_serial(const policy& policy,
+    const Predicate& predicate) NOEXCEPT
+{
+    const auto values = sequence(count);
+    const auto expected = std::all_of(values.cbegin(), values.cend(),
+        predicate);
+
+    return std::all_of(policy, values.cbegin(), values.cend(), predicate) ==
+        expected;
+}
+
+static bool sort_serial(const policy& policy) NOEXCEPT
+{
+    const auto greater = [](size_t left, size_t right) NOEXCEPT
+    {
+        return left > right;
+    };
+
+    auto expected = scrambled(count);
+    std::sort(expected.begin(), expected.end(), greater);
+    auto values = scrambled(count);
+    std::sort(policy, values.begin(), values.end(), greater);
+    return values == expected;
+}
+
+static bool sorts(size_t size) NOEXCEPT
+{
+    auto expected = scrambled(size);
+    std::sort(expected.begin(), expected.end());
+    auto values = scrambled(size);
+    std::sort(par, values.begin(), values.end(), std::less<size_t>{});
+    return values == expected;
+}
+
 // thread_pool
 
 BC_AUTO_TEST_CASE(execution__thread_pool__zero_workers__one)
@@ -81,14 +252,7 @@ BC_AUTO_TEST_CASE(execution__thread_pool__submit_throwing__future_rethrows)
 
 BC_AUTO_TEST_CASE(execution__thread_pool__destruct__drains_queue)
 {
-    std::atomic_size_t ran{};
-    {
-        thread_pool pool{ 1 };
-        for (size_t index{}; index < count; ++index)
-            pool.submit([&]() NOEXCEPT { ++ran; });
-    }
-
-    BC_REQUIRE_EQUAL(ran.load(), count);
+    BC_REQUIRE_EQUAL(drained(count), count);
 }
 
 // policy
@@ -205,18 +369,8 @@ BC_AUTO_TEST_CASE(execution__bounds__floor__contiguous_balanced_not_below_floor)
     BC_REQUIRE_EQUAL(edges.size(), add1(chunks(policy, count)));
     BC_REQUIRE(edges.front() == values.cbegin());
     BC_REQUIRE(edges.back() == values.cend());
-
-    size_t smallest = max_size_t;
-    size_t largest = zero;
-    for (size_t index{}; index < sub1(edges.size()); ++index)
-    {
-        const auto width = to_unsigned(std::distance(edges.at(index), edges.at(add1(index))));
-        smallest = std::min(smallest, width);
-        largest = std::max(largest, width);
-    }
-
-    BC_REQUIRE_GE(smallest, floor);
-    BC_REQUIRE_LE(largest - smallest, one);
+    BC_REQUIRE_GE(smallest_width(edges), floor);
+    BC_REQUIRE_LE(largest_width(edges) - smallest_width(edges), one);
 }
 
 BC_AUTO_TEST_CASE(execution__bounds__remainder__goes_to_leading_tasks)
@@ -226,31 +380,14 @@ BC_AUTO_TEST_CASE(execution__bounds__remainder__goes_to_leading_tasks)
     const auto edges = bounds(policy, values.cbegin(), values.cend());
     const auto tasks = std::min(2_size, workers);
     BC_REQUIRE_EQUAL(edges.size(), add1(tasks));
-    BC_REQUIRE_EQUAL(std::distance(edges.at(0), edges.at(1)), tasks == 2u ? 3 : 5);
+    BC_REQUIRE_EQUAL(std::distance(edges.at(0), edges.at(1)), leading_width(tasks));
 }
 
 // chunked
 
 BC_AUTO_TEST_CASE(execution__chunked__floor__each_element_once_with_task_index)
 {
-    const auto values = sequence(count);
-    const auto policy = par_if(true, 3);
-    const auto edges = bounds(policy, values.cbegin(), values.cend());
-    std::vector<size_t> seen(count);
-    std::vector<size_t> indexes(count);
-    chunked(policy, values.cbegin(), values.cend(), [&](auto from, auto to, size_t index) NOEXCEPT
-    {
-        for (auto it = from; it != to; ++it)
-        {
-            seen.at(*it - one) += one;
-            indexes.at(*it - one) = index;
-        }
-    });
-
-    BC_REQUIRE(std::all_of(seen.cbegin(), seen.cend(), [](size_t once) NOEXCEPT { return once == one; }));
-    for (size_t index{}; index < sub1(edges.size()); ++index)
-        for (auto it = edges.at(index); it != edges.at(add1(index)); ++it)
-            BC_REQUIRE_EQUAL(indexes.at(*it - one), index);
+    BC_REQUIRE(chunked_once_by_index(par_if(true, 3)));
 }
 
 BC_AUTO_TEST_CASE(execution__chunked__throwing_task__rethrows)
@@ -263,16 +400,10 @@ BC_AUTO_TEST_CASE(execution__chunked__throwing_task__rethrows)
 
 BC_AUTO_TEST_CASE(execution__for_each__policies__same_as_serial)
 {
-    const auto values = sequence(count);
-    size_t expected{};
-    std::for_each(values.cbegin(), values.cend(), [&](size_t value) NOEXCEPT { expected += value; });
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-    {
-        std::atomic_size_t sum{};
-        std::for_each(policy, values.cbegin(), values.cend(), [&](size_t value) NOEXCEPT { sum += value; });
-        BC_REQUIRE_EQUAL(sum.load(), expected);
-    }
+    BC_REQUIRE(for_each_serial(seq));
+    BC_REQUIRE(for_each_serial(par));
+    BC_REQUIRE(for_each_serial(par_if(true, 7)));
+    BC_REQUIRE(for_each_serial(par_if(true, count)));
 }
 
 BC_AUTO_TEST_CASE(execution__for_each__empty__no_calls)
@@ -287,46 +418,28 @@ BC_AUTO_TEST_CASE(execution__for_each__empty__no_calls)
 
 BC_AUTO_TEST_CASE(execution__transform__unary_policies__same_as_serial)
 {
-    const auto values = sequence(count);
-    const auto square = [](size_t value) NOEXCEPT { return value * value; };
-    std::vector<size_t> expected(count);
-    std::transform(values.cbegin(), values.cend(), expected.begin(), square);
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-    {
-        std::vector<size_t> out(count);
-        const auto end = std::transform(policy, values.cbegin(), values.cend(), out.begin(), square);
-        BC_REQUIRE(end == out.cend());
-        BC_REQUIRE(out == expected);
-    }
+    BC_REQUIRE(transform_unary_serial(seq));
+    BC_REQUIRE(transform_unary_serial(par));
+    BC_REQUIRE(transform_unary_serial(par_if(true, 7)));
+    BC_REQUIRE(transform_unary_serial(par_if(true, count)));
 }
 
 BC_AUTO_TEST_CASE(execution__transform__binary_policies__same_as_serial)
 {
-    const auto left = sequence(count);
-    const auto right = scrambled(count);
-    const auto add = [](size_t one, size_t two) NOEXCEPT { return one + two; };
-    std::vector<size_t> expected(count);
-    std::transform(left.cbegin(), left.cend(), right.cbegin(), expected.begin(), add);
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-    {
-        std::vector<size_t> out(count);
-        const auto end = std::transform(policy, left.cbegin(), left.cend(), right.cbegin(), out.begin(), add);
-        BC_REQUIRE(end == out.cend());
-        BC_REQUIRE(out == expected);
-    }
+    BC_REQUIRE(transform_binary_serial(seq));
+    BC_REQUIRE(transform_binary_serial(par));
+    BC_REQUIRE(transform_binary_serial(par_if(true, 7)));
+    BC_REQUIRE(transform_binary_serial(par_if(true, count)));
 }
 
 // reduce
 
 BC_AUTO_TEST_CASE(execution__reduce__policies__same_as_serial)
 {
-    const auto values = sequence(count);
-    const auto expected = std::reduce(values.cbegin(), values.cend(), 42_size, std::plus<size_t>{});
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-        BC_REQUIRE_EQUAL(std::reduce(policy, values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}), expected);
+    BC_REQUIRE(reduce_serial(seq));
+    BC_REQUIRE(reduce_serial(par));
+    BC_REQUIRE(reduce_serial(par_if(true, 7)));
+    BC_REQUIRE(reduce_serial(par_if(true, count)));
 }
 
 BC_AUTO_TEST_CASE(execution__reduce__init_applied_once)
@@ -347,12 +460,10 @@ BC_AUTO_TEST_CASE(execution__reduce__empty__init)
 
 BC_AUTO_TEST_CASE(execution__transform_reduce__policies__same_as_serial)
 {
-    const auto values = sequence(count);
-    const auto square = [](size_t value) NOEXCEPT { return value * value; };
-    const auto expected = std::transform_reduce(values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}, square);
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-        BC_REQUIRE_EQUAL(std::transform_reduce(policy, values.cbegin(), values.cend(), 42_size, std::plus<size_t>{}, square), expected);
+    BC_REQUIRE(transform_reduce_serial(seq));
+    BC_REQUIRE(transform_reduce_serial(par));
+    BC_REQUIRE(transform_reduce_serial(par_if(true, 7)));
+    BC_REQUIRE(transform_reduce_serial(par_if(true, count)));
 }
 
 BC_AUTO_TEST_CASE(execution__transform_reduce__empty__init)
@@ -365,17 +476,21 @@ BC_AUTO_TEST_CASE(execution__transform_reduce__empty__init)
 
 BC_AUTO_TEST_CASE(execution__all_of__policies__same_as_serial)
 {
-    const auto values = sequence(count);
     const auto positive = [](size_t value) NOEXCEPT { return value > zero; };
     const auto small = [](size_t value) NOEXCEPT { return value < count; };
     const auto tiny = [](size_t value) NOEXCEPT { return value < 10u; };
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-    {
-        BC_REQUIRE_EQUAL(std::all_of(policy, values.cbegin(), values.cend(), positive), std::all_of(values.cbegin(), values.cend(), positive));
-        BC_REQUIRE_EQUAL(std::all_of(policy, values.cbegin(), values.cend(), small), std::all_of(values.cbegin(), values.cend(), small));
-        BC_REQUIRE_EQUAL(std::all_of(policy, values.cbegin(), values.cend(), tiny), std::all_of(values.cbegin(), values.cend(), tiny));
-    }
+    BC_REQUIRE(all_of_serial(seq, positive));
+    BC_REQUIRE(all_of_serial(seq, small));
+    BC_REQUIRE(all_of_serial(seq, tiny));
+    BC_REQUIRE(all_of_serial(par, positive));
+    BC_REQUIRE(all_of_serial(par, small));
+    BC_REQUIRE(all_of_serial(par, tiny));
+    BC_REQUIRE(all_of_serial(par_if(true, 7), positive));
+    BC_REQUIRE(all_of_serial(par_if(true, 7), small));
+    BC_REQUIRE(all_of_serial(par_if(true, 7), tiny));
+    BC_REQUIRE(all_of_serial(par_if(true, count), positive));
+    BC_REQUIRE(all_of_serial(par_if(true, count), small));
+    BC_REQUIRE(all_of_serial(par_if(true, count), tiny));
 }
 
 BC_AUTO_TEST_CASE(execution__all_of__empty__true)
@@ -388,28 +503,23 @@ BC_AUTO_TEST_CASE(execution__all_of__empty__true)
 
 BC_AUTO_TEST_CASE(execution__sort__policies__same_as_serial)
 {
-    const auto greater = [](size_t left, size_t right) NOEXCEPT { return left > right; };
-    auto expected = scrambled(count);
-    std::sort(expected.begin(), expected.end(), greater);
-
-    for (const auto& policy: { seq, par, par_if(true, 7), par_if(true, count) })
-    {
-        auto values = scrambled(count);
-        std::sort(policy, values.begin(), values.end(), greater);
-        BC_REQUIRE(values == expected);
-    }
+    BC_REQUIRE(sort_serial(seq));
+    BC_REQUIRE(sort_serial(par));
+    BC_REQUIRE(sort_serial(par_if(true, 7)));
+    BC_REQUIRE(sort_serial(par_if(true, count)));
 }
 
 BC_AUTO_TEST_CASE(execution__sort__odd_task_counts__sorted)
 {
-    for (const auto size: { 3u, 5u, 7u, 9u, 11u, 13u, 17u, 100u, 101u })
-    {
-        auto expected = scrambled(size);
-        std::sort(expected.begin(), expected.end());
-        auto values = scrambled(size);
-        std::sort(par, values.begin(), values.end(), std::less<size_t>{});
-        BC_REQUIRE(values == expected);
-    }
+    BC_REQUIRE(sorts(3));
+    BC_REQUIRE(sorts(5));
+    BC_REQUIRE(sorts(7));
+    BC_REQUIRE(sorts(9));
+    BC_REQUIRE(sorts(11));
+    BC_REQUIRE(sorts(13));
+    BC_REQUIRE(sorts(17));
+    BC_REQUIRE(sorts(100));
+    BC_REQUIRE(sorts(101));
 }
 
 BC_AUTO_TEST_CASE(execution__sort__empty__empty)

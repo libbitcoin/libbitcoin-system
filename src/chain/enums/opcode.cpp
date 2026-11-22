@@ -405,8 +405,8 @@ std::string opcode_to_mnemonic(opcode value, uint32_t active_forks) NOEXCEPT
     }
 }
 
-// This converts only names, not any data for push codes.
-// This also converts hexadecial representations of opcode ('0x' prefixed).
+// Converts only names, not any data for push codes.
+// Also converts hexadecial representations of opcode ('0x' prefixed).
 bool opcode_from_mnemonic(opcode& out_code,
     const std::string_view& value) NOEXCEPT
 {
@@ -692,7 +692,8 @@ bool opcode_from_hexadecimal(opcode& out_code,
         return false;
 
     data_chunk out;
-    if (!decode_base16(out, { std::next(value.cbegin(), prefix), value.cend() }))
+    const auto start = std::next(value.cbegin(), prefix);
+    if (!decode_base16(out, { start, value.cend() }))
         return false;
 
     out_code = static_cast<opcode>(out.front());

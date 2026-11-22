@@ -31,66 +31,63 @@
 
 // Utf8 Everywhere
 //
-// Windows and other environments, such as Java, that supported Unicode prior
-// to the advent of utf8 utilize 16 bit characters. These are typically encoded
-// as wchar_t in C++. Unicode no longer fits in 16 bits and as such these
-// implementations now require variable length character encoding just as utf8.
-// Windows support for UCS2 was added in Windows NT 3.1. Support for UTF16
-// was added in Windows 2000. So its wide characters are also variable length.
+// Windows and other environments, such as Java, that supported Unicode
+// prior to the advent of utf8 use 16 bit characters, typically encoded
+// as wchar_t in C++. Unicode does not fit in 16 bits, so these
+// implementations require variable length character encoding just as
+// utf8. Windows added UCS2 support in Windows NT 3.1 and UTF16 in
+// Windows 2000, so its wide characters are also variable length.
 // boost.org/doc/libs/1_75_0/libs/locale/doc/html/recommendations_and_myths.html
 //
 // Libbitcoin embraces the "utf8 everywhere" design: utf8everywhere.org
-// The objective is to use utf8 as the canonical string encoding, pushing
-// wchar_t translation to the edge (stdio, argv, O/S and external API calls).
-// The macro BC_USE_LIBBITCOIN_MAIN does most of the heavy lifting to ensure
-// that stdio and argv is configured for utf8. The 'to_utf' functions are
-// provided for API translations.
+// Objective is utf8 as canonical string encoding, pushing
+// wchar_t translation to the edge (stdio, argv, O/S and external
+// API calls). The macro BC_USE_LIBBITCOIN_MAIN does most of the
+// heavy lifting to ensure stdio and argv are configured for
+// utf8. The 'to_utf' functions provide API translations.
 
 // Regarding source files:
 //
-// Don't use #pragma execution_character_set("utf-8") in vc++.
-// This instruction causes sources to be explicitly interpreted as utf8.
-// However this technique improperly encodes literals ("フ" for example).
-// Instead use non-BOM UTF8 encoded files. To do this use "save as..."
-// utf8 without a "signature" (BOM) in the Visual Studio save dialog.
-// This is not required for files that contain only ascii characters.
-// This is the typical file format for C++ sources in other environments.
+// Don't use #pragma execution_character_set("utf-8") in vc++, which causes
+// sources to be explicitly interpreted as utf8 but improperly encodes literals
+// ("フ" for example). Instead use non-BOM UTF8 encoded files, via "save as..."
+// utf8 without a "signature" (BOM) in Visual Studio save dialog. Not required
+// for files containing only ascii characters. Non-BOM utf8 is the typical file
+// format for C++ sources in other environments.
 // Do not use the L qualifier when source is UTF-8 w/out BOM (mangles output):
 // const auto utf16 = L"acción.кошка.日本国";
 // std::wcout << utf16;
 
 // Regarding std lib paths:
 //
-// On Win32 std::filesystem::path interprets narrow characters in the ANSI code
+// On Win32 std::filesystem::path interprets narrow characters in ANSI code
 // page, not utf8. Convert between utf8 strings and paths with to_path and
-// from_path, which use the path's utf8 (char8_t) interface on all platforms.
+// from_path, using path's utf8 (char8_t) interface on all platforms.
 // en.cppreference.com/w/cpp/filesystem/path/string
 
 // Regarding console applications:
 //
 // BC_USE_LIBBITCOIN_MAIN should be declared prior to bc::system::main() in a
-// console application. This translates arguments and the environment to UTF8
-// in Win32 builds. This macro implements main() and forwards to
-// bc::system::main(), which should be implemented as if it was main() with
-// the expectation that argv is utf8.
+// console application. Translates arguments and environment to UTF8 in Win32
+// builds. Implements main() and forwards to bc::system::main(), which should be
+// implemented as if main(), expecting utf8 argv.
 
 // Regarding console I/O:
 // 
-// BC_USE_LIBBITCOIN_MAIN sets up three UTF8 streams in Win32 builds and on
-// other builds these are aliased to the standard streams.
+// BC_USE_LIBBITCOIN_MAIN sets up three UTF8 streams in Win32 builds, aliased to
+// standard streams on other builds.
 // Never use std::cout|std::cerr|std::cin (aborts on assertion):
 // std::cout << "text";
 // std::cerr << "text";
 // std::cin >> string;
-// Instead always use the following (defined by BC_USE_LIBBITCOIN_MAIN):
+// Instead always use (defined by BC_USE_LIBBITCOIN_MAIN):
 // bc::system::cin
 // bc::system::cout
 // bc::system::cerr
 //
 // BC_USE_LIBBITCOIN_MAIN should be declared prior to bc::system::main() in a
-// console application. This enables Unicode argument and environment
-// processing in Windows. This macro implements main() and forwards to
-// bc::system::main(), which should be implemented as if it was main() with
-// the expectation that argv is utf8.
+// console application. Enables Unicode argument and environment processing in
+// Windows. Implements main() and forwards to bc::system::main(), which should
+// be implemented as if main(), expecting utf8 argv.
 
 #endif

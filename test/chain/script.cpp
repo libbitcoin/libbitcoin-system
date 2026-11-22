@@ -228,8 +228,8 @@ BC_AUTO_TEST_CASE(script__multisig__valid)
         const auto name = test_name(test);
         BC_REQUIRE_MESSAGE(tx.is_valid(), name);
 
-        // These are always valid.
-        // These are scripts potentially affected by bip66 (but should not be).
+        // Always valid.
+        // Scripts potentially affected by bip66 (but should not be).
         BC_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) == error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) == error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) == error::script_success, name);
@@ -259,8 +259,8 @@ BC_AUTO_TEST_CASE(script__multisig__invalid)
         const auto name = test_name(test);
         BC_REQUIRE_MESSAGE(tx.is_valid(), name);
 
-        // These are always invalid.
-        // These are scripts potentially affected by bip66 (but should not be).
+        // Always invalid.
+        // Scripts potentially affected by bip66 (but should not be).
         BC_CHECK_MESSAGE(tx.connect({ flags::no_rules }, 0) != error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::bip66_rule }, 0) != error::script_success, name);
         BC_CHECK_MESSAGE(tx.connect({ flags::all_rules }, 0) != error::script_success, name);
@@ -296,10 +296,13 @@ constexpr auto multisig_not_key_a = "03dcfd9e580de35d8c2060d76dbf9e5561fe20febd2
 constexpr auto multisig_not_key_b = "02440e0304bf8d32b2012994393c6a477acf238dd6adb4c3cef5bfa72f30c9861c";
 
 // The spend is not a coinbase, so that it can be endorsed.
-static transaction_accessor multisig_not_spend(const std::string& input_script, const std::string& output_script)
+static transaction_accessor multisig_not_spend(const std::string& input_script,
+    const std::string& output_script)
 {
-    const transaction_accessor tx{ 0, inputs{ { point{ one_hash, 0 }, script{ input_script }, 0 } }, outputs{}, 0 };
-    tx.inputs_ptr()->front()->prevout = to_shared(output{ {}, script{ output_script } });
+    const input in{ point{ one_hash, 0 }, script{ input_script }, 0 };
+    const transaction_accessor tx{ 0, inputs{ in }, outputs{}, 0 };
+    const auto prevout = to_shared(output{ {}, script{ output_script } });
+    tx.inputs_ptr()->front()->prevout = prevout;
     return tx;
 }
 
@@ -318,7 +321,8 @@ static transaction_accessor multisig_not_tx(bool signed_key_on_top)
 
     endorsement top;
     const auto unsigned_tx = multisig_not_spend("", output);
-    if (!unsigned_tx.create_endorsement(top, secret, script{ output }, 0, 0, coverage::hash_all, script_version::unversioned, flags::no_rules))
+    if (!unsigned_tx.create_endorsement(top, secret, script{ output }, 0, 0,
+        coverage::hash_all, script_version::unversioned, flags::no_rules))
         return {};
 
     return multisig_not_spend("0 [0101] [0101] [" + encode_base16(top) + "]", output);

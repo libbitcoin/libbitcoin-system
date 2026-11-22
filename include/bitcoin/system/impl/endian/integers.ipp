@@ -29,15 +29,15 @@ namespace system {
 BC_PUSH_WARNING(NO_ARRAY_INDEXING)
 BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
-// C++ standard: "The [shift] behavior is undefined if ... greater than or
-// equal to the width of the promoted left operand." So we must be careful to
-// not shift bytes by byte_bits (8). For this reason we specialize on byte-size
-// integers. This also presents a performance optimization for byte conversion,
-// which is close to a no-op. Empty vector returns zero and zero returns empty.
+// C++ standard: "The [shift] behavior is undefined if ... greater than or equal
+// to the width of the promoted left operand." So bytes must not be shifted by
+// byte_bits (8), hence specialization on byte-size integers. Also a performance
+// optimization for byte conversion, which is close to no-op. Empty vector
+// returns zero and zero returns empty.
 
 // C++ standard: "Right-shift on signed integral types is an arithmetic right
-// shift, which performs sign-extension". In other words, repeatedly shifting
-// -1 of any integer width will perpetually produce "1" bits.
+// shift, which performs sign-extension". Repeatedly shifting -1 of any integer
+// width perpetually produces "1" bits.
 
 // To big/little data.
 // ----------------------------------------------------------------------------

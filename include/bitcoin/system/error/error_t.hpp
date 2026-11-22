@@ -22,15 +22,14 @@
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/error/macros.hpp>
 
-// The zero-valued code is the only one that will produce a false in the
-// std::error_code bool operator override (false, no error). Each enumeration
-// has an independent success code to produce the same type for ternaries.
-// Codes of distinct enumerations can be assigned to each other as they are
-// all std::system type. However a ternary with two different enums cannot
-// assign/return to the same code instance, as the compiler cannot know which
-// type to promote. A common success code would make this tedious, and an
-// explicit success code for the given category improves consistency as the
-// source of a propagated success can be extracted.
+// Zero-valued code is the only one producing false in std::error_code bool
+// operator override (false, no error). Each enumeration has independent success
+// code to produce same type for ternaries. Codes of distinct enumerations can
+// be assigned to each other as all are std::system type. However ternary with
+// two different enums cannot assign/return to same code instance, as compiler
+// cannot know which type to promote. Common success code would make this
+// tedious, and explicit success code for given category improves consistency as
+// source of propagated success can be extracted.
 
 namespace libbitcoin {
 namespace system {

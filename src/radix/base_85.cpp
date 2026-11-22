@@ -26,8 +26,8 @@
 #include <bitcoin/system/math/math.hpp>
 
 // base85
-// Base 85 is an ascii data encoding with a domain of 85 symbols (characters).
-// 85 is not a power of 2 so base85 is not a bit mapping.
+// Base 85 is ascii data encoding with domain of 85 symbols (characters).
+// 85 is not power of 2 so base85 is not bit mapping.
 
 namespace libbitcoin {
 namespace system {

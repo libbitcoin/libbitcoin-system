@@ -28,15 +28,15 @@ namespace system {
 /// ---------------------------------------------------------------------------
 
 /// Promote integral to integral of widest bit width (no-op for non-integrals).
-/// This is used to promote to 64 bit before native operation, which moves the
-/// overflow limit from 32 bit (baesd on promotion) to 64 bit (maximum domain).
+/// Promotes to 64 bit before native operation, moving overflow limit from 32
+/// bit (based on promotion) to 64 bit (maximum domain).
 template <typename From, if_integer<From> = true>
 constexpr to_promoted_type<From> promote(From value) NOEXCEPT;
 
 /// Sign may be changed on promotion by binary operators.
 /// Sign will not (?) be changed by unary ops (-) unless size is also promoted.
-/// This is a narrowing cast to restore Restored type after a native operation.
-/// Also used as a narrowing cast after use of promote.
+/// Narrowing cast to restore Restored type after native operation.
+/// Also used as narrowing cast after use of promote.
 template <typename Restored, typename Common,
     if_common<Common> = true,
     if_integral_integer<Restored> = true,
@@ -159,7 +159,7 @@ constexpr Unsigned to_unsigned(Unsigned value) NOEXCEPT;
 /// ---------------------------------------------------------------------------
 
 /// Cast floating point to integral integer (rounded if whole, truncated
-/// otherwise). True for any finite value that falls within Integer domain.
+/// otherwise). True for any finite value within Integer domain.
 /// False if fractional part exceeds representation error when whole.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
@@ -167,32 +167,32 @@ template <typename Integer = size_t, typename Float,
 inline bool to_integer(Integer& out, Float value, bool whole=true) NOEXCEPT;
 
 /// Cast floating point to integral integer (ceilinged).
-/// Any non-finite value returns the integer domain maximum.
-/// Overflow/underflow is clamped to respective integer upper/lower limit.
+/// Any non-finite value returns integer domain maximum.
+/// Overflow/underflow clamped to respective integer upper/lower limit.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>
 inline Integer to_ceilinged_integer(Float value) NOEXCEPT;
 
 /// Cast floating point to integral integer (floored).
-/// Any non-finite value returns the integer domain maximum.
-/// Overflow/underflow is clamped to respective integer upper/lower limit.
+/// Any non-finite value returns integer domain maximum.
+/// Overflow/underflow clamped to respective integer upper/lower limit.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>
 inline Integer to_floored_integer(Float value) NOEXCEPT;
 
 /// Cast floating point to integral integer (rounded).
-/// Any non-finite value returns the integer domain maximum.
-/// Overflow/underflow is clamped to respective integer upper/lower limit.
+/// Any non-finite value returns integer domain maximum.
+/// Overflow/underflow clamped to respective integer upper/lower limit.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>
 inline Integer to_rounded_integer(Float value) NOEXCEPT;
 
 /// Cast floating point to integral integer (truncated).
-/// Any non-finite value returns the integer domain maximum.
-/// Overflow/underflow is clamped to respective integer upper/lower limit.
+/// Any non-finite value returns integer domain maximum.
+/// Overflow/underflow clamped to respective integer upper/lower limit.
 template <typename Integer = size_t, typename Float,
     if_integral_integer<Integer> = true,
     if_floating_point<Float> = true>

@@ -32,7 +32,7 @@ constexpr bool is_code_point(char32_t point) NOEXCEPT
 }
 
 // Decode one code point from UTF8 (char), UTF16 or UTF32 (by char size).
-// False if the sequence is truncated, overlong, or not a code point.
+// False if sequence is truncated, overlong, or not a code point.
 template <typename Char>
 static bool decode(char32_t& point, const std::basic_string<Char>& in,
     size_t& offset) NOEXCEPT

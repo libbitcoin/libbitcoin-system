@@ -177,8 +177,8 @@ const ec_secret& hd_private::secret() const NOEXCEPT
 // Methods.
 // ----------------------------------------------------------------------------
 
-// HD keys do not carry a payment address prefix (just like WIF).
-// So we are currently not converting to ec_public or ec_private.
+// HD keys carry no payment address prefix (like WIF),
+// so no conversion to ec_public or ec_private.
 
 hd_key hd_private::to_hd_key() const NOEXCEPT
 {

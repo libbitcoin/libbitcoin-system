@@ -65,7 +65,7 @@ constexpr bool is_subtract_overflow(Unsigned left, Unsigned right) NOEXCEPT;
 
 /// multiply/divide.
 /// ---------------------------------------------------------------------------
-/// Multiply is limited to integrals, as it requires domain bounds.
+/// Multiply limited to integrals, as it requires domain bounds.
 
 /// True if multiply would overflow Integer domain.
 template <typename Unsigned,
@@ -79,7 +79,7 @@ constexpr bool is_divide_overflow(Dividend dividend, Divisor divisor) NOEXCEPT;
 
 /// power/log.
 /// ---------------------------------------------------------------------------
-/// These are not limited to integral as they do not require domain bounds.
+/// Not limited to integral as they do not require domain bounds.
 
 /// True if 0^0.
 template <size_t Base, typename Exponent,
@@ -103,9 +103,9 @@ constexpr bool is_log_overflow(Base base, Value value) NOEXCEPT;
 /// ---------------------------------------------------------------------------
 /// Avoid structured exception handling, use only to cause program abort.
 /// Exceptions can be used in constexpr to invalidate constexpr evaluation,
-/// which includes template matching during compilation. So these are safe and
-/// simplifying to use in template argument validation. Otherwise they should
-/// generally be avoided and use only to abort program execution (not caught).
+/// including template matching during compilation, so these are safe and
+/// simplifying in template argument validation. Otherwise generally avoid
+/// them and use only to abort program execution (not caught).
 
 // TODO: generalize safe_add/subtract/multiply argument types.
 

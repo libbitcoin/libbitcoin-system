@@ -20,13 +20,13 @@
 
 // Verify compiler "usual arithmetic conversion" expectations.
 // ----------------------------------------------------------------------------
-// Shift works like a unary op (right operand is not incorporated).
+// Shift works like unary op (right operand not incorporated).
 // Order of operands does not affect (other) binary ops.
 // self-assigning (e.g. >>=, /=) ops obviously do not (cannot) promote.
 // ! and comparison are not mathematical ops.
 
 // Unary ops (+/-/~) change to unsigned upon width promotion, not otherwise.
-// + is a unary op and produces promotion.
+// + is unary op and produces promotion.
 // std::common_type does not support unary operators.
 // std::common_type<Left, Right>::type == decltype(left - right)
 // std::common_type<Value>::type != decltype(-value)

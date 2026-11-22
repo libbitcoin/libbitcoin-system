@@ -289,10 +289,10 @@ size_t block::malleated32_size() const NOEXCEPT
     return zero;
 }
 
-// A set of tx hashes has the merkle root of a shorter set if and only if at
-// some depth its node count is even and above two and its last two nodes are
-// equal: the shorter set has an odd count at that depth and clones its last
-// node, which the longer set holds. This is the test at width depth.
+// Set of tx hashes has merkle root of a shorter set if and only if at some
+// depth its node count is even and above two and its last two nodes are equal:
+// shorter set has odd count at that depth and clones its last node, which
+// longer set holds. This is the test at width depth.
 bool block::is_malleated32(size_t width) const NOEXCEPT
 {
     // Caller bounds width.
@@ -471,7 +471,8 @@ code block::populate_internal(const context& ctx) const NOEXCEPT
             if (in->point_hash() == self)
                 return error::coinbase_maturity;
 
-            if (!relative || !chain::input::is_relative_locktime_applied(in->sequence()))
+            if (!relative
+                || !chain::input::is_relative_locktime_applied(in->sequence()))
                 continue;
 
             if (hashes.empty())
@@ -479,8 +480,9 @@ code block::populate_internal(const context& ctx) const NOEXCEPT
                     hashes.emplace(other.hash(false));
 
             // An internal spend has zero age, so any relative lock applies.
-            if (hashes.contains(in->point_hash()) &&
-                chain::input::is_relative_locked(in->sequence(), zero, zero, zero, zero))
+            if (hashes.contains(in->point_hash())
+                && chain::input::is_relative_locked(in->sequence(), zero, zero,
+                    zero, zero))
                 return error::relative_time_locked;
         }
     }

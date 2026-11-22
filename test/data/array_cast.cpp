@@ -64,7 +64,7 @@ static_assert( is_defined<if_proportional<8, uint64_t, uint64_t>>); // n = 8
 
 // proportion<size_t, Integral, Integral>
 // ----------------------------------------------------------------------------
-// proportion is guarded by if_proportional type constraint.
+// proportion guarded by if_proportional type constraint.
 
 static_assert( proportion<1, uint8_t,  uint8_t > == 1u); // n = 1
 static_assert( proportion<1, uint16_t, uint8_t > == 2u); // n = 2
@@ -252,8 +252,8 @@ static_assert(std::is_same_v<decltype(array_cast<uint16_t>(const_data8x2)), cons
 static_assert(std::is_same_v<decltype(array_cast<uint8_t>(const_data16x1)), const array8x2&>);
 static_assert(std::is_same_v<decltype(array_cast<uint16_t>(const_data16x1)), const array16x1&>);
 
-// Since _u8 data is cast into integrals its above order is preserved.
-// The endianness of the _u32 integrals affects their numerical interpretation.
+// Since _u8 data is cast into integrals, its above order is preserved.
+// Endianness of _u32 integrals affects their numerical interpretation.
 BC_AUTO_TEST_CASE(cast__array_cast__const__expected)
 {
     constexpr data_array<2> data8x2{ 0x01_u8, 0x02_u8 };
@@ -266,8 +266,8 @@ BC_AUTO_TEST_CASE(cast__array_cast__const__expected)
     BC_REQUIRE_EQUAL(value8x2[1], data8x2[1]);
 }
 
-// Since _u8 data is cast into integrals its above order is preserved.
-// The endianness of the _u32 integrals affects their numerical interpretation.
+// Since _u8 data is cast into integrals, its above order is preserved.
+// Endianness of _u32 integrals affects their numerical interpretation.
 BC_AUTO_TEST_CASE(cast__array_cast__non_const__expected)
 {
     data_array<2> data8x2{ 0x01_u8, 0x02_u8 };
@@ -388,8 +388,8 @@ static_assert(!std::is_same_v<const_array32, const std_array<int32_t, ints32>&>)
 static_assert(!std::is_same_v<const_array32, const std_array<uint16_t, ints32>&>);
 static_assert(!std::is_same_v<const_array32, const std_array<uint32_t, ints32 * 2_size>&>);
 
-// But, a data buffer of any size can be cast to an array of any size.
-// This is the unsafe nature of a reinterpret_cast (and why it cannot be constexpr).
+// But data buffer of any size can be cast to array of any size.
+// Unsafe nature of reinterpret_cast (and why it cannot be constexpr).
 // ============================================================================
 // 1 byte to 1 int (out of bounds)
 constexpr uint8_t data1[1]{ 1_u8 };

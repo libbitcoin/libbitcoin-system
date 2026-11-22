@@ -34,22 +34,22 @@ BC_API std::ostream& cerr_stream() THROWS;
 
 /// Win32 UTF8 standard I/O utilities.
 /// ---------------------------------------------------------------------------
-/// These are no-ops unless called on Win32 builds.
+/// No-ops unless called on Win32 builds.
 
-/// Initialize windows to use UTF8 for stdio. This cannot be uninitialized and
-/// once set bc stdio must be used in place of std stdio.
+/// Initialize windows to use UTF8 for stdio, cannot be uninitialized. Once set,
+/// bc stdio must be used in place of std stdio.
 BC_API void set_utf8_stdio() THROWS;
 
-/// Initialize windows to use UTF8 for stdin. This cannot be uninitialized and
-/// once set bc::system::cin must be used in place of std::cin.
+/// Initialize windows to use UTF8 for stdin, cannot be uninitialized. Once set,
+/// bc::system::cin must be used in place of std::cin.
 BC_API void set_utf8_stdin() THROWS;
 
-/// Initialize windows to use UTF8 for stdout. This cannot be uninitialized and
-/// once set bc::system::cout must be used in place of std::cout.
+/// Initialize windows to use UTF8 for stdout, cannot be uninitialized. Once
+/// set, bc::system::cout must be used in place of std::cout.
 BC_API void set_utf8_stdout() THROWS;
 
-/// Initialize windows to use UTF8 for stderr. This cannot be uninitialized and
-/// once set bc::system::cerr must be used in place of std::cerr.
+/// Initialize windows to use UTF8 for stderr, cannot be uninitialized. Once
+/// set, bc::system::cerr must be used in place of std::cerr.
 BC_API void set_utf8_stderr() THROWS;
 
 /// Initialize windows to use binary for stdin. This cannot be uninitialized.

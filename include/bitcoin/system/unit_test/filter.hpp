@@ -25,9 +25,9 @@ namespace libbitcoin {
 namespace system {
 namespace unit_test {
 
-/// Selects test units by run_test filters. A filter is levels joined by '/',
-/// each a ','-separated list of patterns, and selects every unit within a
-/// matching path. A '!' prefixed filter excludes instead.
+/// Selects test units by run_test filters. Filter is levels joined by '/', each
+/// a ','-separated list of patterns, selecting every unit within matching path.
+/// '!' prefixed filter excludes instead.
 class filter
 {
 public:
@@ -40,8 +40,8 @@ public:
     /// No filters selects every unit.
     filter(const std::vector<std::string>& filters) NOEXCEPT;
 
-    /// True if selected by any filter (or there are none) and excluded by
-    /// no '!' filter, where units is the path of suites then case.
+    /// True if selected by any filter (or none) and excluded by no '!' filter,
+    /// where units is path of suites then case.
     bool selects(const path& units) const NOEXCEPT;
 
 private:

@@ -161,9 +161,9 @@ static_assert(  0_i8 == 0);
 static_assert(is_same_type<decltype(42_i8), int8_t>);
 
 // ...negatives are not decimal literals, they are (promoting) operators!
-// While they may appear to represent the value in the type, they do not.
-// And the minimum value cannot be expressed (maximum positive exceeded).
-// There is *no way* to represent a negative value using a decimal literal.
+// While they may appear to represent value in type, they do not.
+// And minimum value cannot be expressed (maximum positive exceeded).
+// There is *no way* to represent negative value using decimal literal.
 static_assert(  -1_i8 == -1);
 static_assert( -16_i8 == -16);
 static_assert( -32_i8 == -32);
@@ -280,7 +280,7 @@ static_assert(is_same_type<decltype(0xff), signed int>);
 static_assert(is_same_type<decltype(0xffU), unsigned int>);
 
 // UNDESIRABLE SEAMS (unexpected size and sign)
-// Default (unsuffixed) integer literals have the following signed types.
+// Default (unsuffixed) integer literals have following signed types.
 static_assert(is_same_type<decltype(0xff), signed int>);    // 1 (not 8)
 static_assert(is_same_type<decltype(0xff'ff), signed int>);    // 2 (not 16)
 static_assert(is_same_type<decltype(0xff'ff'ff), signed int>);    // 3
@@ -328,10 +328,10 @@ static_assert(0xff'ff'ff'ff'ff'ff == 0b1111'1111'1111'1111'1111'1111'1111'1111'1
 static_assert(0xff'ff'ff'ff'ff'ff'ff == 0b1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111);
 static_assert(0xff'ff'ff'ff'ff'ff'ff'ff == 0b1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111'1111);
 
-// UNDESIRABLE SEAM (unexpected overflow behavior, resulting from unexpected size and sign)
-// As all literal representations are positive (- is an operator),
-// When negating a (positive) literal, the type width controls overflow.
-// A literal without the high bit set cannot correspond to a negative value.
+// UNDESIRABLE SEAM (unexpected overflow behavior from unexpected size and sign)
+// All literal representations are positive (- is an operator), so when
+// negating a (positive) literal, type width controls overflow.
+// Literal without high bit set cannot correspond to negative value.
 static_assert(0xff != -1); // POSITIVE
 static_assert(0xff'ff != -1); // POSITIVE
 static_assert(0xff'ff'ff != -1); // POSITIVE
@@ -341,9 +341,9 @@ static_assert(0xff'ff'ff'ff'ff'ff != -1); // POSITIVE
 static_assert(0xff'ff'ff'ff'ff'ff'ff != -1); // POSITIVE
 static_assert(0xff'ff'ff'ff'ff'ff'ff'ff == -1); // unsigned long long overflow to corresponding negative
 
-// There are no negative integer literals.
-// Applying a unary operator is an operation, unary operators do not change sign.
-// Literals are not promotable by unary operators (as they are already promoted).
+// No negative integer literals.
+// Applying unary operator is operation, unary operators do not change sign.
+// Literals not promotable by unary operators (as already promoted).
 static_assert(is_same_type<decltype(+0xff), decltype(0xff)>);
 static_assert(is_same_type<decltype(+0xff'ff), decltype(0xff'ff)>);
 static_assert(is_same_type<decltype(+0xff'ff'ff), decltype(0xff'ff'ff)>);
@@ -426,15 +426,15 @@ static_assert(is_same_type<decltype(0xff'ff'ff'ff'ff'ffULL), unsigned long long>
 static_assert(is_same_type<decltype(0xff'ff'ff'ff'ff'ff'ffULL), unsigned long long>);
 static_assert(is_same_type<decltype(0xff'ff'ff'ff'ff'ff'ff'ffULL), unsigned long long>);
 
-// Note that 0xffffffff and 0xffffffffffffffff are domain limited.
-// 0xffffffffffffffff cannot in any way be represented as a signed literal.
-// 0xffffffff cannot in any way be represented as a 32 bit signed literal.
-// 0xffffffff can be explicitly promoted to LL, becoming a 64 bit signed literal.
+// 0xffffffff and 0xffffffffffffffff are domain limited.
+// 0xffffffffffffffff cannot in any way be represented as signed literal.
+// 0xffffffff cannot in any way be represented as 32 bit signed literal.
+// 0xffffffff can be explicitly promoted to LL, becoming 64 bit signed literal.
 static_assert(0xff'ff'ff'ffLL == 0x00'00'00'00'ff'ff'ff'ff);
 static_assert(is_same_type<decltype(0xff'ff'ff'ffLL), signed long long>);
 
 // UNDESIRABLE SEAM (unexpected sign change based on value)
-// Note that any literal of 32 bits will become unsigned iff its high bit is set.
+// Any literal of 32 bits becomes unsigned iff its high bit is set.
 static_assert(is_same_type<decltype(0xff), signed int>);
 static_assert(is_same_type<decltype(0xff'ff), signed int>);
 static_assert(is_same_type<decltype(0xff'ff'ff), signed int>);
@@ -449,7 +449,7 @@ static_assert(is_same_type<decltype(0xef'ff'ff'ff), unsigned int>);
 static_assert(is_same_type<decltype(0xff'ff'ff'ff), unsigned int>);
 
 // UNDESIRABLE SEAM (unexpected sign change based on value)
-// Note that any literal of 64 bits will become unsigned iff its high bit is set.
+// Any literal of 64 bits becomes unsigned iff its high bit is set.
 static_assert(is_same_type<decltype(0xff'ff'ff'ff'ff), signed long long>);
 static_assert(is_same_type<decltype(0xff'ff'ff'ff'ff'ff), signed long long>);
 static_assert(is_same_type<decltype(0xff'ff'ff'ff'ff'ff'ff), signed long long>);

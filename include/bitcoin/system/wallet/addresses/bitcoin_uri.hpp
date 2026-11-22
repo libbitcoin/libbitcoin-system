@@ -28,8 +28,8 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A bitcoin URI corresponding to BIP21 and BIP72.
-/// The object is not constant, setters can change state after construction.
+/// Bitcoin URI corresponding to BIP21 and BIP72.
+/// Not constant, setters can change state after construction.
 class BC_API bitcoin_uri
   : public uri_reader
 {

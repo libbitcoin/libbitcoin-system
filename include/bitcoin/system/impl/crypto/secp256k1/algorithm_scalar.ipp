@@ -45,8 +45,7 @@ constexpr bool algorithm::is_less(const scalar_t& a, const scalar_t& b) NOEXCEPT
     return !carry;
 }
 
-// Adds 2^256 - n (modulo 2^256) by mask, which subtracts n from a value not
-// below n.
+// Adds 2^256 - n (modulo 2^256) by mask, subtracting n from value not below n.
 constexpr void algorithm::reduce(scalar_t& r, uint64_t overflow) NOEXCEPT
 {
     auto carry = false;
@@ -248,8 +247,8 @@ constexpr void algorithm::inverse(scalar_t& r, const scalar_t& a) NOEXCEPT
     from_signed62(r, x);
 }
 
-// Exponent n - 2 by windows of four bits, from a table of the powers of a
-// below sixteen, where only the exponent selects the entry.
+// Exponent n - 2 by windows of four bits, from table of powers of a below
+// sixteen, where only exponent selects entry.
 constexpr void algorithm::inverse_power(scalar_t& r,
     const scalar_t& a) NOEXCEPT
 {
@@ -293,8 +292,8 @@ constexpr void algorithm::split(scalar_t& k1, scalar_t& k2,
     add(k1, c1, k);
 }
 
-// Each digit is the low Bits + 1 bits less 2^Bits, which is odd and nonzero,
-// and the remainder (value - digit) / 2^Bits is again odd.
+// Each digit is low Bits + 1 bits less 2^Bits, odd and nonzero, and remainder
+// (value - digit) / 2^Bits is again odd.
 template <size_t Bits, size_t Count>
 constexpr void algorithm::recode(digits_t<Count>& digits,
     const scalar_t& value) NOEXCEPT

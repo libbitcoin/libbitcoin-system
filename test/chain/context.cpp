@@ -38,8 +38,8 @@ BC_AUTO_TEST_CASE(context__is_insufficient_version__below_minimum__true)
     BC_REQUIRE(!instance.is_insufficient_version(5));
 }
 
-// CONSENSUS: the version comparison is signed, a negative version is below
-// any positive minimum.
+// CONSENSUS: version comparison is signed,
+// negative version is below any positive minimum.
 BC_AUTO_TEST_CASE(context__is_insufficient_version__negative_version__true)
 {
     const context instance{ 0, 0, 0, 0, 4, 0, 0 };
@@ -79,7 +79,7 @@ BC_AUTO_TEST_CASE(context__is_invalid_work__mismatch__true)
 
 // is_early_timestamp
 // ----------------------------------------------------------------------------
-// BIP94 (testnet4) bounds how far back a retarget block timestamp may reach.
+// BIP94 (testnet4) bounds how far back retarget block timestamp may reach.
 
 BC_AUTO_TEST_CASE(context__is_early_timestamp__patch_disabled__false)
 {
@@ -146,7 +146,7 @@ BC_AUTO_TEST_CASE(context__is_early_timestamp__bip54_and_patch__patch_limit)
 
 // is_negative_timespan
 // ----------------------------------------------------------------------------
-// bip54 requires the last block of a period at/after the period's first.
+// bip54 requires last block of period at/after period's first.
 
 BC_AUTO_TEST_CASE(context__is_negative_timespan__rule_disabled__false)
 {

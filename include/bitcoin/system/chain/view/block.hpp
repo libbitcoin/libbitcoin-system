@@ -70,12 +70,12 @@ public:
     code check_guard(const context& ctx) const NOEXCEPT;
 
     /// Population.
-    /// Prevouts are the wire-encoded prevouts of each spend in block order.
+    /// Prevouts are wire-encoded prevouts of each spend in block order.
     /// Fails if any populated prevout is internally immature or locked.
     code populate(const context& ctx, data_chunk&& prevouts) NOEXCEPT;
 
-    /// Prevouts are the wire-encoded prevouts of each spend of the selected
-    /// txs in block order, others are null (internal checks are skipped).
+    /// Prevouts are wire-encoded prevouts of each spend of selected txs in
+    /// block order, others are null (internal checks are skipped).
     bool populate(data_chunk&& prevouts,
         const std::vector<bool>& selected) NOEXCEPT;
 

@@ -131,17 +131,21 @@ struct is_std_optional_t<std::optional<Type>> : std::true_type {};
 template<typename Type>
 constexpr bool is_std_optional = is_std_optional_t<Type>::value;
 
-template <typename Type, std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
+template <typename Type,
+    std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
 constexpr size_t array_count = std::tuple_size_v<std::decay_t<Type>>;
 
-template <typename Type, std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
+template <typename Type,
+    std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
 using array_element = typename std::decay_t<Type>::value_type;
 
 // TODO: use executed lambda to remove ().
-template <typename Type, std::enable_if_t<!is_std_array<std::decay_t<Type>>, bool> = true>
+template <typename Type,
+    std::enable_if_t<!is_std_array<std::decay_t<Type>>, bool> = true>
 constexpr size_t size_of() { return sizeof(Type); }
 
-template <typename Type, std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
+template <typename Type,
+    std::enable_if_t<is_std_array<std::decay_t<Type>>, bool> = true>
 constexpr size_t size_of()
 {
     // Recurse arrays until non-array type.

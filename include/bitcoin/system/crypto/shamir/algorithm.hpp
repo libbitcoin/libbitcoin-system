@@ -35,9 +35,9 @@ namespace libbitcoin {
 namespace system {
 namespace shamir {
 
-/// Secret sharing over GF(256), with the slip39 digest share, share word
-/// checksum and master secret encryption. Field multiplication is constant
-/// time (no tables).
+/// Secret sharing over GF(256), with slip39 digest share,
+/// share word checksum and master secret encryption.
+/// Field multiplication is constant time (no tables).
 template <typename Shamir,
     if_same<typename Shamir::T, shamir::shamirk_t> = true>
 class algorithm
@@ -66,13 +66,12 @@ public:
     static constexpr size_t entropy_size(size_t threshold) NOEXCEPT;
 
     /// Split secret into count shares, of which threshold are required.
-    /// False if the sharing is invalid or entropy is not entropy_size.
+    /// False if sharing is invalid or entropy is not entropy_size.
     static bool split(shares_t& out, const secret_t& secret, size_t threshold,
         size_t count, const data_slice& entropy) NOEXCEPT;
 
-    /// Recover the secret from threshold shares, verifying the digest share.
-    /// False if the shares are insufficient, repeat a coordinate, or the
-    /// digest does not match.
+    /// Recover secret from threshold shares, verifying digest share. False if
+    /// shares are insufficient, repeat a coordinate, or digest does not match.
     static bool recover(secret_t& out, const shares_t& shares,
         size_t threshold) NOEXCEPT;
 
@@ -109,8 +108,8 @@ protected:
     /// Sharing.
     /// -----------------------------------------------------------------------
 
-    /// The secret and its digest are shared at these reserved coordinates,
-    /// so share coordinates are below the digest coordinate.
+    /// Secret and its digest are shared at these reserved coordinates, so share
+    /// coordinates are below digest coordinate.
     static constexpr auto secret_index = 255_u8;
     static constexpr auto digest_index = 254_u8;
 

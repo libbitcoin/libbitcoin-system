@@ -31,15 +31,15 @@ namespace number {
 
 // ****************************************************************************
 // CONSENSUS:
-// Due to compression, a leading sign byte is required if high bit is set.
-// This produces two zero representations (+/-0). The subsequent byte-based
-// overflow constraint thereby restricts the stack's 64-bit integer domain by
-// one value. An implementation that either avoided vectorization or vector
-// compression in the first place, or later implemented the overflow guard over
-// the converted integeral would have avoided this seam. These were both
-// premature optimizations, as a variant stack is more efficient than variably-
-// lengthed byte vector integral storage. The resulting integer domain
-// reduction is captured by the is_overflow functions below.
+// Due to compression, leading sign byte is required if high bit is set.
+// This produces two zero representations (+/-0). Subsequent byte-based
+// overflow constraint thereby restricts stack's 64-bit integer domain
+// by one value. An implementation that either avoided vectorization or
+// vector compression in the first place, or later implemented overflow
+// guard over converted integeral, would have avoided this seam. Both
+// were premature optimizations, as variant stack is more efficient than
+// variably-lengthed byte vector integral storage. Resulting integer
+// domain reduction is captured by is_overflow functions below.
 // ****************************************************************************
 
 TEMPLATE

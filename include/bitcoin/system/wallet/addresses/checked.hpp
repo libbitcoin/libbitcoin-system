@@ -29,10 +29,10 @@ namespace wallet {
 // TODO: use this template to define all checked wallet primitives.
 // For example: typedef checked<1, short_hash_size, 4> payment;
 
-/// Checked types are used for bitcoin payment addresses and other standards
-/// that leverage the same technique. The behavior is unique to bitcoin.
-/// This class is optimized to transport value_type (only) at no material
-/// cost over a simple array, while simplifying parsing and checksumming.
+/// Checked types, for bitcoin payment addresses and other standards
+/// leveraging same technique. Behavior unique to bitcoin. Optimized
+/// to transport value_type (only) at no material cost over simple
+/// array, while simplifying parsing and checksumming.
 template <size_t Prefix, size_t Payload,
     size_t Checksum = checksum_default_size>
 class checked

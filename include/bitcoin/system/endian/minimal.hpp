@@ -39,7 +39,7 @@ constexpr data_array<Size> to_little_endian_size(Integer value) NOEXCEPT;
 /// From integer (including uintx) to chunk.
 /// ---------------------------------------------------------------------------
 /// Chunk size infered from integer value bit width (not type size).
-/// Use "excess" to reserve the specified number of bytes beyond return size.
+/// Use "excess" to reserve specified number of bytes beyond return size.
 
 template <typename Integer,
     if_integer<Integer> = true>

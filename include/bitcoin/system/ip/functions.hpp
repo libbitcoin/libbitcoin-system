@@ -27,21 +27,20 @@ namespace libbitcoin {
 namespace system {
 namespace ip {
 
-/// IPv6 supports embedding of an IPv4 address (4 bytes) into IPv6 encodings
-/// (16 bytes). The two formats, "compatible" and "mapped" embed the same
-/// address differently, with the distinction being the level of support of the
-/// device. This is problematic for addresses, as they are device independent.
-/// P2P protocol is 16 bytes and allows for either encoding, however the
-/// "compatible" concoding is deprecated, so we produce only mapped encoding
-/// for P2P serialization. However, as both formats are send via P2P we decode
-/// from all three IPv6 encodings (native, compatible, mapped). For human
-/// readability we serialize addresses as text, for both logging and shutdown
-/// persistence. We refer to this format as denormalized, as it supports only
-/// native IPv4 and native IPv6 serialization. IPv6 host names are "bracketed".
-/// This provides distinction from the port number (otherwise conflating ":").
-/// This form is referred to as "literal" IPv6 encoding (from IPv6 URIs). All
-/// text addresses are literal encodings, and all host names are serialized as
-/// non-literal, and deserialized as either literal or non-literal.
+/// IPv6 supports embedding IPv4 address (4 bytes) into IPv6 encodings (16
+/// bytes). Two formats, "compatible" and "mapped", embed same address
+/// differently, distinguished by device level of support. This is problematic
+/// for addresses, as they are device independent. P2P protocol is 16 bytes and
+/// allows either encoding, but "compatible" encoding is deprecated, so only
+/// mapped encoding is produced for P2P serialization. As both formats are sent
+/// via P2P, all three IPv6 encodings (native, compatible, mapped) are decoded.
+/// For human readability addresses serialize as text, for both logging and
+/// shutdown persistence. This format is denormalized, supporting only native
+/// IPv4 and native IPv6 serialization. IPv6 host names are "bracketed",
+/// distinguishing them from port number (otherwise conflating ":"). This form
+/// is "literal" IPv6 encoding (from IPv6 URIs). All text addresses are
+/// literal encodings, and all host names serialize as non-literal, and
+/// deserialize as either literal or non-literal.
 
 /// Member if subnet addresses contain host.
 BC_API bool is_member(const address& ip, const address& subnet,

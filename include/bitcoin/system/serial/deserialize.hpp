@@ -26,9 +26,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// Trim and convert text to the Value type.
+/// Trim and convert text to Value type.
 /// Value may be any non-specialized deserializable type (that implements >>).
-/// The data_slice type is not deserializable (cannot hold data).
+/// data_slice type is not deserializable (cannot hold data).
 
 /// Deserialize to untrimmed/unsplit text, call deserialize(Value, string).
 /// Stream configuration is not honored for value conversion from text.
@@ -36,7 +36,7 @@ template <typename Value>
 bool deserialize(Value& out, std::istream& input) NOEXCEPT;
 
 /// Specialize template to avoid trimming of string deserialization.
-/// Strings are pass through unchanged, this provides type generalization.
+/// Strings pass through unchanged, providing type generalization.
 inline bool deserialize(std::string& out, const std::string_view& text) NOEXCEPT;
 
 /// Specialize template because basic_ostream treats uint8_t as char.

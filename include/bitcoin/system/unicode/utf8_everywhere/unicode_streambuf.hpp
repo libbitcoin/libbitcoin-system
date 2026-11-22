@@ -26,10 +26,10 @@ namespace libbitcoin {
 namespace system {
 
 /// Not thread safe, virtual.
-/// Class to translate internal utf8 iostreams to external utf16 iostreams.
-/// This uses wide and narrow input and output buffers of 1024 characters/bytes.
-/// However because of utf8-utf16 conversion ratios of up to 4:1 the effective
-/// wide output buffering may be reduced to as much as 256 characters.
+/// Translates internal utf8 iostreams to external utf16 iostreams.
+/// Wide and narrow input and output buffers of 1024
+/// characters/bytes, but utf8-utf16 conversion ratios of up to 4:1
+/// may reduce effective wide output buffering to 256 characters.
 class BC_API unicode_streambuf
   : public std::streambuf
 {

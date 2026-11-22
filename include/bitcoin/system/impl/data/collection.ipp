@@ -28,12 +28,12 @@ namespace system {
 // TODO: std::binary_search?
 // TODO: provide optional comparison function?
 // en.cppreference.com/w/cpp/utility/functional/less
-// It is the responsibility of the caller to ensure that parameters implement
-// sufficient comparison operator overloads (LT and GT). Either the 'list' 
-// elements must implement (at least) member comparison operator overloads or
-// the 'value' parameter must implement binary comparison operator overloads.
-// Be aware that C-style arrays/strings are compared by pointers, not values.
-// A 'list' of C-style arrays of char may be seached with std::string 'value'.
+// Caller must ensure parameters implement sufficient comparison operator
+// overloads (LT and GT). Either 'list' elements must implement (at least)
+// member comparison operator overloads or 'value' parameter must implement
+// binary comparison operator overloads.
+// C-style arrays/strings are compared by pointers, not values.
+// 'list' of C-style arrays of char may be seached with std::string 'value'.
 // std::string comparisons are not locale aware.
 template <typename Collection, typename Element>
 typename Collection::difference_type
@@ -133,8 +133,9 @@ typename Collection::difference_type
 constexpr find_position(const Collection& list,
     const typename Collection::value_type& element) NOEXCEPT
 {
-    const auto position = std::find(std::cbegin(list), std::cend(list), element);
-    return position == std::cend(list) ? negative_one :
+    const auto end = std::cend(list);
+    const auto position = std::find(std::cbegin(list), end, element);
+    return position == end ? negative_one :
         std::distance(std::cbegin(list), position);
 }
 

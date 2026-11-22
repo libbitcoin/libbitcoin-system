@@ -71,7 +71,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
     const auto sufficient = std::partition(points.begin(), points.end(), below);
 
     // C++17: Parallel policy for std::min_element.
-    // If there are values large enough, return the smallest (of the largest).
+    // If values are large enough, return smallest (of largest).
     const auto minimum = std::min_element(sufficient, points.end(), lesser);
 
     if (minimum != points.end())
@@ -81,7 +81,7 @@ void points_value::greedy(points_value& out, const points_value& unspent,
     }
 
     // C++17: Parallel policy for std::sort.
-    // Sort all by descending value in order to use the fewest inputs possible.
+    // Sort all by descending value to use fewest inputs possible.
     std::sort(points.begin(), points.end(), greater);
 
     // This is naive, will not necessarily find the smallest combination.

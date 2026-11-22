@@ -25,9 +25,9 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Container for a protocol version tuple with up to four segments.
+/// Container for protocol version tuple with up to four segments.
 /// Segments are non-negative integers, padded with zeros for fewer than four.
-/// The format is major.minor[.subminor[.patch]] with at least one dot.
+/// Format is major.minor[.subminor[.patch]] with at least one dot.
 class BC_API version
 {
 public:
@@ -63,7 +63,8 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Deserialize from input stream (throws on invalid format).
-    friend BC_API std::istream& operator>>(std::istream& input, version& argument) THROWS;
+    friend BC_API std::istream& operator>>(std::istream& input,
+        version& argument) THROWS;
 
     /// Serialize to output stream.
     friend BC_API std::ostream& operator<<(std::ostream& output,

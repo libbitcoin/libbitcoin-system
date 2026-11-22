@@ -226,7 +226,7 @@ BC_AUTO_TEST_CASE(operation__constructor__push_positive_1__expected)
     const auto data = data_chunk{ op_81 };
     operation instance(data);
 
-    // This is read as an encoded operation, not as data.
+    // Read as encoded operation, not as data.
     // Constructors read (unencoded) data and can select minimal encoding.
     BC_REQUIRE(instance.is_valid());
     BC_REQUIRE_EQUAL(instance.to_data(), data);
@@ -246,7 +246,7 @@ BC_AUTO_TEST_CASE(operation__constructor__push_positive_16__expected)
     const auto data = data_chunk{ op_96 };
     operation instance(data);
 
-    // This is read as an encoded operation, not as data.
+    // Read as encoded operation, not as data.
     // Constructors read (unencoded) data and can select minimal encoding.
     BC_REQUIRE(instance.is_valid());
     BC_REQUIRE_EQUAL(instance.to_data(), data);

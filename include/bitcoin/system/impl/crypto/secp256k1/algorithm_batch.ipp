@@ -29,9 +29,9 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 // ----------------------------------------------------------------------------
 // protected
 
-// The s of all rows invert together. Rows without a valid signature or key
-// fill their lanes with the generator and distinct small scalars, and are not
-// read. Lanes with an exceptional addition verify alone.
+// s of all rows invert together. Rows without valid signature or key fill their
+// lanes with generator and distinct small scalars, and are not read. Lanes with
+// exceptional addition verify alone.
 template <typename Word>
 bool algorithm::verify_ecdsa(data_chunk& results,
     const std::span<const ec_compressed>& keys,
@@ -86,8 +86,8 @@ bool algorithm::verify_ecdsa(data_chunk& results,
             }
 
             odds[lane] = sign == ec_odd_sign ? max_uint64 : 0_u64;
-            overflows[lane] = is_less(r[row], prime_minus_order) ?
-                max_uint64 : 0_u64;
+            const auto overflow = is_less(r[row], prime_minus_order);
+            overflows[lane] = overflow ? max_uint64 : 0_u64;
 
             multiply(u1[lane], z[row], w[row]);
             multiply(u2[lane], r[row], w[row]);
@@ -152,8 +152,8 @@ bool algorithm::verify_ecdsa(data_chunk& results,
         [](uint8_t result) NOEXCEPT { return is_nonzero(result); });
 }
 
-// Rows computed in lanes convert to affine together by one inversion, and
-// lanes with an exceptional addition verify alone.
+// Rows computed in lanes convert to affine together by one inversion, and lanes
+// with exceptional addition verify alone.
 template <typename Word>
 bool algorithm::verify_schnorr(data_chunk& results,
     const std::span<const ec_xonly>& keys,
@@ -275,8 +275,8 @@ void algorithm::multiply(data_chunk& valid, std_vector<ec_compressed>& out,
         [&](size_t row) NOEXCEPT -> const scalar_t& { return ks[row]; });
 }
 
-// Rows without a valid point fill their lanes with the generator and are not
-// read. Lanes with an exceptional addition compute alone.
+// Rows without valid point fill their lanes with generator and are not read.
+// Lanes with exceptional addition compute alone.
 template <bool Secret, typename Word, typename Scalar>
 void algorithm::multiply_rows(data_chunk& valid,
     std_vector<ec_compressed>& out,
@@ -364,8 +364,8 @@ void algorithm::multiply_rows(data_chunk& valid,
     to_keys(out, pending, sums);
 }
 
-// Each row is t * G by comb (one addition per digit, no doubling) plus the
-// point and each addend, and a row with an exceptional addition computes alone.
+// Each row is t * G by comb (one addition per digit, no doubling) plus point
+// and each addend, and row with exceptional addition computes alone.
 inline void algorithm::tweak_comb(data_chunk& valid,
     std_vector<ec_xonly>& out, const std::span<const scalar_t>& tweaks,
     const affine_t<uint64_t>& point,
@@ -438,8 +438,8 @@ void algorithm::tweak(data_chunk& valid, std_vector<ec_xonly>& out,
         tweak_lanes<Word>(valid, out, tweaks, point, addends);
 }
 
-// Each addend is one lane addition to the sum of a row, and a row with an
-// exceptional addition computes alone.
+// Each addend is one lane addition to sum of row,
+// and row with exceptional addition computes alone.
 template <typename Word>
 void algorithm::tweak_lanes(data_chunk& valid, std_vector<ec_xonly>& out,
     const std::span<const scalar_t>& tweaks,

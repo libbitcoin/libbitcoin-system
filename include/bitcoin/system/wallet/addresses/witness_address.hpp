@@ -30,11 +30,11 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A class for working with witness payment addresses.
+/// Witness payment address.
 /// For non-witness addresses, see payment_address.
 /// Supports BIP173 (bech32) with BIP350 (bech32m) for non-zero versions.
-/// Strict parsing requires that the prefix is known (mainnet or testnet).
-/// Strict parsing requires that the program is known (currently version 0).
+/// Strict parsing requires known prefix (mainnet or testnet).
+/// Strict parsing requires known program (version 0).
 /// Lax (not strict) allows unknown programs, but not invalid known programs.
 class BC_API witness_address
 {

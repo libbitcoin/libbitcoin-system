@@ -53,7 +53,7 @@ static bool recover_public(const secp256k1_context* context,
 
 // ECDSA recoverable sign/recover
 // ----------------------------------------------------------------------------
-// It is recommended to verify a signature after signing.
+// Verifying signature after signing is recommended.
 
 bool sign_recoverable(recoverable_signature& out, const ec_secret& secret,
     const hash_digest& hash) NOEXCEPT

@@ -29,8 +29,8 @@ namespace libbitcoin {
 namespace system {
 
 /// ChaCha20-Poly1305 authenticated encryption with associated data (rfc8439).
-/// The nonce is expressed as a 32-bit and a 64-bit little-endian segment
-/// (bip324 convention), and MUST not be repeated for the same key.
+/// Nonce is expressed as 32-bit and 64-bit little-endian segment (bip324
+/// convention), and MUST not be repeated for same key.
 class BC_API chacha20_poly1305 final
 {
 public:
@@ -46,14 +46,14 @@ public:
     void encrypt(const_byte_span plain, const_byte_span aad, uint32_t nonce32,
         uint64_t nonce64, byte_span cipher) NOEXCEPT;
 
-    /// Encrypt plain1 || plain2 with aad into cipher, avoiding the caller
+    /// Encrypt plain1 || plain2 with aad into cipher, avoiding caller
     /// concatenation copy (cipher = sum of plain sizes + expansion).
     void encrypt(const_byte_span plain1, const_byte_span plain2,
         const_byte_span aad, uint32_t nonce32, uint64_t nonce64,
         byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher with aad into plain (cipher = plain size + expansion).
-    /// False if the tag does not authenticate, in which case plain is cleared.
+    /// False if tag does not authenticate, in which case plain is cleared.
     bool decrypt(byte_span plain, const_byte_span aad, uint32_t nonce32,
         uint64_t nonce64, const_byte_span cipher) NOEXCEPT;
 

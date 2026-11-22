@@ -33,8 +33,8 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // Values may or may not be truly random depending on the underlying device.
 std::random_device& maybe_random::get_device() NOEXCEPT
 {
-    // Thread storage duration: each thread has its own instance, allocated
-    // when the thread begins and deallocated when it ends (static implied).
+    // Thread storage duration: each thread has own instance, allocated when
+    // thread begins and deallocated when it ends (static implied).
     thread_local std::random_device device{};
 
     // Reference remains valid for the lifetime of the calling thread.

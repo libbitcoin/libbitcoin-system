@@ -53,8 +53,8 @@ BC_AUTO_TEST_CASE(ascii__is_ascii_number__ascii_numbers__true)
 
 BC_AUTO_TEST_CASE(ascii__is_ascii_number__non_ascii_numbers__false)
 {
-    // These tests are invalid, as the conversion to uint32_t is just a cast.
-    // These fail in clang, as it recognizes them as multiple byte characters.
+    // Invalid tests, as conversion to uint32_t is only a cast. Fail in clang,
+    // as it recognizes them as multiple byte characters.
     ////BC_REQUIRE(!is_ascii_number('Ⅰ'));
     ////BC_REQUIRE(!is_ascii_number('Ⅱ'));
     ////BC_REQUIRE(!is_ascii_number('Ⅲ'));

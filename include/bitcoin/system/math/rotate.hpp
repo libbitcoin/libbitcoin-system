@@ -26,7 +26,7 @@ namespace system {
 
 /// rotl/rotr (platform independent intrinsic bitwise rotation).
 /// ---------------------------------------------------------------------------
-/// This avoids default to std::rotl/rotr in favor of bitwise implementation.
+/// Avoids default to std::rotl/rotr in favor of bitwise implementation.
 
 /// shift is unguarded.
 template <typename Integral,

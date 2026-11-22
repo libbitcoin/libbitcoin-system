@@ -34,7 +34,7 @@ static void hold_console()
 #endif
 }
 
-// The "try" functions are safe for instructions not compiled in.
+// "try" functions safe for instructions not compiled in.
 // selector           Write the bs release file name for this machine.
 // selector <release> Write the bs release download url for this machine.
 // selector --tags    Write each supported build tag, one per line.

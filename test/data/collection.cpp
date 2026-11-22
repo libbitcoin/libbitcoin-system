@@ -29,7 +29,7 @@ BC_AUTO_TEST_SUITE(collection_tests)
 // insert_sorted
 // binary_search:
 //  Collection must implement [].
-//  Either list members or the search key must implement lexical compare (<, >).
+//  Either list members or search key must implement lexical compare (<, >).
 
 // binary_search (native byte comparison operators)
 

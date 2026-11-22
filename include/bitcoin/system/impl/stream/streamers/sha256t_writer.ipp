@@ -58,7 +58,7 @@ void sha256t_writer<Tag, OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
     // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
-    // The stream could be invalidated, but writers shouldn't have to check it.
+    // Stream could be invalidated, but writers shouldn't have to check it.
     context_.write(size, data);
 }
 
@@ -73,7 +73,7 @@ void sha256t_writer<Tag, OStream>::do_flush() NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // Only hash overflow returns update false, which requires (2^64-8)/8 bytes.
-// The stream could invalidate, but writers shouldn't have to check this.
+// Stream could invalidate, but writers shouldn't have to check this.
 template <data_t Tag, typename OStream>
 void sha256t_writer<Tag, OStream>::flusher() NOEXCEPT
 {

@@ -136,7 +136,7 @@ constexpr Value bit_left(size_t offset) NOEXCEPT
     // en.cppreference.com/w/cpp/language/operator_arithmetic
 
     // Subtraction is between size_t operands and guarded.
-    // This converts the left offset to a right offset, overflow true.
+    // Converts left offset to right offset, overflow true.
     return offset >= bits<Value> ? 0 :
         bit_right<Value>(sub1(bits<Value> - offset));
 }
@@ -202,8 +202,8 @@ constexpr void set_right_into(Value& target, size_t offset, bool state) NOEXCEPT
 // ----------------------------------------------------------------------------
 
 // C++ standard: "Right-shift on signed integral types is an arithmetic right
-// shift, which performs sign-extension". In other words, repeatedly shifting
-// -1 of any integer width will produce "1" bits, indefinitely.
+// shift, which performs sign-extension". So repeatedly shifting -1 of any
+// integer width produces "1" bits, indefinitely.
 
 // a << b is undefined for negative a.
 // a >> b is implementation-dependent for negative a.
@@ -288,12 +288,12 @@ constexpr void unmask_right_into(Value& value, size_t bits) NOEXCEPT
 
 // C++ standard: "The behavior is undefined if the right operand is negative,
 // or greater than or equal to the width of the promoted left operand."
-// These functions make explicit the intended behavior in that condition.
-// overflow true is logically equivalent to shifting by one the specified
-// shift number of times, which results in a zero if shift >= width(value).
-// overflow true shifts shift % width(value), which cannot zeroize the value.
-// These are both default behaviors of different compilers. Shift left/right of
-// signed Value transits unsigned, as native -<</->> is undefined/unspecified.
+// These functions make explicit intended behavior in that condition. overflow
+// true is logically equivalent to shifting by one the specified shift number of
+// times, resulting in zero if shift >= width(value). overflow true shifts shift
+// % width(value), which cannot zeroize value. These are both default behaviors
+// of different compilers. Shift left/right of signed Value transits unsigned,
+// as native -<</->> is undefined/unspecified.
 
 // OPERATOR <<
 template <typename Value, if_unsigned_integral_integer<Value>>
@@ -334,7 +334,8 @@ constexpr Value shift_right(Value value, size_t shift, bool overflow) NOEXCEPT
         value >> (shift % span));
 }
 template <typename Value, if_unsigned_integral_integer<Value>>
-constexpr void shift_right_into(Value& value, size_t shift, bool overflow) NOEXCEPT
+constexpr void shift_right_into(Value& value, size_t shift,
+    bool overflow) NOEXCEPT
 {
     constexpr auto span = bits<Value>;
     overflow && shift >= span ? value = 0 : value >>= (shift % span);

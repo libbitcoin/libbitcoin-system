@@ -28,10 +28,10 @@ namespace libbitcoin {
 namespace system {
 namespace f {
 
-// These are implemented for integrals in /math/functional `f` namespace:
+// Implemented for integrals in /math/functional `f` namespace:
 // and_, or_, xor_, not_, shr<>, shl<>, ror<>, rol<>, add<>, addc<>, add.
 // Those names should not be applied explicitly to extended types unless
-// conditionally compiled. The following are okay for explicit extension.
+// conditionally compiled. Following are okay for explicit extension.
 
 template <typename xWord, typename Word, if_integral_integer<Word> = true,
     if_same<xWord, xint128_t> = true>

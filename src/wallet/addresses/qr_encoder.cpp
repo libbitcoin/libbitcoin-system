@@ -322,10 +322,11 @@ size_t qr_encoder::estimate_bits(const segments& parts,
     for (const auto& part: parts)
     {
         const auto length = length_bits(part.mode, actual);
-        const auto count = part.mode == segment_mode::kanji ?
-            to_half(part.size) : part.size;
+        const auto kanji = part.mode == segment_mode::kanji;
+        const auto count = kanji ? to_half(part.size) : part.size;
         const auto chunks = ceilinged_divide(count, power2<size_t>(length));
-        bits += payload_bits(part.mode, part.size) + chunks * (mode_bits + length);
+        const auto headers = chunks * (mode_bits + length);
+        bits += payload_bits(part.mode, part.size) + headers;
     }
 
     return bits;
@@ -418,8 +419,12 @@ data_chunk qr_encoder::to_data(const std::string& value, const segments& parts,
                 {
                     const auto chars = std::min(end - index, two);
                     uint64_t number{};
-                    for (size_t character{}; character < chars; ++character, ++index)
-                        number = number * alphabet.size() + alphabet.find(value[index]);
+                    for (size_t character{}; character < chars;
+                        ++character, ++index)
+                    {
+                        const auto digit = alphabet.find(value[index]);
+                        number = number * alphabet.size() + digit;
+                    }
 
                     sink.write_bits(number, payload_bits(part.mode, chars));
                 }
@@ -665,8 +670,8 @@ size_t qr_encoder::eat_eight_bit(segments& out, const std::string& value,
             ++stop;
 
         const auto header = mode_bits + length_bits(mode, version);
-        const auto resume = classify(value, stop, kanji) == eight ?
-            eight_header : zero;
+        const auto next_mode = classify(value, stop, kanji);
+        const auto resume = next_mode == eight ? eight_header : zero;
         const auto divided = payload_bits(eight, end - start) +
             payload_bits(mode, stop - end) + header + resume;
 

@@ -46,7 +46,7 @@ public:
         byte_span cipher) NOEXCEPT;
 
     /// Decrypt cipher into plain (cipher = expansion + plain size).
-    /// False if the tag does not authenticate, in which case plain is cleared.
+    /// False if tag does not authenticate, in which case plain is cleared.
     bool decrypt(byte_span plain, const nonce& nonce,
         const_byte_span cipher) NOEXCEPT;
 

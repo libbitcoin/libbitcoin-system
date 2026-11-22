@@ -179,8 +179,8 @@ bool rsa::verify_pss(const public_key& key, const_byte_span signature,
     if (size < encoded.size() && is_nonzero(encoded.front()))
         return false;
 
-    const const_byte_span message{ std::prev(encoded.end(), size),
-        encoded.end() };
+    const auto start = std::prev(encoded.end(), size);
+    const const_byte_span message{ start, encoded.end() };
 
     switch (digest.size())
     {

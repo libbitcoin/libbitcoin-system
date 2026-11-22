@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Sieve is limited to integral types.
-/// There are no false negatives, with the goal of minimizing false positives.
+/// No false negatives, with goal of minimizing false positives.
 template <size_t SieveBits, size_t SelectBits,
     if_not_greater<SelectBits, SieveBits> = true,
     if_not_greater<SieveBits, bits<uint64_t>> = true>

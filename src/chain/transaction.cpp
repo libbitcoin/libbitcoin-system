@@ -499,7 +499,7 @@ bool transaction::output_overflow(size_t input) const NOEXCEPT
     return input >= outputs_->size();
 }
 
-// There are three versions of signature hashing and verification.
+// Three versions of signature hashing and verification.
 // Version: (unversioned) original, (v0) bip143/segwit, (v1) bip341/taproot.
 bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     const script& subscript, uint64_t value, const hash_cptr& tapleaf,
@@ -513,18 +513,18 @@ bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     const auto bip143 = script::is_enabled(flags, flags::bip143_rule);
     const auto bip342 = script::is_enabled(flags, flags::bip342_rule);
 
-    // This is where the connection between bip141 and bip143 is made. If a
-    // versioned 1 program (segwit) extracted by bip141 but bip143 (segwit
-    // hashing) is not active, then drop down to unversioned signature hashing.
+    // Connection between bip141 and bip143 is made here. If a versioned 1
+    // program (segwit) extracted by bip141 but bip143 (segwit hashing) not
+    // active, drop down to unversioned signature hashing.
     if (bip143 && version == script_version::segwit)
     {
         version0_sighash(out, input, subscript, value, sighash_flags);
         return true;
     }
 
-    // This is where the connection between bip341 and bip342 is made. If a
-    // version 2 program (taproot) extracted by bip341 but bip342 (tapscript)
-    // is not active then drop down to unversioned signature hashing. 
+    // Connection between bip341 and bip342 is made here. If a version 2 program
+    // (taproot) extracted by bip341 but bip342 (tapscript) not active, drop
+    // down to unversioned signature hashing.
     if (bip342 && version == script_version::taproot)
     {
         return version1_sighash(out, input, subscript, value, tapleaf,
@@ -532,8 +532,8 @@ bool transaction::signature_hash(hash_digest& out, const input_iterator& input,
     }
 
     // Given above forks are documented to activate together, this distinction
-    // is moot, however these are distinct BIPs and therefore must be either be
-    // differentiated as such in code, or the BIP distiction would be ignored.
+    // is moot, however these are distinct BIPs and must be differentiated as
+    // such in code, or BIP distinction would be ignored.
     unversioned_sighash(out, input, subscript, sighash_flags);
     return true;
 }
@@ -609,9 +609,9 @@ bool transaction::is_overweight() const NOEXCEPT
 }
 
 //*****************************************************************************
-// CONSENSUS: Legacy sigops are counted in coinbase scripts despite the fact
-// that coinbase input scripts are never executed. There is no need to exclude
-// p2sh coinbase sigops since there is never a script to count.
+// CONSENSUS: Legacy sigops are counted in coinbase scripts despite coinbase
+// input scripts never being executed. No need to exclude p2sh coinbase sigops
+// since there is never a script to count.
 //*****************************************************************************
 bool transaction::is_signature_operations_limited(bool bip16,
     bool bip141) const NOEXCEPT
@@ -820,7 +820,7 @@ bool transaction::is_unconfirmed_spend(size_t height) const NOEXCEPT
     const auto unconfirmed = [=](const auto& input) NOEXCEPT
     {
         // Spends internal to a block are handled by block validation.
-        // The lack of equality check here prevents conflict with self.
+        // Lack of equality check here prevents conflict with self.
         return height < input->metadata.prevout_height;
     };
 
@@ -834,7 +834,7 @@ bool transaction::is_confirmed_double_spend(size_t height) const NOEXCEPT
     const auto spent = [=](const auto& input) NOEXCEPT
     {
         // Spends internal to a block are handled by block validation.
-        // The lack of equality check here prevents conflict with self.
+        // Lack of equality check here prevents conflict with self.
         return height > input->metadata.spender_height;
     };
 
@@ -981,7 +981,7 @@ code transaction::check(const context& ctx) const NOEXCEPT
 }
 
 // Do not need to invoke on coinbase.
-// This assumes that prevout caching is completed on all inputs.
+// Assumes prevout caching is completed on all inputs.
 code transaction::accept(const context& ctx) const NOEXCEPT
 {
     ////BC_ASSERT(!is_coinbase());
@@ -1005,7 +1005,7 @@ code transaction::accept(const context& ctx) const NOEXCEPT
 
 // Do not need to invoke on coinbase.
 // Node performs these checks through database query.
-// This assumes that prevout and metadata caching are completed on all inputs.
+// Assumes prevout and metadata caching are completed on all inputs.
 code transaction::confirm(const context& ctx) const NOEXCEPT
 {
     ////BC_ASSERT(!is_coinbase());

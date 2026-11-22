@@ -33,8 +33,8 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 
 namespace printing {
 
-// Hides enclosing operator<< declarations from unqualified lookup, so that a
-// value prints only by an operator<< associated with its own type.
+// Hides enclosing operator<< declarations from unqualified lookup, so value
+// prints only by operator<< associated with its own type.
 struct barrier
 {
 };
@@ -120,7 +120,7 @@ inline std::string format(const Writer& writer) NOEXCEPT
     return stream.str();
 }
 
-// Comparisons follow the usual arithmetic conversions of the operands.
+// Comparisons follow usual arithmetic conversions of operands.
 // ----------------------------------------------------------------------------
 
 #if defined(HAVE_GNUC) || defined(HAVE_CLANG)

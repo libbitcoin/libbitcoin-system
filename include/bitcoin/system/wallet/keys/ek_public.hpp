@@ -60,7 +60,7 @@ private:
     static ek_public from_string(const std::string& encoded) NOEXCEPT;
 
     /// Members.
-    /// These should be const, apart from the need to implement assignment.
+    /// These should be const, apart from need to implement assignment.
     bool valid_;
     encrypted_public public_;
 };

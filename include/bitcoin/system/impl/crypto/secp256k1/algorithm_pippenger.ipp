@@ -35,7 +35,7 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 // All rows are valid if sum(a R) + sum(a e P) - sum(a s)G is infinity, for
 // weights a of one (first) and 128 random bits (others), derived by hashing
-// the batch.
+// batch.
 inline bool algorithm::verify_schnorr(const std::span<const ec_xonly>& keys,
     const std::span<const hash_digest>& challenges,
     const std::span<const ec_signature>& signatures) NOEXCEPT
@@ -103,9 +103,9 @@ inline bool algorithm::verify_schnorr(const std::span<const ec_xonly>& keys,
 // ----------------------------------------------------------------------------
 // protected
 
-// Each window of bits is a signed digit, with a carry into the next window
-// for digits above half the window, and each point adds into the bucket of
-// its digit. Buckets sum by running sums from the top, and windows by Horner.
+// Each window of bits is signed digit, with carry into next window for digits
+// above half window, and each point adds into bucket of its digit. Buckets sum
+// by running sums from top, and windows by Horner.
 inline void algorithm::multiply(jacobian_t<uint64_t>& r,
     const std::span<const term_t>& terms) NOEXCEPT
 {

@@ -18,13 +18,12 @@
  */
 #include "../../test.hpp"
 
-// MSVC literals in a UTF8 source file.
-// Use of L and U is not recommended as it will only work for ASCII when
-// the source file does not have a BOM (which we avoid for other reasons).
-// We use it below to simplify creation of ASCII test vectors. The prefix
-// types the data but doesn't convert it at compile time (interestingly
-// intellisense picks up the conversion propery. So non-asci text below
-// is not actually converted property.
+// MSVC literals in UTF8 source file.
+// L and U not recommended, as they only work for ASCII when source
+// file has no BOM (avoided for other reasons). Used below to simplify
+// creation of ASCII test vectors. Prefix types data but doesn't
+// convert it at compile time (intellisense picks up conversion
+// properly), so non-ascii text below not converted properly.
 
 BC_PUSH_WARNING(NO_REINTERPRET_CAST)
 
@@ -122,9 +121,9 @@ BC_AUTO_TEST_CASE(paths__to_path__always__expected)
     BC_REQUIRE(result.u8string() == u8"\\\\?\\C:\\very\\long\\path\\exceeding\\MAX_PATH\\Unicode 文件名.txt");
 }
 
-// The functions are not platform-specific, though the vectors are. Only win32
-// qualifies a path with a drive and extends one that reaches the maximum,
-// which is MAX_PATH (260) as it includes the terminator.
+// Functions not platform-specific, though vectors are. Only win32 qualifies
+// path with drive and extends one that reaches maximum, which is MAX_PATH
+// (260) as it includes terminator.
 constexpr size_t long_path_size = 260;
 constexpr size_t maximum_path_size = 260;
 

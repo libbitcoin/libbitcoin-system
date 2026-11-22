@@ -31,7 +31,7 @@ namespace config {
 
 const std::string point::delimiter = ":";
 
-// Point format is currently private to bx:
+// Point format private to bx:
 // "txhash:index"
 
 static bool decode_point(chain::point& point,

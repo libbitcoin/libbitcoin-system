@@ -31,19 +31,19 @@ namespace ecdsa {
 
 // local
 // ----------------------------------------------------------------------------
-// `ec_signature` is an alias for secp256k1_ecdsa_signature (private format).
-// The output of ecdsa_signature_parse_der_lax (via decode_signature) is in a
-// fixed-width (64 byte) form but is not in a standard/public form. The output
-// of secp256k1_ecdsa_signature_normalize (in verify_signature) is also in a
-// private format.
+// `ec_signature` is alias for secp256k1_ecdsa_signature (private format).
+// Output of ecdsa_signature_parse_der_lax (via decode_signature) is in
+// fixed-width (64 byte) form but not standard/public form.
+// Output of secp256k1_ecdsa_signature_normalize (in verify_signature)
+// is also private format.
 
 static constexpr auto ec_success = 1;
 
 // Return indicates modified, not success/fail.
-// BIP62 required low-s signatures, but that is not active.
+// BIP62 required low-s signatures, but is not active.
 // secp256k1_ecdsa_verify rejects non-normalized (low-s) signatures, but
-// bitcoin does not have such a limitation, so we always normalize.
-// This normalization produces secp256k1_ecdsa_signature (private format).
+// bitcoin has no such limitation, so always normalize.
+// Normalization produces secp256k1_ecdsa_signature (private format).
 static bool normalize_signature(const secp256k1_context* context,
     ec_signature& out, const ec_signature& in) NOEXCEPT
 {
@@ -104,16 +104,16 @@ bool decode_signature(ec_signature& out, const data_slice& der_signature,
         return false;
 
     // ************************************************************************
-    // CONSENSUS: This function parses DER with various errors as allowed by
-    // Bitcoin prior to activation of BIP66. This attempts to codify the lax
-    // rules applied by version(s) of OpenSSL in use up to that time.
+    // CONSENSUS: Parses DER with various errors as allowed by Bitcoin prior to
+    // activation of BIP66. Codifies lax rules applied by version(s) of OpenSSL
+    // in use up to that time.
     // ************************************************************************
     return ecdsa_signature_parse_der_lax(out, der_signature.data(),
         der_signature.size());
 }
 
 // Return indicates modified, not success/fail.
-// Convert a secp256k1_ecdsa_signature to low-s secp256k1_ecdsa_signature.
+// Convert secp256k1_ecdsa_signature to low-s secp256k1_ecdsa_signature.
 bool normalize_signature(ec_signature& out, const ec_signature& in) NOEXCEPT
 {
     const auto context = ec_context_sign::context();
@@ -135,7 +135,7 @@ bool canonicalize_signature(ec_signature& out, const ec_signature& in) NOEXCEPT
 
 // ECDSA sign/verify signature
 // ----------------------------------------------------------------------------
-// It is recommended to verify a signature after signing.
+// Verifying signature after signing is recommended.
 
 // Produces low-s private form `secp256k1_ecdsa_signature` (usable in verify).
 bool sign(ec_signature& out, const ec_secret& secret,
@@ -150,7 +150,7 @@ bool sign(ec_signature& out, const ec_secret& secret,
 }
 
 // Expects private form `secp256k1_ecdsa_signature` (converts to low-s).
-// This expected signature form is the output of decode_signature(...).
+// Expected signature form is output of decode_signature(...).
 bool verify_signature(const data_chunk& point, const hash_digest& hash,
     const ec_signature& signature) NOEXCEPT
 {
@@ -162,7 +162,7 @@ bool verify_signature(const data_chunk& point, const hash_digest& hash,
 }
 
 // Expects private form `secp256k1_ecdsa_signature` (converts to low-s).
-// This expected signature form is the output of decode_signature(...).
+// Expected signature form is output of decode_signature(...).
 bool verify_signature(const ec_compressed& compressed,
     const hash_digest& hash, const ec_signature& signature) NOEXCEPT
 {

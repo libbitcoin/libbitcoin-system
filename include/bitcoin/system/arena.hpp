@@ -27,14 +27,14 @@
 namespace libbitcoin {
 
 /// Strictly conforms to std::pmr::memory_resource.
-/// Thread safe resource interface, for use with our (polymorphic) allocator.
+/// Thread safe resource interface, for use with (polymorphic) allocator.
 class arena
 {
 public:
     virtual ~arena() NOEXCEPT = default;
 
     /// Allocate bytes with alignment (align must be power of 2).
-    /// Throws if the requested size and alignment cannot be obtained.
+    /// Throws if requested size and alignment cannot be obtained.
     NODISCARD ALLOCATOR void* allocate(size_t bytes,
         size_t align=alignof(max_align_t)) THROWS
     {
@@ -54,18 +54,18 @@ public:
         return do_is_equal(other);
     }
 
-    /// Non-linear allocator just returns next address.
+    /// Non-linear allocator returns next address.
     /// Linear allocator resets to and returns buffer first address.
     /// Detachable linear allocator allocates buffer returns its first address.
     virtual void* start(size_t baseline) THROWS = 0;
 
-    /// Non-linear allocator just returns zero.
+    /// Non-linear allocator returns zero.
     /// Linear allocator returns current allocation size.
     /// Detachable linear allocator detaches allocation and returns its size.
     virtual size_t detach() NOEXCEPT = 0;
 
     /// Non-linear and linear allocator is a nop.
-    /// Detachable linear allocator frees the memory associated with memory.
+    /// Detachable linear allocator frees memory associated with memory.
     virtual void release(void* memory) NOEXCEPT = 0;
 
 private:
@@ -78,16 +78,16 @@ private:
 BC_API bool operator==(const arena& left, const arena& right) NOEXCEPT;
 
 /// ***************************************************************************
-/// BE AWARE of the risks of memory relocation. Generally speaking a custom
-/// resource [arena] must be used in strict isolation (avoiding relocation).
+/// BE AWARE of risks of memory relocation. Generally custom resource [arena]
+/// must be used in strict isolation (avoiding relocation).
 /// "In the polymorphic allocator model, 'transferring ownership' of a memory
 /// allocation is possible only for objects within the same arena. If object
 /// O1 lives in arena A1, and object O2 lives in arena A2, then an 'assignment'
 /// like O1 = std::move(O2) cannot transfer any pointers from O2 into O1 - they
 /// point into the wrong arena! The assignment must allocate a fresh copy of
 /// O2's data in arena A1. This completely nerfs C++11 move semantics..."
-/// Note also that move constructors are allocator extended and may result in
-/// copies when transitioning arenas - correct but obviously inefficient.
+/// Move constructors are also allocator extended and may result in copies when
+/// transitioning arenas - correct but obviously inefficient.
 /// quuxplusone.github.io/blog/2023/06/02/not-so-quick-pmr
 /// quuxplusone.github.io/blog/2023/06/03/p1144-pmr-koans
 /// ***************************************************************************

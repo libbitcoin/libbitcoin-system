@@ -38,8 +38,8 @@ namespace chain {
 class block;
 class header;
 
-/// system::settings are using within chain_state to compute context, but are
-/// not used directly within chain classes, which would be an abstraction leak.
+/// system::settings used within chain_state to compute context, but not used
+/// directly within chain classes, which would be abstraction leak.
 class BC_API chain_state
 {
 public:
@@ -64,8 +64,8 @@ public:
     /// The number of bip9 deployments (settings).
     static constexpr size_t deployment_count = 8;
 
-    /// bip9 deployment parameters. A deployment is signaled if it is
-    /// configured with a nonzero threshold, unless always active.
+    /// bip9 deployment parameters. Deployment is signaled if configured with
+    /// nonzero threshold, unless always active.
     struct deployment
     {
         /// A start of this value is active above genesis, without signaling.
@@ -96,10 +96,9 @@ public:
     };
 
     /// Heights used to identify construction requirements.
-    /// All values are lower-bounded by the genesis block height.
-    /// Obtaining all values even in the case where the set of queries could be
-    /// short-circuited allows us to cache results for the next block,
-    /// minimizing overall querying.
+    /// All values are lower-bounded by genesis block height.
+    /// Obtaining all values even where set of queries could be short-circuited
+    /// allows caching results for next block, minimizing overall querying.
     struct map
     {
         // This sentinel indicates that the value was not requested.
@@ -117,8 +116,8 @@ public:
         /// (block - (block % 2016 == 0 ? 2016 : block % 2016))
         size_t timestamp_retarget{};
 
-        /// Periods of a signaled bip9 deployment, sampled from high down to
-        /// the first boundary with median time past below start.
+        /// Periods of signaled bip9 deployment, sampled from high down to first
+        /// boundary with median time past below start.
         struct signal
         {
             /// (block - (block % period)) (or map::unrequested)
@@ -146,8 +145,8 @@ public:
         /// Signaling of a bip9 deployment.
         struct signal
         {
-            /// Median time past at a period boundary and signal count of the
-            /// period that it closes.
+            /// Median time past at period boundary
+            /// and signal count of period it closes.
             struct boundary
             {
                 uint32_t median_time_past{};
@@ -160,9 +159,8 @@ public:
             /// Signaling blocks of the block's period below the block.
             size_t count{};
 
-            /// Boundaries from map high down to the first above the last
-            /// defined boundary, by descending height (consumed on
-            /// construction).
+            /// Boundaries from map high down to first above last defined
+            /// boundary, by descending height (consumed on construction).
             std::vector<boundary> ordered{};
         };
 
@@ -185,8 +183,8 @@ public:
             uint32_t self{};
             versions ordered{};
 
-            /// Counts of ordered values at or above the bip34, bip66 and
-            /// bip65 versions.
+            /// Counts of ordered values at or above
+            /// bip34, bip66 and bip65 versions.
             size_t bip34{};
             size_t bip66{};
             size_t bip65{};

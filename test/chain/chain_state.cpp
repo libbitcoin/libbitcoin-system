@@ -330,7 +330,8 @@ BC_AUTO_TEST_CASE(chain_state__is_signal__other_top_bits__false)
 // ----------------------------------------------------------------------------
 // Boundaries descend from the boundary at/below the height.
 
-static chain_state::data::signal::boundary started_boundary(const chain_state::deployment& deployment, size_t count)
+static chain_state::data::signal::boundary started_boundary(
+    const chain_state::deployment& deployment, size_t count)
 {
     return { deployment.start, count };
 }
@@ -662,9 +663,9 @@ BC_AUTO_TEST_CASE(chain_state__work_required_retarget__overflow_patch_enabled__c
     BC_REQUIRE_EQUAL(work, settings.proof_of_work_limit);
 }
 
-// The timespan is clamped to the configured bounds, so any two timespans
-// beyond a bound retarget alike. The limit is raised so the result is not
-// saturated to proof_of_work_limit.
+// Timespan is clamped to configured bounds, so any two
+// timespans beyond a bound retarget alike. Limit is raised
+// so result is not saturated to proof_of_work_limit.
 BC_AUTO_TEST_CASE(chain_state__work_required_retarget__timespan_above_maximum__clamped)
 {
     settings settings(chain::selection::mainnet);
@@ -904,7 +905,7 @@ BC_AUTO_TEST_CASE(chain_state__maximum_timespan__mainnet__interval_times_factor)
 
 // State transitions.
 // ----------------------------------------------------------------------------
-// Retargeting is disabled so that work_required is the preceding bits.
+// Retargeting is disabled so work_required is preceding bits.
 
 static chain::chain_state::data transition_values()
 {
@@ -1030,8 +1031,8 @@ BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header__pool_promotion)
 
 // Version promotion.
 // ----------------------------------------------------------------------------
-// Promotions push the parent version into the window, so promoting count blocks
-// of a version leaves count - 1 of them in the window and one as the version.
+// Promotions push parent version into window, so promoting count blocks of a
+// version leaves count - 1 of them in window and one as the version.
 
 static chain_state::cptr versioned_state(uint32_t version, size_t count,
     const settings& settings)
@@ -1120,8 +1121,8 @@ BC_AUTO_TEST_CASE(chain_state__construct__promoted_versions_leave_window__recoun
     BC_REQUIRE_EQUAL(promoted->minimum_block_version(), recounted->minimum_block_version());
 }
 
-// Two block periods with a threshold of one: locked in at boundary 2 by the
-// signal of block 1, and active at boundary 4.
+// Two block periods, threshold of one: locked in at boundary 2 by signal of
+// block 1, and active at boundary 4.
 BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_bip9_signal__active_at_next_boundary)
 {
     settings settings(selection::mainnet);
@@ -1170,8 +1171,8 @@ BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_bip9_no_signal__not_a
 
 // block storm patch
 // ----------------------------------------------------------------------------
-// BIP94: the retarget is computed from the first block of the period, so a
-// retarget height requires the full interval of bits.
+// BIP94: retarget is computed from first block of period, so a retarget
+// height requires full interval of bits.
 
 BC_AUTO_TEST_CASE(chain_state__get_map__retarget_height_block_storm_patch__full_interval)
 {
@@ -1196,8 +1197,10 @@ static chain::chain_state::data storm_values(const settings& settings, uint32_t 
     chain::chain_state::data values{};
     values.height = interval;
     values.timestamp.retarget = 1000000;
-    values.timestamp.ordered.push_back(1000000 + interval * settings.block_spacing_seconds);
-    values.bits.ordered = chain_state::bitss(interval, settings.proof_of_work_limit);
+    const auto spacing = settings.block_spacing_seconds;
+    const auto limit = settings.proof_of_work_limit;
+    values.timestamp.ordered.push_back(1000000 + interval * spacing);
+    values.bits.ordered = chain_state::bitss(interval, limit);
     values.bits.ordered.front() = first;
     return values;
 }
@@ -1382,8 +1385,8 @@ BC_AUTO_TEST_CASE(chain_state__get_map__no_retarget_bip54_timespan__requested)
     BC_REQUIRE_EQUAL(map.timestamp_retarget, 0u);
 }
 
-// Promotion from a retarget height carries that block's timestamp as the
-// retarget timestamp of the period, without retargeting.
+// Promotion from retarget height carries that block's timestamp as retarget
+// timestamp of period, without retargeting.
 BC_AUTO_TEST_CASE(chain_state__construct__parent_to_header_from_retarget_height__retarget_timestamp)
 {
     settings settings(selection::mainnet);
@@ -1491,9 +1494,9 @@ BC_AUTO_TEST_CASE(chain_state__construct__top_to_pool__retarget_height__promoted
     BC_REQUIRE_EQUAL(pool.previous_timestamp(), 1000u);
 }
 
-// The retargeting interval is configured down so a full period is spannable.
-// bitcoind starts the period (interval - 1) blocks back, litecoin goes back
-// the full interval, so the patched period start is one block earlier.
+// Retargeting interval is configured down so a full period is spannable.
+// bitcoind starts period (interval - 1) blocks back, litecoin goes back full
+// interval, so patched period start is one block earlier.
 
 static chain::chain_state::data warp_values()
 {
@@ -1537,9 +1540,9 @@ static uint32_t warp_work_required(bool patch)
     return state8.work_required();
 }
 
-// Period start is height 4 (timestamp 980), so the timespan is 1000-980.
-// The patched period start is height 3 (timestamp 970), timespan 1000-970.
-// A longer timespan retargets to a larger (easier) target.
+// Period start is height 4 (timestamp 980), so timespan is 1000-980.
+// Patched period start is height 3 (timestamp 970), timespan 1000-970.
+// Longer timespan retargets to larger (easier) target.
 BC_AUTO_TEST_CASE(chain_state__work_required__ltc_time_warp_patch__easier)
 {
     const auto plain = warp_work_required(false);

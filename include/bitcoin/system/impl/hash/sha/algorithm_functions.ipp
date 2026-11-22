@@ -21,7 +21,7 @@
 
 // 4.1 Functions
 // ============================================================================
-// The integral [f]unction namespace is implemented in math/function.hpp.
+// Integral [f]unction namespace is implemented in math/function.hpp.
 // When available vector overrides (e.g. xint128_t, xint256_t, xint512_t) are
 // implemented in `intrinsics/xcpu/...` and `intrinsics/arm/...` (for example).
 
@@ -102,13 +102,15 @@ Sigma(auto x) NOEXCEPT
     if constexpr (is_extended<decltype(x)>)
     {
         // Normal form, unmodified.
-        return f::xor_(f::xor_(f::ror<A, s>(x), f::ror<B, s>(x)), f::ror<C, s>(x));
+        const auto left = f::xor_(f::ror<A, s>(x), f::ror<B, s>(x));
+        return f::xor_(left, f::ror<C, s>(x));
     }
     else
     {
         // Normal form, optimized.
         //return (x >>> A) ^ (x >>> B) ^ (x >>> C)
-        return f::ror<A, s>(f::xor_(f::ror<B - A, s>(f::xor_(f::ror<C - B, s>(x), x)), x));
+        const auto inner = f::xor_(f::ror<C - B, s>(x), x);
+        return f::ror<A, s>(f::xor_(f::ror<B - A, s>(inner), x));
     }
 }
 

@@ -99,7 +99,7 @@ constexpr data_slice data_slice::from_literal(const Byte(&bytes)[Size]) NOEXCEPT
     // Literals are null terminated but initializer syntax char arrays are not.
     // Those are picked up here and lose their last char. Workaround:
     // data_slice slice({ 'f', 'o', 'o', 'b', 'a', 'r', '\0' });
-    // The more common syntax works as expected: data_slice slice("foobar");
+    // More common syntax works as expected: data_slice slice("foobar");
     return from_size(&bytes[0], sub1(Size));
 }
 

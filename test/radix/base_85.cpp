@@ -84,8 +84,8 @@ BC_AUTO_TEST_CASE(decode_base85_invalid_length_test)
     BC_REQUIRE(result.empty());
 }
 
-// The semicolon is not in the Z85 alphabet, and such characters are treated as
-// valid but with zero value in the reference implementation.
+// Semicolon is not in Z85 alphabet, and such characters are treated as valid
+// but with zero value in reference implementation.
 BC_AUTO_TEST_CASE(decode_base85_outside_alphabet_test)
 {
     data_chunk result;

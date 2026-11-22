@@ -64,7 +64,8 @@ static computed compute(const columns& columns) NOEXCEPT
     out.out.resize(columns.sums.size());
     out.valid.resize(columns.sums.size());
     const stopper cancel{};
-    out.success = batch::compute(cancel, out.out, out.valid, { columns.sums, columns.hashes });
+    out.success = batch::compute(cancel, out.out, out.valid,
+        { columns.sums, columns.hashes });
     return out;
 }
 

@@ -44,10 +44,10 @@
 #define SECP256K1_TAG_PUBKEY_HYBRID_EVEN 0x06
 #define SECP256K1_TAG_PUBKEY_HYBRID_ODD 0x07
 
-/// libsecp256k1 compatible interface to the local implementation, for the
-/// functions used by the library. Operations on secret values are blinded and
-/// their table lookups scan the table, but they are otherwise variable time.
-/// Opaque types other than the ecdsa signature are implementation defined.
+/// libsecp256k1 compatible interface to local implementation, for functions
+/// used by library. Operations on secret values blinded and their table lookups
+/// scan table, but otherwise variable time. Opaque types other than ecdsa
+/// signature are implementation defined.
 
 /// Types.
 /// ---------------------------------------------------------------------------

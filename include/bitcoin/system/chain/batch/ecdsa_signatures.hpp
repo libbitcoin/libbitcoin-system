@@ -34,9 +34,9 @@ namespace chain {
 BC_PUSH_WARNING(NO_USE_OF_SPAN)
 
 /// Accumulator of captured ecdsa verification groups (variable-width AoS).
-/// Each record is one group: a single sigop (1 of 1) or a multisig band
-/// (m of n). The group id is the record ordinal, capped at max_uint16. The
-/// store expands each group to its banded rows upon commit.
+/// Each record is one group: single sigop (1 of 1) or multisig band (m of n).
+/// Group id is record ordinal, capped at max_uint16. Store expands each group
+/// to its banded rows upon commit.
 class ecdsa_signatures
 {
 public:
@@ -65,7 +65,7 @@ public:
         return true;
     }
 
-    /// Visit each group in capture order (group id is the visit ordinal).
+    /// Visit each group in capture order (group id is visit ordinal).
     /// Handler: void(const hash_digest&, std::span<const ec_compressed>,
     /// std::span<const ec_signature>).
     template <typename Handler>
@@ -130,8 +130,8 @@ public:
     }
 
     /// Verify all groups in place (store commit failure fallback). Each group
-    /// applies the sequential op_checkmultisig trial (1 of 1 degenerates to a
-    /// single verify), exactly the evaluation its capture fabricated.
+    /// applies sequential op_checkmultisig trial (1 of 1 degenerates to single
+    /// verify), exactly the evaluation its capture fabricated.
     bool verify() const NOEXCEPT
     {
         auto success = true;

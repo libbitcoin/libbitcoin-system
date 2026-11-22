@@ -56,7 +56,7 @@ constexpr bool script::is_push_only_pattern(const operations& ops) NOEXCEPT
 }
 
 // ****************************************************************************
-// CONSENSUS: this pattern is used to activate bip16 validation rules.
+// CONSENSUS: pattern used to activate bip16 validation rules.
 // ****************************************************************************
 constexpr bool script::is_relaxed_push_pattern(const operations& ops) NOEXCEPT
 {
@@ -76,7 +76,7 @@ constexpr bool script::is_nominal_push_pattern(const operations& ops) NOEXCEPT
 }
 
 // ****************************************************************************
-// CONSENSUS: this pattern is used to commit to bip141 witness data.
+// CONSENSUS: pattern used to commit to bip141 witness data.
 // ****************************************************************************
 constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 {
@@ -92,7 +92,7 @@ constexpr bool script::is_commitment_pattern(const operations& ops) NOEXCEPT
 }
 
 // ****************************************************************************
-// CONSENSUS: this pattern is used in bip141 validation rules.
+// CONSENSUS: pattern used in bip141 validation rules.
 // ****************************************************************************
 constexpr bool script::is_pay_witness_pattern(
     const operations& ops) NOEXCEPT
@@ -160,7 +160,7 @@ constexpr bool script::is_pay_key_hash_pattern(const operations& ops) NOEXCEPT
 }
 
 // ****************************************************************************
-// CONSENSUS: this pattern is used to activate bip16 validation rules.
+// CONSENSUS: pattern used to activate bip16 validation rules.
 // ****************************************************************************
 constexpr bool script::is_pay_script_hash_pattern(
     const operations& ops) NOEXCEPT
@@ -310,14 +310,15 @@ constexpr bool script::is_pay_multisig_standard_pattern(
         return false;
 
     // Standard multisig requires valid public key forms.
-    for (auto op = std::next(ops.cbegin()); op != std::prev(ops.cend(), 2); ++op)
+    const auto end = std::prev(ops.cend(), 2);
+    for (auto op = std::next(ops.cbegin()); op != end; ++op)
         if (!is_public_key(op->data()))
             return false;
 
     return true;
 }
 
-// This does not match 0 of n (no signatures to verify).
+// Does not match 0 of n (no signatures to verify).
 // Allows non-minimal number encoding, and invalid size public keys.
 // op_check_multisig is limited to 20 signatures (max_multisig_public_keys).
 constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
@@ -342,8 +343,8 @@ constexpr bool script::is_pay_multisig_pattern(const operations& ops) NOEXCEPT
     return !is_zero(m) && !is_zero(n) && !(m > n) && (n == size - 3u);
 }
 
-// The first push is based on wacky satoshi op_check_multisig behavior that
-// we must perpetuate, though this is not used in consensus validation.
+// First push based on wacky satoshi op_check_multisig behavior that must be
+// perpetuated, though not used in consensus validation.
 constexpr bool script::is_sign_multisig_pattern(const operations& ops) NOEXCEPT
 {
     const auto endorsement = [](const operation& op) NOEXCEPT
@@ -364,7 +365,7 @@ constexpr bool script::is_sign_public_key_pattern(
 }
 
 // ****************************************************************************
-// CONSENSUS: this pattern is used to activate bip141 validation rules.
+// CONSENSUS: pattern used to activate bip141 validation rules.
 // ****************************************************************************
 constexpr bool script::is_sign_key_hash_pattern(const operations& ops) NOEXCEPT
 {
@@ -460,9 +461,9 @@ inline operations script::to_pay_multisig_pattern(uint8_t signatures,
         to_stack<ec_compressed_size>(points));
 }
 
-// This supports up to 16 signatures, but check_multisig is limited to 20.
-// The embedded script is limited to 520 bytes, an effective limit of 15
-// for p2sh multisig, which can be as low as 7 with all uncompressed keys.
+// Supports up to 16 signatures, but check_multisig is limited to 20.
+// Embedded script is limited to 520 bytes, effective limit of 15 for p2sh
+// multisig, which can be as low as 7 with all uncompressed keys.
 inline operations script::to_pay_multisig_pattern(uint8_t signatures,
     const data_stack& points) NOEXCEPT
 {

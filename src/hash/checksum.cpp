@@ -125,8 +125,8 @@ static uint32_t bech32_checksum(const base32b_chunk& data) NOEXCEPT
 
 constexpr uint32_t to_bech32_constant(checksum_constant constant) NOEXCEPT
 {
-    return constant == checksum_constant::bech32m ?
-        bech32m_checksum_constant : bech32_checksum_constant;
+    const auto is_bech32m = (constant == checksum_constant::bech32m);
+    return is_bech32m ? bech32m_checksum_constant : bech32_checksum_constant;
 }
 
 constexpr checksum_constant bech32_witness_constant(uint8_t version) NOEXCEPT

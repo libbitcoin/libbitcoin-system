@@ -43,14 +43,14 @@ public:
     /// Number of arguments above which the argument is considered unlimited.
     static const int max_arguments;
 
-    /// Construct an instance of the printer class.
+    /// Construct instance of printer class.
     /// settings     Populated config file settings metadata.
     /// application  This application (e.g. 'bitcoin_server').
     /// description  This application description (e.g. 'Server').
     printer(const options_metadata& settings, const std::string& application,
         const std::string& description="") NOEXCEPT;
 
-    /// Construct an instance of the printer class.
+    /// Construct instance of printer class.
     /// settings     Populated config file settings metadata.
     /// variables    Parsed variables, for setting provenance.
     /// application  This application (e.g. 'bitcoin_server').
@@ -59,9 +59,9 @@ public:
         const std::string& application,
         const std::string& description="") NOEXCEPT;
 
-    /// Construct an instance of the printer class.
+    /// Construct instance of printer class.
     /// settings     Populated config file settings metadata.
-    /// defaults     Settings metadata bound to default values, for descriptions.
+    /// defaults     Settings metadata bound to default values (descriptions).
     /// variables    Parsed variables, for setting provenance.
     /// application  This application (e.g. 'bitcoin_server').
     /// description  This application description (e.g. 'Server').
@@ -69,7 +69,7 @@ public:
         const variables_map& variables, const std::string& application,
         const std::string& description="") NOEXCEPT;
 
-    /// Construct an instance of the printer class.
+    /// Construct instance of printer class.
     /// options      Populated command line options metadata.
     /// arguments    Populated command line arguments metadata.
     /// application  This application (e.g. 'bx').
@@ -80,12 +80,12 @@ public:
         const std::string& description="",
         const std::string& command="") NOEXCEPT;
 
-    /// Convert a paragraph of text into a column.
-    /// This formats to 80 char width as: [ 23 | ' ' | 55 | '\n' ].
-    /// If one word exceeds width it will cause a column overflow.
-    /// This always sets at least one line and always collapses whitespace.
-    /// paragraph  The paragraph to columnize.
-    /// return     The column, as a list of fragments.
+    /// Convert paragraph of text into column.
+    /// Formats to 80 char width as: [ 23 | ' ' | 55 | '\n' ].
+    /// Word exceeding width causes column overflow.
+    /// Always sets at least one line and always collapses whitespace.
+    /// paragraph  Paragraph to columnize.
+    /// return     Column, as list of fragments.
     std::vector<std::string> columnize(const std::string& paragraph,
         size_t width) NOEXCEPT;
 

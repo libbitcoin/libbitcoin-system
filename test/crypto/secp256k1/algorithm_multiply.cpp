@@ -131,7 +131,8 @@ constexpr scalar number(const bytes& value) NOEXCEPT
 
 static affine entry(size_t index) NOEXCEPT
 {
-    const auto slice = secp256k1::generator_slices[index / accessor::slice_size];
+    const auto slice_index = index / accessor::slice_size;
+    const auto slice = secp256k1::generator_slices[slice_index];
     const auto offset = accessor::locate(index % accessor::slice_size);
     affine out{};
     const auto size = out.x.size();
@@ -400,8 +401,8 @@ static bool is_secret_product(const scalar& k, const scalar& m) NOEXCEPT
     return is_same(out, multiple(k));
 }
 
-// Each window entry is the prior plus the window base, which is 2^comb_bits
-// times the prior window base, from G.
+// Each window entry is prior plus window base, which is 2^comb_bits times
+// prior window base, from G.
 static bool is_comb_table() NOEXCEPT
 {
     jacobian base{};

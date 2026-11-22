@@ -21,10 +21,10 @@
 
 // Native (SHA-NI or NEON)
 // ============================================================================
-// The rotating variables method is used for sha native. Tha native
-// instructions rely on register locality to achieve performance benefits.
-// Implementation of native sha using buffer expansion is horribly slow.
-// This split creates bifurcations (additional complexities) in this template.
+// Rotating variables method is used for sha native, as native instructions rely
+// on register locality to achieve performance benefits. Native sha using buffer
+// expansion is horribly slow. This split creates bifurcations (additional
+// complexities) in this template.
 
 // protected
 // ----------------------------------------------------------------------------
@@ -281,9 +281,9 @@ native_rounds(xint128_t& lo, xint128_t& hi, const block_t& block) NOEXCEPT
 }
 
 // Transforms perform scheduling and compression with optional endianness
-// conversion of the block input. State is normalized, which requires some
-// additional shuffle/unshuffle calls between transformations of same state.
-// State output is not finalized, which is endianness conversion to digest_t.
+// conversion of block input. State is normalized, requiring additional
+// shuffle/unshuffle calls between transformations of same state. State output
+// is not finalized (endianness conversion to digest_t).
 // ----------------------------------------------------------------------------
 
 TEMPLATE
@@ -293,8 +293,7 @@ native_transform(state_t& state, iblocks_t& blocks) NOEXCEPT
 {
     sha::zeroupper();
 
-    // Individual state vars are used vs. array to ensure register
-    // persistence.
+    // Individual state vars used vs. array to ensure register persistence.
     auto& wstate = array_cast<xint128_t>(state);
     auto lo = f::load(wstate[0]);
     auto hi = f::load(wstate[1]);
@@ -370,13 +369,12 @@ native_transform(state_t& state, const auto& block) NOEXCEPT
     state[4] = sha::get_160(hi);
 }
 
-// Finalization creates and/or applies a given padding block to the state
-// accumulation and performs big-endian conversion from state_t to digest_t.
-// As padding blocks are generated and therefore do not require endianness
-// conversion, those calls are not applied when transforming the pad block.
-// This lack of conversion also applies to double hashing. In both cases
-// the "inject" functions are using in place of the "input" functions.
-// There is no benefit to caching pading because it is not prescheduled.
+// Finalization creates and/or applies given padding block to state accumulation
+// and performs big-endian conversion from state_t to digest_t. Padding blocks
+// are generated and so require no endianness conversion, so those calls are not
+// applied when transforming pad block, and likewise for double hashing. In both
+// cases "inject" functions are used in place of "input" functions. No benefit
+// to caching padding, as it is not prescheduled.
 // ----------------------------------------------------------------------------
 
 // TODO: These transitions require state to be unloaded/loaded and
@@ -671,8 +669,8 @@ native_double_hash(const half_t& left, const half_t& right) NOEXCEPT
     return native_finalize_second(lo, hi);
 }
 
-// Two block transforms interleave the independent rounds of each block, so
-// that the latency of each native round is hidden by the other block.
+// Two block transforms interleave independent rounds of each block, so latency
+// of each native round is hidden by other block.
 // ----------------------------------------------------------------------------
 
 TEMPLATE

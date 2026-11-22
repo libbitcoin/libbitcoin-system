@@ -26,8 +26,9 @@ namespace libbitcoin {
 namespace system {
 
 /// std::filesystem::path maintains path internally as unicode, constructing
-/// from the current ANSI code page on Win32. This must be avoided when using
-/// utf8-everywhere. These utilities simplify proper contruction and extraction.
+/// from current ANSI code page on Win32, which must be
+/// avoided when using utf8-everywhere. These utilities
+/// simplify proper construction and extraction.
 BC_API std::string cast_to_string(const std::u8string& value) NOEXCEPT;
 BC_API std::u8string cast_to_u8string(const std::string& value) NOEXCEPT;
 BC_API std::string from_path(const std::filesystem::path& value) NOEXCEPT;
@@ -40,16 +41,16 @@ BC_API std::filesystem::path default_config_path(
 /// Get the fully-qualified path of the executable (empty if unobtainable).
 BC_API std::filesystem::path module_path() NOEXCEPT;
 
-/// Fully qualify the path and return it as another.
+/// Fully qualify path and return it as another.
 /// Not thread safe. If another thread calls SetCurrentDirectory during this
-/// call, the result may be corrupted as static storage is used for directory.
+/// call, result may be corrupted as static storage is used for directory.
 BC_API std::filesystem::path qualified_path(
     const std::filesystem::path& path) NOEXCEPT;
 
-/// Extend the path and return it as another.
-/// std::filesystem::path does not extend long paths, so we provide this.
+/// Extend path and return it as another.
+/// std::filesystem::path does not extend long paths, so this is provided.
 /// Not thread safe. If another thread calls SetCurrentDirectory during this
-/// call, the result may be corrupted as static storage is used for directory.
+/// call, result may be corrupted as static storage is used for directory.
 BC_API std::filesystem::path extended_path(
     const std::filesystem::path& path) NOEXCEPT;
 

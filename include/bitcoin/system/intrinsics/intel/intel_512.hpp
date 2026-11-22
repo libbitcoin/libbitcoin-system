@@ -248,7 +248,7 @@ INLINE Word get(xint512_t a) NOEXCEPT
 }
 
 // AVX512F
-// Low order word to the left.
+// Low order word to left.
 template <typename xWord, if_same<xWord, xint512_t> = true>
 INLINE xint512_t set(
     uint64_t x01, uint64_t x02, uint64_t x03, uint64_t x04,
@@ -405,7 +405,7 @@ INLINE void store_aligned(xint512_t& bytes, xint512_t a) NOEXCEPT
 
 /// compare/select
 /// ---------------------------------------------------------------------------
-/// Masks are all bits set (true) or unset (false) per word.
+/// Masks all bits set (true) or unset (false) per word.
 
 // AVX512F
 INLINE xint512_t andnot(xint512_t a, xint512_t b) NOEXCEPT
@@ -442,7 +442,7 @@ INLINE bool any(xint512_t a) NOEXCEPT
 }
 
 // AVX512BW
-// The index of the first unequal byte, or the word size if equal.
+// Index of first unequal byte, or word size if equal.
 INLINE size_t first_unequal(xint512_t a, xint512_t b) NOEXCEPT
 {
     const uint64_t unequal = _mm512_cmpneq_epi8_mask(a, b);
@@ -454,8 +454,8 @@ INLINE size_t first_unequal(xint512_t a, xint512_t b) NOEXCEPT
 /// ---------------------------------------------------------------------------
 
 // AVX512F
-// vc++ (19.51) can encode a gather index in zmm16-31 with EVEX.P1[2] clear,
-// which is illegal without APX, so its gathers load each lane.
+// vc++ (19.51) can encode gather index in zmm16-31 with EVEX.P1[2] clear,
+// illegal without APX, so its gathers load each lane.
 INLINE xint512_t gather(const uint64_t* table, xint512_t index) NOEXCEPT
 {
 #if defined(HAVE_MSC)

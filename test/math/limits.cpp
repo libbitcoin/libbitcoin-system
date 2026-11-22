@@ -341,8 +341,8 @@ static_assert(bitcoin_max<7> == max_int56);
 static_assert(bitcoin_max<8> == max_int64);
 static_assert(is_same_type<decltype(bitcoin_max<4>), const int32_t>);
 
-/// Bitcoin serialization imposes the following domain constraint on integers.
-/// The domains are constrained by one less negative value than C++ integrals.
+/// Bitcoin serialization imposes following domain constraint on integers.
+/// Domains constrained by one less negative value than C++ integrals.
 
 /// 1 byte :[-2^07+1...2^07-1]
 /// 2 bytes:[-2^15+1...2^15-1]

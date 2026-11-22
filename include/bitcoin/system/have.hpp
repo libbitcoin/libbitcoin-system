@@ -110,8 +110,8 @@
 /// WITH_ build symbols.
 /// ---------------------------------------------------------------------------
 
-/// vc++: There are no flags for SSE4.1, SHANI, SHA512, AVX512IFMA, AVXIFMA,
-/// AES-NI and VAES, so use custom WITH_ options.
+/// vc++: No flags for SSE4.1, SHANI, SHA512, AVX512IFMA, AVXIFMA, AES-NI and
+/// VAES, so use custom WITH_ options.
 #if defined(HAVE_MSC) && defined(HAVE_XCPU)
     #if defined(WITH_SSE41) && !defined(__SSE4_1__)
         #define __SSE4_1__
@@ -244,7 +244,7 @@
 #endif
 
 /// Map standard XCPU defines for intrinsics usage.
-/// vc++: There are no native flags for SHA and SSE41.
+/// vc++: No native flags for SHA and SSE41.
 #if defined(HAVE_XCPU)
     // -msha
     // vc++: SHANI not independently configurable (requires custom option).
@@ -260,8 +260,8 @@
     #endif
     // -mavx512bw -mavx512vl
     // vc++: Advanced Vector Extensions 512 (X86/X64) (/arch:AVX512)
-    // AVX512VL is required because without it compilers widen 256 bit rotates
-    // to 512 bit, which lowers the clock of cpus that throttle avx512.
+    // AVX512VL required because without it compilers widen 256 bit rotates to
+    // 512 bit, which lowers clock of cpus that throttle avx512.
     #if defined(__AVX512BW__) && defined(__AVX512VL__)
         #define HAVE_AVX512
         #define HAVE_512
@@ -366,7 +366,7 @@
 #endif
 
 /// XCPU architecture intrinsics _xgetbv, _cpuid, __cpuidex/__cpuid_count.
-/// Always enabled on XCPU, as the binary is not portable to other CPUs.
+/// Always enabled on XCPU, as binary is not portable to other CPUs.
 #if defined(HAVE_XCPU)
     // TODO: CLANG/GCC compile test XCPU and always set -mxsave.
     // TODO: these these defines can be enabled unconditionally.
@@ -440,7 +440,7 @@
     #define HAVE_CPP20
 #endif
 
-/// These are manually configured here.
+/// Manually configured here.
 /// ---------------------------------------------------------------------------
 
 /// Disable to suppress pragma messages.

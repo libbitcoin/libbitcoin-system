@@ -26,7 +26,7 @@ namespace libbitcoin {
 namespace system {
 namespace config {
 
-/// Container for an [ip-address, port, CIDR] tuple.
+/// Container for [ip-address, port, CIDR] tuple.
 /// Subnet matching is employed when nonzero CIDR suffix is present.
 /// Internal storage always denormalized to native IPv4/IPv6 (no mapped IPv6).
 /// Provided for connection management (not p2p network messaging).

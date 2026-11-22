@@ -47,15 +47,15 @@ static bool is_decimal(char character) NOEXCEPT
 // Decimal digits that can affect rounding to double (halfway cases).
 constexpr size_t significant_digits = 768;
 
-// Decimal orders of magnitude bounding the nonzero finite doubles: 10^lowest
-// is below half the least subnormal and the greatest double is below 10^highest.
+// Decimal orders of magnitude bounding nonzero finite doubles: 10^lowest is
+// below half least subnormal and greatest double is below 10^highest.
 constexpr int64_t lowest_order = std::numeric_limits<double>::min_exponent10 -
     std::numeric_limits<double>::max_digits10;
 constexpr int64_t highest_order =
     add1(std::numeric_limits<double>::max_exponent10);
 
 // Exact numerator and denominator (under four bits per decimal digit), with
-// room for the quotient scaled to one limb.
+// room for quotient scaled to one limb.
 constexpr auto exact_digits = significant_digits + 1u +
     possible_narrow_cast<size_t>(to_unsigned(-lowest_order));
 using exact_t = uintx_t<4u * exact_digits + bits<uint64_t>>;
@@ -816,8 +816,8 @@ code parser::start_number(char character) THROWS
     return {};
 }
 
-// Advance the number grammar, or end the number (state change) on a
-// character that cannot continue it.
+// Advance number grammar, or end number (state change)
+// on character that cannot continue it.
 code parser::step_number(char character) THROWS
 {
     const auto digit = is_decimal(character);

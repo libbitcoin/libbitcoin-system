@@ -24,8 +24,8 @@
 namespace libbitcoin {
 namespace system {
 
-/// Find the position of an element in a *lexically sorted* collection.
-/// Returns the position or negative if not found or list size > max_int32.
+/// Find position of element in *lexically sorted* collection.
+/// Returns position or negative if not found or list size > max_int32.
 template <typename Collection, typename Element>
 typename Collection::difference_type
 constexpr binary_search(const Collection& list,
@@ -40,13 +40,13 @@ template <typename Left, typename Right>
 constexpr bool deep_equal(const Left& left, const Right& right) NOEXCEPT;
 
 /// Determine if collections of integers have equal elements, in time
-/// independent of the elements (sizes are not concealed).
+/// independent of elements (sizes not concealed).
 template <typename Left, typename Right>
 constexpr bool constant_time_equal(const Left& left,
     const Right& right) NOEXCEPT;
 
 /// C++20: list.contains(element)
-/// Determine if a collection contains the specified element.
+/// Determine if collection contains specified element.
 template <typename Collection, typename Element>
 constexpr bool contains(const Collection& list,
     const Element& element) NOEXCEPT;
@@ -117,7 +117,7 @@ template <typename Collection>
 bool part(Collection& from, Collection& to,
     const typename Collection::value_type& element) NOEXCEPT;
 
-/// Reverse the order of collection elements.
+/// Reverse order of collection elements.
 /// Use reverse_view for reverse iteration.
 template <typename Collection>
 inline Collection reverse(Collection&& list) NOEXCEPT;

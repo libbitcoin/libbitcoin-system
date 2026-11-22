@@ -59,8 +59,8 @@ public:
     using scan_matches = std_vector<scan_match>;
 
     /// Records of transactions in block order, as corresponding columns
-    /// (prefixes flattened in transaction order). Point is the prevouts
-    /// summary if summarized, otherwise the input key sum with its hash.
+    /// (prefixes flattened in transaction order). Point is prevouts summary if
+    /// summarized, otherwise input key sum with its hash.
     struct BC_API rows
     {
         /// This thread's rows (capacity retained across use).
@@ -85,17 +85,17 @@ public:
     /// Serialized outpoint.
     using outpoint = data_array<chain::point::serialized_size()>;
 
-    /// The transaction's prevouts summary (input hash times the sum of its
-    /// eligible input keys), false if the transaction is not eligible.
-    /// Requires populated prevouts.
+    /// Transaction's prevouts summary (input hash times sum
+    /// of its eligible input keys), false if transaction
+    /// not eligible. Requires populated prevouts.
     static bool summarize(ec_compressed& out,
         const chain::transaction& tx) NOEXCEPT;
     static bool summarize(ec_compressed& out,
         const chain::view::transaction& tx) NOEXCEPT;
 
-    /// The sum of the transaction's eligible input keys and its input hash,
-    /// whose product is the prevouts summary, false if the transaction is not
-    /// eligible. Requires populated prevouts.
+    /// Sum of transaction's eligible input keys and its input
+    /// hash, whose product is prevouts summary, false if
+    /// transaction not eligible. Requires populated prevouts.
     static bool prepare(ec_compressed& sum, ec_secret& hash,
         const chain::transaction& tx) NOEXCEPT;
     static bool prepare(ec_compressed& sum, ec_secret& hash,
@@ -111,16 +111,15 @@ public:
     static bool has_outputs(const chain::transaction& tx) NOEXCEPT;
     static bool has_outputs(const chain::view::transaction& tx) NOEXCEPT;
 
-    /// Set out to the records of the selected eligible non-coinbase
-    /// transactions of the block, each summarized or prepared. Requires
-    /// populated prevouts.
+    /// Set out to records of selected eligible non-coinbase transactions of
+    /// block, each summarized or prepared. Requires populated prevouts.
     static void collect(rows& out, const chain::block& block,
         const selector& selected, bool summarize) NOEXCEPT;
     static void collect(rows& out, const chain::view::block& block,
         const selector& selected, bool summarize) NOEXCEPT;
 
-    /// Set out to the record of the transaction, summarized or prepared, false
-    /// if not eligible. Requires populated prevouts.
+    /// Set out to record of transaction, summarized or prepared, false if not
+    /// eligible. Requires populated prevouts.
     static bool collect(rows& out, const chain::transaction& tx,
         bool summarize) NOEXCEPT;
     static bool collect(rows& out, const chain::view::transaction& tx,
@@ -162,8 +161,8 @@ protected:
     static bool prepare(ec_compressed& sum, ec_secret& hash,
         const Iterator& begin, const Iterator& end) NOEXCEPT;
 
-    /// Append the record of the transaction at position, false if not
-    /// eligible (rows unchanged).
+    /// Append record of transaction at position,
+    /// false if not eligible (rows unchanged).
     template <typename Transaction>
     static bool append(rows& out, const Transaction& tx, uint32_t position,
         bool summarize) NOEXCEPT;

@@ -27,17 +27,16 @@ namespace system {
 
 // Integer Representations:
 //
-// Unsigned to signed is of the same size is non-narrowing, but signed to
-// unsigned of the same size is narrowing. The minimum signed value cannot be
-// represented in the unsigned domain of the same bit width. Simply put, this
-// is because there is not a negative zero, allowing space for one more value.
+// Unsigned to signed of same size is non-narrowing, but signed to unsigned of
+// same size is narrowing. Minimum signed value cannot be represented in
+// unsigned domain of same bit width, because there is no negative zero,
+// allowing space for one more value.
 //
 // This is the nature of twos complement vs. ones complement. In ones
-// complement, all bits in the positive domain are inverted to obtained the
-// corresponding negative value. This results in a negative zero. By adding one
-// to the ones complement, twos complement consumes this negative zero value,
-// and therefore has a negative range of one more than its positive range
-// (which retains the zero representation).
+// complement, all bits in positive domain are inverted to obtain corresponding
+// negative value, resulting in negative zero. By adding one to ones complement,
+// twos complement consumes this negative zero value, and so has negative range
+// of one more than its positive range (which retains zero representation).
 
 // Coversions.
 // ----------------------------------------------------------------------------
@@ -66,7 +65,7 @@ constexpr Signed negate(Signed value) NOEXCEPT
 }
 
 // C++20: requires twos complement integer representation.
-// So negate<unsigned> is now the same as twos_complement.
+// So negate<unsigned> is same as twos_complement.
 template <typename Unsigned, if_unsigned_integer<Unsigned>>
 constexpr Unsigned negate(Unsigned value) NOEXCEPT
 {

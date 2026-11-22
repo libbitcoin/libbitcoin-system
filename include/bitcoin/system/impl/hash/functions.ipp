@@ -31,19 +31,18 @@ namespace system {
 
 // General cryptographic hash functions.
 // ----------------------------------------------------------------------------
-// These functions optimize for half/N rmd160/sha1/sha256/512 block sizes.
-// They bypass accumulation, using precomputed padding and avoiding unnecessary
-// endianness conversions between double hashes. Array types are most efficient
-// as size is determined at compile time and vector casting is unnecessary.
-// For N full blocks of array data, the padding message schedule is computed at
-// compile time, saving apprimately 30% of the hash cost for the padding block.
-// For up to 1024 full blocks of non-array sha256 data, the same is applied.
-// data_chunk overloads write digest to the chunk buffer, avoiding copies.
-// Accumulator.write optimizes for writes of n > 0 blocks against an empty
-// buffer, forwarding the set of blocks (data modulo block size) to algorithm.
-// exclusive_slice is a specialization of data_slice which does not accept
-// array/vector. This allows overloading for all three data scenarios, where
-// optimizations are maximized for each independently.
+// Optimized for half/N rmd160/sha1/sha256/512 block sizes. These bypass
+// accumulation, using precomputed padding and avoiding unnecessary endianness
+// conversions between double hashes. Array types are most efficient, as size is
+// determined at compile time and vector casting is unnecessary. For N full
+// blocks of array data, padding message schedule is computed at compile time,
+// saving approximately 30% of hash cost for padding block. For up to 1024 full
+// blocks of non-array sha256 data, the same is applied. data_chunk overloads
+// write digest to chunk buffer, avoiding copies. Accumulator.write optimizes
+// for writes of n > 0 blocks against empty buffer, forwarding set of blocks
+// (data modulo block size) to algorithm. exclusive_slice is a specialization of
+// data_slice that does not accept array/vector, allowing overloading for all
+// three data scenarios, with optimizations maximized for each independently.
 
 // TODO: provide unconstrained pass-through to accumulator, which can collpase
 // TODO: the number of functions to one per type.
@@ -225,15 +224,15 @@ INLINE constexpr size_t unique_hash(const data_array<Size>& key) NOEXCEPT
 {
     constexpr auto size = std::min(Size, sizeof(size_t));
 
-    // This optimization breaks data portability (by endianness).
-    // Could be modified to use an endian conversion vs. simple copy.
+    // Optimization breaks data portability (by endianness).
+    // Could be modified to use endian conversion vs. simple copy.
     size_t value{};
     std::copy_n(key.cbegin(), size, byte_cast(value).begin());
     return value;
 }
 
 // Value will vary with sizeof(size_t).
-// A DJB variation uses [^ byte] vs. [+ byte].
+// DJB variation uses [^ byte] vs. [+ byte].
 // Objectives: deterministic, uniform distribution, efficient computation.
 INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
 {
@@ -248,7 +247,7 @@ INLINE constexpr size_t djb2_hash(const data_slice& data) NOEXCEPT
 }
 
 // Combine hash values, such as djb2_hash or unique_hash outputs.
-// Right should always be the lower entropy value (e.g. point index).
+// Right should always be lower entropy value (e.g. point index).
 INLINE constexpr size_t hash_combine(size_t left, size_t right) NOEXCEPT
 {
     // Shift ensures left == right does not always return zero.

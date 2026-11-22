@@ -26,9 +26,9 @@
 namespace libbitcoin {
 namespace system {
 
-/// Support for high level input/output operations on a byte buffer.
-/// Cannot derive from iostream and cannot make both share an interface.
-/// So this is duck-typed to the subset of std::iostream required by flippers.
+/// Support for high level input/output operations on byte buffer.
+/// Cannot derive from iostream and cannot make both share an interface, so
+/// duck-typed to subset of std::iostream required by flippers.
 template <typename Character = char>
 class iostream
 {

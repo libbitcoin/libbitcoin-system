@@ -70,8 +70,8 @@ std::ostream& cerr_stream() THROWS
     return error;
 }
 
-// A stream that is not associated with a console (such as in a service) has
-// no mode to set, indicated by a negative descriptor (-2, or -1 when in error).
+// Stream not associated with console (such as in service) has no mode to set,
+// indicated by negative descriptor (-2, or -1 when in error).
 inline void set_utf8_stdio(FILE* file) THROWS
 {
     const auto descriptor = _fileno(file);

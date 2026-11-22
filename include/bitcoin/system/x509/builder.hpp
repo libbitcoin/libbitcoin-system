@@ -38,10 +38,10 @@ struct subject
     uint64_t not_after{};
 };
 
-/// Build a self-signed v3 ecdsa-with-SHA256 certificate for the key, with
-/// critical basic constraints (not an authority) and key usage (digital
-/// signature), server and client authentication, and alternative names.
-/// False if the key is invalid or the validity is empty.
+/// Build self-signed v3 ecdsa-with-SHA256 certificate for key, with critical
+/// basic constraints (not an authority) and key usage (digital signature),
+/// server and client authentication, and alternative names. False if key is
+/// invalid or validity is empty.
 BC_API bool build_self_signed(data_chunk& out, const secret& key,
     const subject& subject) NOEXCEPT;
 

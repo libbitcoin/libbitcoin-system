@@ -33,7 +33,7 @@ namespace wallet {
 
 typedef checked<1, short_hash_size, 4> payment;
 
-/// A class for working with non-witness payment addresses.
+/// Non-witness payment address.
 /// For witness addresses, see payment_witness.
 class BC_API payment_address
 {
@@ -90,8 +90,8 @@ public:
     uint8_t prefix() const NOEXCEPT;
     short_hash hash() const NOEXCEPT;
 
-    /// Script is extracted to p2pk or p2sh by matching its prefix to the
-    /// args provided here. So for testnet and other alts these are required.
+    /// Script is extracted to p2pk or p2sh by matching its prefix to args
+    /// provided here, so these are required for testnet and other alts.
     chain::script output_script(
         uint8_t p2kh_prefix=mainnet_p2kh,
         uint8_t p2sh_prefix=mainnet_p2sh) const NOEXCEPT;

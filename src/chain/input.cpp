@@ -234,10 +234,10 @@ input::sizes input::serialized_size(const chain::script& script,
     const auto nominal_size = ceilinged_add(const_size,
         script.serialized_size(true));
 
-    // The input has no way to determine if its tx is segregated, as an empty
+    // Input has no way to determine if its tx is segregated, as an empty
     // witness applies to segregated tx as a one byte (zero) serialization.
-    // This determination is therefore left to the transaction, and witness
-    // retains both serialization options from construction.
+    // Determination is therefore left to transaction, and witness retains both
+    // serialization options from construction.
     const auto witnessed_size = ceilinged_add(nominal_size,
         witness.serialized_size(true));
 
@@ -245,10 +245,9 @@ input::sizes input::serialized_size(const chain::script& script,
     return { nominal_size, witnessed_size };
 }
 
-// input.serialized_size(witness) provides sizing for witness, however
-// witnesses are serialized by the transaction. This is an ugly hack as a
-// consequence of bip144 not serializing witnesses as part of inputs, which
-// is logically the proper association.
+// input.serialized_size(witness) provides sizing for witness, however witnesses
+// are serialized by transaction. An ugly hack, consequence of bip144 not
+// serializing witnesses as part of inputs, logically the proper association.
 size_t input::serialized_size(bool witness) const NOEXCEPT
 {
     return witness ? size_.witnessed : size_.nominal;
@@ -366,8 +365,8 @@ bool input::is_relative_locked(uint32_t sequence, size_t height,
         return age < time;
     }
 
-    // BIP68: when the relative lock time is block based, it is interpreted as
-    // a minimum block height constraint over the age of the input.
+    // BIP68: when relative lock time is block based, it is interpreted as
+    // minimum block height constraint over age of input.
     const auto age = floored_subtract(height, prevout_height);
     return age < blocks;
 }

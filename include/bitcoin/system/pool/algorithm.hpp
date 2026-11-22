@@ -148,13 +148,57 @@ public:
     /// The chunks taken by a block.
     using takes_t = std::vector<take_t>;
 
-    /// Rows to recompute and rows to relabel in a walk of the table, and if
-    /// no component of more than maximum_members was met.
+    /// Rows to recompute and rows to relabel in walk of table, and if no
+    /// component of more than maximum_members was met.
     struct walk_t
     {
         std::vector<link_t> pending{};
         std::vector<link_t> affected{};
         bool complete{ true };
+    };
+
+    /// Offer of chunk of row, or closure of its cluster (count from first).
+    struct offer_t
+    {
+        link_t row{};
+        link_t count{};
+        size_t first{};
+        size_t order{};
+        uint64_t rate{};
+        totals_t sum{};
+    };
+
+    /// Size or sigops of row.
+    using least_t = std::pair<uint32_t, link_t>;
+
+    /// Clusters of unmarked rows and their first offers, kept between blocks.
+    struct packing_t
+    {
+        /// Rows and limits kept for.
+        size_t rows{};
+        size_t depth{};
+        totals_t budget{};
+        uint32_t bytes_per_sigop{};
+
+        /// First unmarked row, and place among unmarked of each row from it.
+        link_t base{};
+        std::vector<link_t> places{};
+
+        /// By place: row, earlier place of cluster, next place of cluster,
+        /// and (at first place) cluster has row with excluded parent.
+        std::vector<link_t> open{};
+        std::vector<link_t> joined{};
+        std::vector<link_t> ring{};
+        std::vector<bool> partial{};
+
+        /// Unmarked rows by least size and by least sigops.
+        std::vector<least_t> sizes{};
+        std::vector<least_t> sigops{};
+
+        /// First offers, rows of their closures, and rows of last block.
+        std::vector<offer_t> offers{};
+        std::vector<link_t> closed{};
+        std::vector<link_t> taken{};
     };
 
     /// Blocks taken in turn from the rows, and the marks that continue them.
@@ -163,6 +207,7 @@ public:
         std::vector<mark> marks{};
         std::vector<takes_t> blocks{};
         bool exhausted{};
+        packing_t packing{};
     };
 
     /// Lane counts of a word.
@@ -285,9 +330,9 @@ public:
     static bool ancestry(totals_t& out, const graph_t& graph,
         const component_t& component, const totals_t& limit) NOEXCEPT;
 
-    /// Best outcome fee and chargeable size of the present rows reached from
-    /// the rows by parent, child and rival, false if the size exceeds the
-    /// limit or a component is not resolvable within the bounds.
+    /// Best outcome fee and chargeable size of present rows reached from rows
+    /// by parent, child and rival, false if size exceeds limit or component is
+    /// not resolvable within bounds.
     template <typename Word = xint512_t>
     static bool family(uint64_t& fee, uint64_t& bytes, const graph_t& graph,
         const std::span<const link_t>& rows, uint64_t limit,
@@ -323,9 +368,9 @@ public:
     static constexpr void relabel(const columns_t& columns,
         const component_t& component) NOEXCEPT;
 
-    /// Each transition brings the causes and labels of the rows it reaches up
-    /// to date, and is false if it met a component of more than
-    /// maximum_members, which leaves labels to be made by the columns.
+    /// Each transition brings causes and labels of rows it reaches up to date,
+    /// false if it met component of more than maximum_members, leaving labels
+    /// to be made by columns.
 
     /// The row made present, or conflicted (a confirmed tx spends its point).
     static bool admit(const columns_t& columns, link_t row,
@@ -344,8 +389,8 @@ public:
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
 
-    /// Rows absent from the best outcome of their component, by fee less
-    /// the rate on its size, marked excluded.
+    /// Rows absent from best outcome of their component, by fee less rate on
+    /// its size, marked excluded.
     template <typename Word = xint512_t>
     static void resolve(std::span<mark> marks, const columns_t& columns,
         size_t maximum_outcomes, uint64_t rate,
@@ -368,10 +413,10 @@ public:
     static constexpr uint64_t above(const std::span<const take_t>& takes,
         uint64_t rate) NOEXCEPT;
 
-    /// Lowest rate taken within the count of blocks, max_uint64 if none.
+    /// Lowest rate with room (bytes) within count of blocks, else max_uint64.
     template <typename Arrivals>
     static uint64_t estimate(const projection_t& projection, size_t count,
-        uint64_t space, const Arrivals& arrivals) NOEXCEPT;
+        uint64_t space, uint64_t room, const Arrivals& arrivals) NOEXCEPT;
 
     /// Columns (whole table).
     /// -----------------------------------------------------------------------
@@ -441,8 +486,8 @@ protected:
     static constexpr void each_rival(const graph_t& graph, link_t input,
         const Visitor& visit) NOEXCEPT;
 
-    /// Each row joined to the row in a component (by parent, rival or child),
-    /// false once a visit is.
+    /// Each row joined to row in component (by parent, rival or child),
+    /// false once visit is.
     template <typename Visitor>
     static constexpr bool each_member(const graph_t& graph, link_t row,
         const Visitor& visit) NOEXCEPT;
@@ -461,8 +506,7 @@ protected:
     static constexpr mask_t losers(const component_t& component,
         size_t index) NOEXCEPT;
 
-    /// Index of the outcome of highest fee less the rate on its size (the
-    /// first of equals).
+    /// Index of outcome of highest fee less rate on its size (first of equals).
     template <typename Word>
     static constexpr size_t best(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph, uint64_t rate,
@@ -485,22 +529,22 @@ protected:
     static void forfeit(std::span<mark> marks, const graph_t& graph,
         link_t row) NOEXCEPT;
 
-    /// As pack, with the rate and chargeable size of each chunk taken.
+    /// As pack, with rate and chargeable size of each chunk taken.
     static void pack_(std::vector<link_t>& out, takes_t& takes,
-        std::span<mark> marks, const columns_t& columns,
+        packing_t& kept, std::span<mark> marks, const columns_t& columns,
         const totals_t& budget, size_t depth,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The takes of each of the count of blocks by ascending rate, the size
-    /// of each that of the takes at or above its rate.
+    /// Takes of each of count of blocks by ascending rate, size of each that of
+    /// takes at or above its rate.
     static std::vector<takes_t> levels(const projection_t& projection,
         size_t count) NOEXCEPT;
 
-    /// The rate is taken within the count of blocks, by their levels.
+    /// Rate has room within count of blocks, by their levels.
     template <typename Arrivals>
     static bool reaches(const projection_t& projection,
         const std::vector<takes_t>& levels, size_t count, uint64_t space,
-        uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
+        uint64_t room, uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
 
     /// The rows from the first met by a walk, forgotten by the next.
     struct visits_t
@@ -560,8 +604,8 @@ protected:
     static mask_t closure_(flow_t& flow, residual_t<Capacity>& residual,
         size_t count, size_t links, uint64_t fee, uint64_t size) NOEXCEPT;
 
-    /// The highest rate ancestry closed subset of the cluster, ascending,
-    /// the cluster of no more than maximum_members.
+    /// Highest rate ancestry closed subset of cluster, ascending,
+    /// cluster of no more than maximum_members.
     static void closure(std::vector<link_t>& out, totals_t& sum,
         flow_t& flow, const graph_t& graph,
         const std::vector<link_t>& cluster, uint32_t bytes_per_sigop) NOEXCEPT;
@@ -569,13 +613,13 @@ protected:
     /// The cell of the row with its derived causes recomputed.
     static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;
 
-    /// The cell of the row set, with the rows that depend on the change left
-    /// pending and those whose labels it affects noted.
+    /// Cell of row set, with rows that depend on change left pending and those
+    /// whose labels it affects noted.
     static void change(walk_t& walk, const columns_t& columns, link_t row,
         link_t next) NOEXCEPT;
 
-    /// The pending rows recomputed, with those their changes reach, and the
-    /// affected rows relabeled, false if a component is over maximum_members.
+    /// Pending rows recomputed, with those their changes reach, and affected
+    /// rows relabeled, false if component is over maximum_members.
     static bool spread(walk_t& walk, const columns_t& columns) NOEXCEPT;
 
     /// Each present row labeled into its component, false if one is over

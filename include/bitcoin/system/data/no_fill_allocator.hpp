@@ -47,7 +47,7 @@ public:
     {
         // en.cppreference.com/w/cpp/memory/allocator
         // Base class (std::allocator) owns memory deallocation.
-        // Default fill is bypassed here.
+        // Default fill bypassed.
         ::new(static_cast<void*>(ptr)) Type;
     }
 

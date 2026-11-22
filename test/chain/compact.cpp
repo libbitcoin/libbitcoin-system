@@ -127,9 +127,11 @@ static_assert(compact_t::expand(compact_t::compress(uint256_t{ 1 } << 16u)) == u
 static_assert(compact_t::expand(compact_t::compress(uint256_t{ 1 } << 176u)) == uint256_t{ 1 } << 176u);
 static_assert(compact_t::expand(compact_t::compress(uint256_t{ 1 } << 248u)) == uint256_t{ 1 } << 248u);
 
-constexpr uint32_t factory(int32_t logical_exponent, bool negative, uint32_t mantissa) NOEXCEPT
+constexpr uint32_t factory(int32_t logical_exponent, bool negative,
+    uint32_t mantissa) NOEXCEPT
 {
-    return ((logical_exponent + 3) << 24) | ((negative ? 1 : 0) << 23) | mantissa;
+    const auto exponent = (logical_exponent + 3) << 24;
+    return exponent | ((negative ? 1 : 0) << 23) | mantissa;
 }
 
 // expand

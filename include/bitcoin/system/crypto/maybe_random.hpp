@@ -27,10 +27,10 @@
 namespace libbitcoin {
 namespace system {
 
-/// Entropy drawn from the operating system (and hardware, where the standard
-/// library uses it). Whether those sources are random cannot be known, so
-/// this is maybe random. It is suitable for ephemeral network session keys
-/// and for randomization such as address pool selection.
+/// Entropy drawn from operating system (and hardware, where standard library
+/// uses it). Whether those sources are random cannot be known, so this is maybe
+/// random. Suitable for ephemeral network session keys and for randomization
+/// such as address pool selection.
 /// Do not ever use it for live wallet seeding unless you want to lose money.
 class BC_API maybe_random
 {

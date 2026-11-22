@@ -26,8 +26,8 @@ namespace libbitcoin {
 namespace system {
 namespace error {
 
-// Block sequence is limited to 0xff for single byte store encoding.
-// With the uint8_t domain specified the compiler enforces this guard.
+// Block sequence limited to 0xff for single byte store encoding.
+// With uint8_t domain specified compiler enforces this guard.
 
 enum block_error_t : uint8_t
 {

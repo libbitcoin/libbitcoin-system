@@ -26,11 +26,11 @@ namespace libbitcoin {
 namespace system {
 
 /// Lifetime:
-/// No prvalues are accepted, as they are not meaningfully-writeable.
-/// The slab does not extend the lifetime of any rvalue passed to it.
-/// The caller must ensure that the references or pointers passed to the slab
-/// are not orphaned during its lifetime, which is consistent with any passage
-/// by reference. See data_slice for a detailed explanation of lifetime.
+/// No prvalues accepted, as they are not meaningfully-writeable.
+/// Slab does not extend lifetime of any rvalue passed to it.
+/// Caller must ensure references or pointers passed to slab are not orphaned
+/// during its lifetime, consistent with any passage by reference. See
+/// data_slice for detailed explanation of lifetime.
 /// en.cppreference.com/w/cpp/language/reference#Dangling_references
 
 /// Downsizable but otherwise const iterable wrapper for non-const buffer.
@@ -86,7 +86,7 @@ public:
     /// Methods.
     /// -----------------------------------------------------------------------
 
-    /// Copy data to an array.
+    /// Copy data to array.
     /// Underfill is padded with 0x00, excess is truncated.
     template <size_type Size>
     constexpr std_array<value_type, Size> to_array() const NOEXCEPT;
@@ -100,9 +100,9 @@ public:
     /// Cast buffer to a data_slice.
     constexpr data_slice to_slice() const NOEXCEPT;
 
-    /// Resize the slab by decrementing the end pointer.
-    /// This is the only mutable action that can be taken on the slab.
-    /// Returns true if the size was reduced (expansion is not allowed).
+    /// Resize slab by decrementing end pointer.
+    /// Only mutable action that can be taken on slab.
+    /// Returns true if size was reduced (expansion not allowed).
     constexpr bool resize(size_t size) NOEXCEPT;
 
     /// Properties.

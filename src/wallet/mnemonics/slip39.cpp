@@ -121,8 +121,7 @@ bool slip39::is_valid_grouping(uint8_t group_threshold,
         if (group.count > count_maximum)
             return false;
 
-        // A group of one share is that group's secret, so sharing it more
-        // than once exposes it.
+        // Group of one share is its secret, sharing more than once exposes it.
         if (is_one(group.threshold) && group.count > one)
             return false;
     }
@@ -324,8 +323,8 @@ bool slip39::combine(data_chunk& out, const list& shares,
 
         if (group == groups.end())
         {
-            groups.push_back({ share.group_index(),
-                share.member_threshold(), {} });
+            const auto threshold = share.member_threshold();
+            groups.push_back({ share.group_index(), threshold, {} });
             group = std::prev(groups.end());
         }
         else if (group->threshold != share.member_threshold())
@@ -339,8 +338,8 @@ bool slip39::combine(data_chunk& out, const list& shares,
         group->shares.push_back({ share.member_index(), value });
     }
 
-    // A threshold of groups is required, and no more, as is a threshold of
-    // shares within each of those groups.
+    // Threshold of groups is required, and no more, as is threshold of shares
+    // within each of those groups.
     if (groups.size() != group_threshold)
         return false;
 
@@ -388,9 +387,8 @@ string_list slip39::encoder(const data_chunk& value,
     const auto value_words = count - fixed_words;
     const auto padding = word_bits * value_words - to_bits(value.size());
 
-    // The share value is left padded with zeros to a multiple of the word
-    // size, so the metadata and value are written as a bit stream and then
-    // read back as words.
+    // Share value is left padded with zeros to multiple of word size, so
+    // metadata and value are written as bit stream, then read back as words.
     data_chunk buffer{};
     write::bits::data sink(buffer);
     sink.write_bits(fields.identifier, identifier_bits);
@@ -458,8 +456,8 @@ bool slip39::decoder(data_chunk& value, fields& out,
 
     sink.flush();
 
-    // The extendable flag selects the checksum customization, so it is read
-    // from the share before the share is verified.
+    // Extendable flag selects checksum customization, so it is read from share
+    // before share is verified.
     read::bits::copy source(buffer);
     const auto identifier = source.read_bits(identifier_bits);
     const auto extendable = is_one(source.read_bits(extendable_bits));

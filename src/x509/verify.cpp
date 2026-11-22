@@ -68,8 +68,9 @@ code verify(const certificates& chain, const certificates& anchors,
     if (is_zero(bit_and(leaf.key_usage, digital_signature)))
         return error::key_usage_invalid;
 
-    const auto usage = (intent == purpose::server) ?
-        leaf.server_authentication : leaf.client_authentication;
+    const auto& server = leaf.server_authentication;
+    const auto& client = leaf.client_authentication;
+    const auto usage = (intent == purpose::server) ? server : client;
     if (!usage)
         return error::extended_key_usage_invalid;
 

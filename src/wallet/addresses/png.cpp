@@ -98,7 +98,7 @@ bool png::to_image(std::ostream& out, const data_chunk& data,
         return false;
 
     // PNG chunk length limit is max_chunk_bytes.
-    // This method is otherwise limited only by the stream capacity.
+    // Otherwise limited only by stream capacity.
     if (data.size() > max_image_bytes)
         return false;
 

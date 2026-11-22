@@ -35,8 +35,8 @@ namespace libbitcoin {
 
 /// Default-filling polymorphic allocator.
 /// Strictly conforms to std::pmr::polymorphic_allocator.
-/// Does not default to std::pmr::get_default_resource() but
-/// default_arena::get() exposes the same underlying global default allocators.
+/// Does not default to std::pmr::get_default_resource(), but
+/// default_arena::get() exposes same underlying global default allocators.
 template <class Value = uint8_t>
 class allocator
 {
@@ -69,7 +69,7 @@ public:
 
     /// allocate_bytes/deallocate_bytes
     /// -----------------------------------------------------------------------
-    /// These allocate/deallocate bytes, without consideration of other types.
+    /// Allocate/deallocate bytes, without consideration of other types.
 
     NODISCARD ALLOCATOR void* allocate_bytes(size_t bytes,
         size_t align=alignof(max_align_t)) THROWS
@@ -85,7 +85,7 @@ public:
 
     /// allocate_object/deallocate_object
     /// -----------------------------------------------------------------------
-    /// These allocate/deallocate bytes of Type size, for count of Type.
+    /// Allocate/deallocate bytes of Type size, for count of Type.
 
     template <class Type>
     NODISCARD ALLOCATOR Type* allocate_object(size_t count=1) THROWS
@@ -102,7 +102,7 @@ public:
 
     /// allocate/deallocate
     /// -----------------------------------------------------------------------
-    /// These allocate/deallocate bytes of Value size, for count of Value.
+    /// Allocate/deallocate bytes of Value size, for count of Value.
 
     NODISCARD ALLOCATOR Value* allocate(size_t count) THROWS
     {
@@ -116,7 +116,7 @@ public:
 
     /// new_object/delete_object
     /// -----------------------------------------------------------------------
-    /// These allocate & construct / destruct & deallocate.
+    /// Allocate & construct / destruct & deallocate.
 
     template <class Type, class ...Args>
     NODISCARD ALLOCATOR Type* new_object(Args&&... args) THROWS
@@ -143,7 +143,7 @@ public:
 
     /// construct/destroy
     /// -----------------------------------------------------------------------
-    /// These neither allocate nor deallocate.
+    /// Neither allocate nor deallocate.
 
     template <class Type, class ...Args>
     void construct(Type* ptr, Args&&... arguments) THROWS
@@ -175,7 +175,7 @@ public:
     }
 
     // www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2875r0.pdf
-    // To become undeprecated in C++26 (which basically means it is not now).
+    // To become undeprecated in C++26 (deprecated until then).
     template <class Type>
     static void destroy(Type* ptr) NOEXCEPT
     {
@@ -288,11 +288,11 @@ inline bool operator==(const allocator<Left>& left,
 
 using byte_allocator = allocator<uint8_t>;
 
-// If Type accepts an allocator on construct (e.g. vector) then
-// std::uses_allocator_construction_args supplies the allocator.
+// If Type accepts allocator on construct (e.g. vector) then
+// std::uses_allocator_construction_args supplies allocator.
 
-// Create a pointer to an instance of Type presumed to be allocated and
-// constructed by allocator, and pass it and deleter and allocator as:
+// Create pointer to instance of Type presumed allocated and constructed by
+// allocator, and pass it and deleter and allocator as:
 // shared_ptr<Type>(Type*, allocate.deleter<Type>(), allocate)
 #define POINTER(Type, allocate, ptr) \
     ptr, allocate.deleter<Type>(), allocate
@@ -303,8 +303,8 @@ using byte_allocator = allocator<uint8_t>;
 #define CREATE(Type, allocate, ...) \
     POINTER(Type, allocate, allocate.new_object<Type>(__VA_ARGS__))
 
-// Construct a shared_ptr to allocated instance (ptr) of const Type on an
-// allocated address (at) passing deleter and allocator to shared_ptr construct.
+// Construct shared_ptr to allocated instance (ptr) of const Type on allocated
+// address (at), passing deleter and allocator to shared_ptr construct.
 #define INPLACE(at, Type, allocate, ptr) \
     allocate.construct<std::shared_ptr<const Type>>( \
         at, ptr, allocate.deleter<Type>(), allocate)

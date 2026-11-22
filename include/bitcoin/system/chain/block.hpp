@@ -158,7 +158,7 @@ public:
     code connect(const context& ctx) const NOEXCEPT;
     code confirm(const context& ctx) const NOEXCEPT;
 
-    /// Populate previous outputs internal to the block.
+    /// Populate previous outputs internal to block.
     /// Fails if any populated prevout is internally immature or locked.
     code populate(const context& ctx) const NOEXCEPT;
 

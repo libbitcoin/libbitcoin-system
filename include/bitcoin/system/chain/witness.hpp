@@ -72,7 +72,7 @@ public:
     /// -----------------------------------------------------------------------
 
     /// Skip a witness (as if deserialized) true if not superfluous.
-    /// Superfluous means an empty stack, not a stack of empty elements.
+    /// Superfluous means empty stack, not stack of empty elements.
     static bool skip(reader& source, bool prefix) NOEXCEPT;
 
     data_chunk to_data(bool prefix) const NOEXCEPT;
@@ -91,7 +91,7 @@ public:
     const chain::annex& annex() const NOEXCEPT;
 
     /// Computed properties.
-    /// serialized_size(true) returns one for an empty witness stack.
+    /// serialized_size(true) returns one for empty witness stack.
     size_t serialized_size(bool prefix) const NOEXCEPT;
 
     /// Patterns.

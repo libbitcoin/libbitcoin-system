@@ -47,8 +47,8 @@ constexpr auto identity_pt = base16_array("43da9ad5a079483e224bcdd61cd1728a68c2b
 
 BC_AUTO_TEST_CASE(catalogs_electrum_v1__count__all__expected)
 {
-    // Any new dictionary must be added below to guarantee lack of normalization.
-    // Failure to do so may lead to invalid seed generation, which is very bad.
+    // New dictionary must be added below to guarantee lack of normalization.
+    // Failure to do so may lead to invalid seed generation.
     BC_CHECK_MESSAGE(electrum_v1::catalogs::count() == dictionary_count, "new dictionary");
 }
 
@@ -84,8 +84,8 @@ BC_AUTO_TEST_CASE(catalogs_electrum_v1__sorted__unsorted__false)
 
 // abnormal
 
-// These dictionaries are in normal form.
-// So there is no need to nfkd normalize these for wordlist-based seedings.
+// These dictionaries in normal form.
+// So no need to nfkd normalize these for wordlist-based seedings.
 BC_AUTO_TEST_CASE(catalogs_electrum_v1__normal__normal_words__true)
 {
     BC_CHECK(!abnormal(electrum_v1::en));

@@ -28,8 +28,8 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-// This prefix results in the prefix "passphrase" in the base58 encoding.
-// The prefix is not modified as the result of variations to address.
+// Results in prefix "passphrase" in base58 encoding.
+// Prefix not modified by variations to address.
 const data_array<parse_encrypted_token::magic_size> parse_encrypted_token::magic_
 {
     { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 }

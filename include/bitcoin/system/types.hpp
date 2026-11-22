@@ -37,9 +37,9 @@ namespace libbitcoin {
 template <typename Type, size_t Size>
 using std_array = std::array<Type, Size>;
 
-/// std_array aligned to its element, as clang-cl under-aligns a std::array of
-/// vectors (the MSVC STL declares std::array under pragma pack). Alignment is
-/// requested only for over-aligned elements, as a requested alignment alters
+/// std_array aligned to its element, as clang-cl under-aligns std::array of
+/// vectors (MSVC STL declares std::array under pragma pack). Alignment is
+/// requested only for over-aligned elements, as requested alignment alters
 /// msvc x86 argument passing.
 template <typename Type, size_t Size,
     bool = (alignof(Type) > alignof(std::max_align_t))>
@@ -51,10 +51,10 @@ struct alignas(Type) aligned_array<Type, Size, true>
   : std_array<Type, Size> {};
 
 /// std_vector aliased to allow seamless conditional allocator usage.
-/// The default area is applied by default, so remains globally relocatable.
-/// In some cases library code requires default allocator vectors, so these
-/// are retained but are thus not usable with utilities that accept std_vector.
-/// Since string and other containers are not widely used in high performance
+/// Default area is applied by default, so remains globally relocatable.
+/// Some library code requires default allocator vectors, so these are
+/// retained but thus not usable with utilities that accept std_vector. As
+/// string and other containers are not widely used in high performance
 /// scenarios requiring performant memory allocation, they are not specialized.
 template <typename Type>
 using std_vector = std::vector<Type /*, allocator<Type>*/>;
@@ -140,12 +140,12 @@ using to_common_type = std::common_type_t<Left, Right>;
 
 /// Not possible with std::common_type.
 /// Alias for -> decltype([op] Unary), resulting integral promotion type.
-/// This provides a type constraint for depromotion of native operator results.
+/// Provides type constraint for depromotion of native operator results.
 template <typename Unary>
 using to_common_sized_type = decltype(+Unary{});
 
 /// Promotion to larger of two types, independent of sign.
-/// This must prefer the Left over right, so that left controls explicit sign.
+/// Must prefer Left over right, so left controls explicit sign.
 template <typename Left, typename Right>
 using to_greater_type = iif<
     (sizeof(Left) >= sizeof(Right)), Left, Right>;
@@ -166,7 +166,7 @@ typedef uintx_t<256u> uint256_t;
 typedef uintx_t<512u> uint512_t;
 
 /// No integral type rounding, all types exact byte size.
-/// Prefers the exact integral type and falls back to uintx_t.
+/// Prefers exact integral type and falls back to uintx_t.
 template <size_t Bytes>
 using unsigned_exact_type =
     iif<Bytes == 0u, size_t,
@@ -293,7 +293,8 @@ constexpr type& assign(std::in_place_index_t<Index>, Args&&... args) NOEXCEPT \
 #define FORWARD_ALTERNATIVE_VARIANT_ASSIGNMENT(type, Alternative, inner) \
 constexpr type& operator=(Alternative&& alternative) NOEXCEPT \
 { \
-    inner.template emplace<Alternative>(std::forward<Alternative>(alternative)); \
+    inner.template emplace<Alternative>( \
+        std::forward<Alternative>(alternative)); \
     return *this; \
 }
 

@@ -57,9 +57,12 @@ static bool is_short(const std::string& argument) NOEXCEPT
 static void validate_adjacent(const std::string& argument) THROWS
 {
     if (is_long(argument) && argument.ends_with('='))
-        throw validation_exception{ "the argument for option '" +
+        throw validation_exception
+        {
+            "the argument for option '" +
             argument.substr(zero, sub1(argument.size())) +
-            "' should follow immediately after the equal sign" };
+            "' should follow immediately after the equal sign"
+        };
 }
 
 static const option_description& declared_option(const std::string& name,
@@ -74,8 +77,8 @@ static const option_description& declared_option(const std::string& name,
     return *option;
 }
 
-// Take the least number of tokens of the option from the arguments. An
-// argument that is exactly a declared short option name is not a token.
+// Take least number of tokens of option from arguments. Argument exactly a
+// declared short option name is not a token.
 static void take_tokens(parsed_option& parsed,
     const option_description& option, const string_list& arguments,
     size_t& index, const options_description& options) THROWS
@@ -86,12 +89,16 @@ static void take_tokens(parsed_option& parsed,
     const auto available = parsed.tokens.size() + (arguments.size() - index);
 
     if (available < minimum)
-        throw validation_exception{ "the required argument for option '" +
-            name + "' is missing" };
+        throw validation_exception
+        {
+            "the required argument for option '" + name + "' is missing"
+        };
 
     if (!parsed.tokens.empty() && is_zero(semantic->max_tokens()))
-        throw validation_exception{ "option '" + name +
-            "' does not take any arguments" };
+        throw validation_exception
+        {
+            "option '" + name + "' does not take any arguments"
+        };
 
     auto needed = floored_subtract(minimum, parsed.tokens.size());
     for (; is_nonzero(needed) && index < arguments.size(); --needed, ++index)
@@ -100,8 +107,10 @@ static void take_tokens(parsed_option& parsed,
         validate_adjacent(argument);
         if (is_short(argument) && !is_null(options.find_nothrow(argument,
             false)))
-            throw validation_exception{ "the required argument for "
-                "option '" + name + "' is missing" };
+            throw validation_exception
+            {
+                "the required argument for option '" + name + "' is missing"
+            };
 
         parsed.tokens.push_back(argument);
     }
@@ -183,8 +192,8 @@ parsed_options parse_command_line(int argc, const char* argv[],
 
         if (is_short(argument))
         {
-            // Switches may be grouped, the first other option takes the rest
-            // of the argument as its token.
+            // Switches may be grouped, first other option takes rest of
+            // argument as its token.
             auto name = argument.substr(zero, two);
             auto rest = argument.substr(two);
             while (true)
@@ -193,7 +202,8 @@ parsed_options parse_command_line(int argc, const char* argv[],
                     false);
 
                 parsed_option occurrence{ option.key(), {} };
-                const auto zero_tokens = is_zero(option.semantic()->max_tokens());
+                const auto maximum = option.semantic()->max_tokens();
+                const auto zero_tokens = is_zero(maximum);
                 if (zero_tokens && !rest.empty())
                 {
                     parsed.push_back(std::move(occurrence));
@@ -225,8 +235,11 @@ parsed_options parse_command_line(int argc, const char* argv[],
             continue;
 
         if (position >= arguments.max_total_count())
-            throw validation_exception{ "too many positional options have "
-                "been specified on the command line" };
+            throw validation_exception
+            {
+                "too many positional options have "
+                "been specified on the command line"
+            };
 
         option.key = arguments.name_for_position(position++);
     }
@@ -261,8 +274,11 @@ parsed_options parse_config_file(std::istream& stream,
 
         const auto equals = line.find('=');
         if (equals == std::string::npos)
-            throw validation_exception{ "the options configuration file "
-                "contains an invalid line '" + line + "'" };
+            throw validation_exception
+            {
+                "the options configuration file "
+                "contains an invalid line '" + line + "'"
+            };
 
         const auto name = section + trim_copy(line.substr(zero, equals));
         const auto value = trim_copy(line.substr(add1(equals)));

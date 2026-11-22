@@ -78,10 +78,10 @@ BC_AUTO_TEST_CASE(unicode_istream__tokenization__test)
 
 BC_AUTO_TEST_CASE(unicode_istream__overflow__test)
 {
-    // This is a 20x10 matrix of 3 bytes per character triples (1800 bytes).
-    // The buffer is 256 (wide) and 1024 (narrow), resulting in a potential
-    // character split because 256 is not a multiple of 3. However sgetn()
-    // doesn't split on non-character boundaries as it reads, so this works.
+    // 20x10 matrix of 3 bytes per character triples (1800 bytes). Buffer is
+    // 256 (wide) and 1024 (narrow), potential character split as 256 not
+    // multiple of 3. However sgetn() doesn't split on non-character
+    // boundaries as it reads, so this works.
     const auto utf8_1800_bytes =
         "テストテストテストテストテストテストテストテストテストテスト"
         "テストテストテストテストテストテストテストテストテストテスト"

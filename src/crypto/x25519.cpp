@@ -43,8 +43,8 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     // The Montgomery ladder constant (a - 2) / 4 = 121665 in radix 2^16.
     constexpr field a24{ 0xdb41, 1 };
 
-    // Clamp the scalar: clear the low three bits, clear the high bit and set
-    // the next highest bit (rfc7748 decodeScalar25519).
+    // Clamp scalar: clear low three bits, clear high bit, set next highest bit
+    // (rfc7748 decodeScalar25519).
     auto clamped = scalar;
     mask_right_into(clamped[0], 3);
     mask_left_into(clamped[31], 1);
@@ -67,7 +67,8 @@ bool x25519::multiply(key& out, const key& scalar, const key& point) NOEXCEPT
     {
         const auto bit = sub1(index);
         const auto byte = clamped[shift_right(bit, 3)];
-        const auto swap = to_int<int64_t>(get_right(byte, bit_and(bit, 7_size)));
+        const auto offset = bit_and(bit, 7_size);
+        const auto swap = to_int<int64_t>(get_right(byte, offset));
 
         select(a, b, swap);
         select(c, d, swap);
@@ -118,8 +119,8 @@ bool x25519::multiply(key& out, const key& scalar) NOEXCEPT
     return multiply(out, scalar, base);
 }
 
-// This sacrifices about 1.1 bits of entropy, out of 251 (acceptable).
-// About one third of Z85 key encodings contain a hash sign (a config comment).
+// Sacrifices about 1.1 bits of entropy, out of 251 (acceptable).
+// About one third of Z85 key encodings contain hash sign (config comment).
 static bool allowed(const x25519::key& key, bool sanitize) NOEXCEPT
 {
     if (!sanitize)

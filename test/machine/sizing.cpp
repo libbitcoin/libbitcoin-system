@@ -90,11 +90,11 @@ static_assert(b7 == 2 * sizeof(size_t));
 constexpr auto a8 = sizeof(std::variant<bool, int64_t, std::shared_ptr<std_vector<uint8_t>>>);
 static_assert(a8 == 2 * sizeof(size_t) + 1 * sizeof(int64_t));
 
-// std::variant<bool, int64_t, const std_vector<uint8_t>*> requires 2 pointers (max element + 1).
-// This would be possible in the case where all stack data_chunks are externally owned.
-// This is the case for all script/witness push data elements (but not for computed hashes).
-// The program may need to hold a shared_ptr to the witness and script, though (like the tx) it
-// could be made a requirement of the caller to retain the passed-by-reference objects in scope.
+// std::variant<bool, int64_t, const std_vector<uint8_t>*> requires 2 pointers
+// (max element + 1). Possible where all stack data_chunks are externally owned,
+// as for all script/witness push data elements (but not computed hashes).
+// Program may need to hold shared_ptr to witness and script, though (like tx)
+// caller could be required to retain passed-by-reference objects in scope.
 constexpr auto a9 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>*>);
 constexpr auto c9 = sizeof(std::variant<bool, int64_t, std::shared_ptr<std_vector<uint8_t>>>);
 ////constexpr auto d9 = sizeof(std::variant<bool, int64_t, std_vector<uint8_t>>);
@@ -102,20 +102,20 @@ static_assert(a9 == 2 * sizeof(int64_t));
 static_assert(c9 == 2 * sizeof(size_t) + 1 * sizeof(int64_t));
 ////static_assert(d9 == 2 * sizeof(size_t) + pmr32(2) * sizeof(int64_t));
 
-// Computed hashes can be maintained in the variant by std::unique_ptr<std_vector<uint8_t>>.
-// This constrols their lifetime without increasing the size of the union. But
-// std::unique_ptr<std_vector<uint8_t>> can be used as a safer std_vector<uint8_t>*,
-// so that's all that is needed.
+// Variant can hold computed hashes by std::unique_ptr<std_vector<uint8_t>>.
+// Controls their lifetime without increasing size of union. But
+// std::unique_ptr<std_vector<uint8_t>> serves as safer std_vector<uint8_t>*,
+// so that is all needed.
 constexpr auto a10 = sizeof(std::variant<bool, int64_t, std::unique_ptr<std_vector<uint8_t>>, std_vector<uint8_t>*>);
 constexpr auto a11 = sizeof(std::variant<bool, int64_t, std::unique_ptr<std_vector<uint8_t>>>);
 static_assert(a10 == 2 * sizeof(int64_t));
 static_assert(a11 == 2 * sizeof(int64_t));
 
-// Use of std::weak_ptr<data_chunk> vs. std_vector<uint8_t>* would expand the
-// variant size, and use of std::unique_ptr<std_vector<uint8_t>> with the shared
-// pointer's raw pointer would attempt to delete the shared-object's underlying
-// data_chunk. So a C ponter is necessary for shared_ptr references, and their
-// lifetimes must be externally controlled.
+// std::weak_ptr<data_chunk> vs. std_vector<uint8_t>* would expand
+// variant size, and std::unique_ptr<std_vector<uint8_t>> with shared
+// pointer's raw pointer would attempt to delete shared-object's
+// underlying data_chunk. So C pointer is necessary for shared_ptr
+// references, and their lifetimes must be externally controlled.
 constexpr auto a0 = sizeof(std::weak_ptr<data_chunk>);
 static_assert(a0 == 2 * sizeof(size_t));
 

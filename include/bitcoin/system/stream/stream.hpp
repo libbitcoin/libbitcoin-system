@@ -49,11 +49,11 @@
 
 //*****************************************************************************
 // CONSENSUS: Serialization must be consensus-normalized for hashing headers
-// and transactions, otherwise valid transactions will seen as invalid.
-// Deserialization is neither a consensus nor a DoS consideration. It does not
-// matter in what form an object is obtained, just that hash serialization is
-// consensus-normalized. The 'write_variable()' method writes variable integers
-// in consensus-normal form, and all other byte writer methods are explicit.
+// and transactions, otherwise valid transactions will be seen as invalid.
+// Deserialization is neither a consensus nor a DoS consideration. Form in
+// which object is obtained does not matter, only that hash serialization is
+// consensus-normalized. 'write_variable()' method writes variable integers in
+// consensus-normal form, and all other byte writer methods are explicit.
 //*****************************************************************************
 
 #endif

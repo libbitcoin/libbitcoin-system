@@ -29,8 +29,8 @@ constexpr auto normalize(Integer value)
     return value;
 }
 
-// This is the perspective of a little-endian machine.
-// The normalize() helper reverses the expecation on a big-endian machine.
+// Perspective of little-endian machine.
+// normalize() helper reverses expectation on big-endian machine.
 // Beware of type promotion (use explicit types).
 
 // native_to_big_end (constexpr, signed/unsigned)

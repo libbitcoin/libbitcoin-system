@@ -94,7 +94,6 @@ void golomb::construct(bitwriter& writer, const std::vector<uint64_t>& hashes,
     }
 }
 
-// protected
 void golomb::construct(bitwriter& writer, const data_stack& items, uint8_t bits,
     const siphash_key& entropy, uint64_t target_false_positive_rate) NOEXCEPT
 {
@@ -132,7 +131,6 @@ data_chunk golomb::construct(const data_stack& items, uint8_t bits,
 // Single element match
 // ----------------------------------------------------------------------------
 
-// protected
 bool golomb::match_single(bitreader& reader, const data_chunk& target,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate) NOEXCEPT
@@ -178,7 +176,6 @@ bool golomb::match_single(const data_chunk& compressed_set,
 // Intersection match
 // ----------------------------------------------------------------------------
 
-// protected
 bool golomb::match_stack(bitreader& source, const data_stack& targets,
     uint64_t set_size, const siphash_key& entropy, uint8_t bits,
     uint64_t target_false_positive_rate) NOEXCEPT
@@ -223,8 +220,9 @@ bool golomb::match_stack(const data_chunk& compressed_set,
     const data_stack& targets, uint64_t set_size, const half_hash& entropy,
     uint8_t bits, uint64_t target_false_positive_rate) NOEXCEPT
 {
-    return match_stack(compressed_set, targets, set_size, to_siphash_key(entropy),
-        bits, target_false_positive_rate);
+    const auto key = to_siphash_key(entropy);
+    return match_stack(compressed_set, targets, set_size, key, bits,
+        target_false_positive_rate);
 }
 
 // private

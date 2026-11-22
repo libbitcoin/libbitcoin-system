@@ -30,7 +30,7 @@ BC_PUSH_WARNING(NO_THROW_IN_NOEXCEPT)
 // Thread registry.
 // ----------------------------------------------------------------------------
 // Registration is append-only: pool threads live until process terminate, and
-// purges stop with the validation chaser before that, so entries never dangle.
+// purges stop with validation chaser before that, so entries never dangle.
 
 struct signature_registry
 {

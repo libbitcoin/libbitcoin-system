@@ -21,11 +21,10 @@
 
 BC_AUTO_TEST_SUITE(stream_tests)
 
-// These are a simple single test per object in the stream tree.
-// These are not meant to verify the behavior of the devices or streamers but
-// instead to perform a simple smoke test for every construction. This ensures
+// Simple single test per object in stream tree. Not meant to verify behavior
+// of devices or streamers, but to smoke test every construction, ensuring
 // proper construction and basic behavior to and from boost::iostreams (ios).
-// The devices and streamers independently tested in their own directories.
+// Devices and streamers independently tested in their own directories.
 
 // read::bytes
 

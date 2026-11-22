@@ -28,9 +28,9 @@ namespace system {
 namespace chain {
 
 /// Helper class for operations stripping.
-/// Bridges the gap between xptr (stack data) and cptr (op data). Otherwise
-/// chain::operation could be used. This is also slightly more efficient,
-/// being specialized for valid ops and the assumption of distinct data_chunks.
+/// Bridges gap between xptr (stack data) and cptr (op data). Otherwise
+/// chain::operation could be used. Also slightly more efficient, being
+/// specialized for valid ops and assumption of distinct data_chunks.
 class BC_API stripper final
 {
 public:

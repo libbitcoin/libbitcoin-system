@@ -45,8 +45,7 @@ constexpr size_t window_mask = sub1(window_size);
 constexpr size_t maximum_chain = 128;
 constexpr uint32_t no_position = max_uint32;
 
-// Symbols and input bytes coded per block, each block coded by its own
-// frequencies.
+// Symbols and input bytes coded per block, each by its own frequencies.
 constexpr size_t block_symbols = 16384;
 constexpr size_t block_bytes = 65536;
 
@@ -187,8 +186,8 @@ static void assign_codes(code_tree<Size>& out) NOEXCEPT
     }
 }
 
-// Huffman code lengths of at most limit bits, at least two codes so that
-// every code is complete (rfc1951 3.2.2).
+// Huffman code lengths of at most limit bits, at least two codes so every code
+// is complete (rfc1951 3.2.2).
 template <size_t Size>
 static void build_tree(code_tree<Size>& out, const frequencies<Size>& counts,
     size_t limit) NOEXCEPT
@@ -362,16 +361,22 @@ static length_tokens run_lengths(const data_chunk& lengths) NOEXCEPT
             while (run >= minimum_long_zeros)
             {
                 const auto count = std::min(run, maximum_long_zeros);
-                out.push_back({ repeat_long_zeros,
-                    narrow_cast<uint16_t>(count - minimum_long_zeros) });
+                out.push_back(
+                {
+                    repeat_long_zeros,
+                    narrow_cast<uint16_t>(count - minimum_long_zeros)
+                });
                 run -= count;
             }
 
             if (run >= minimum_zeros)
             {
                 const auto count = std::min(run, maximum_zeros);
-                out.push_back({ repeat_zeros,
-                    narrow_cast<uint16_t>(count - minimum_zeros) });
+                out.push_back(
+                {
+                    repeat_zeros,
+                    narrow_cast<uint16_t>(count - minimum_zeros)
+                });
                 run -= count;
             }
         }
@@ -382,8 +387,11 @@ static length_tokens run_lengths(const data_chunk& lengths) NOEXCEPT
             while (run >= minimum_repeat)
             {
                 const auto count = std::min(run, maximum_repeat);
-                out.push_back({ repeat_previous,
-                    narrow_cast<uint16_t>(count - minimum_repeat) });
+                out.push_back(
+                {
+                    repeat_previous,
+                    narrow_cast<uint16_t>(count - minimum_repeat)
+                });
                 run -= count;
             }
         }
@@ -589,8 +597,8 @@ INLINE bool match_words(size_t& length, const uint8_t* left,
     return true;
 }
 
-// The length of the match at candidate to that at position, up to limit, or
-// zero if the byte at best differs (the match cannot exceed best).
+// Length of match at candidate to that at position, up to limit, or zero if
+// byte at best differs (match cannot exceed best).
 static size_t match_length(const data_chunk& window, size_t candidate,
     size_t position, size_t best, size_t limit) NOEXCEPT
 {
@@ -663,8 +671,8 @@ void deflater::slide() NOEXCEPT
     std::for_each(chains_.begin(), chains_.end(), rebase);
 }
 
-// Greedy longest match within the window at each position, holding back the
-// lookahead until the stream ends.
+// Greedy longest match within window at each position,
+// holding back lookahead until stream ends.
 void deflater::tokenize(data_chunk& out, bool final) NOEXCEPT
 {
     while (position_ < window_.size() &&

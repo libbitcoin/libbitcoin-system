@@ -125,7 +125,8 @@ constexpr CLASS& CLASS::operator*=(const uintx_t& other) NOEXCEPT
     for (size_t left = 0; left < left_size; ++left)
     {
         limb_t carry{};
-        const auto end = (limbs - left < right_size) ? limbs - left : right_size;
+        const auto available = limbs - left;
+        const auto end = (available < right_size) ? available : right_size;
         for (size_t right = 0; right < end; ++right)
         {
             limb_t high{};

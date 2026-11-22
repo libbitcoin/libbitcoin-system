@@ -104,7 +104,7 @@ constexpr opcode operation::opcode_from_nonnegative(uint8_t value) NOEXCEPT
         operation::opcode_from_positive(value);
 }
 
-// Compute the minimal data opcode for a given chunk of data.
+// Compute minimal data opcode for given chunk of data.
 // Caller should clear data if converting to non-payload opcode.
 constexpr opcode operation::minimal_opcode_from_data(
     const data_chunk& data) NOEXCEPT
@@ -130,7 +130,7 @@ constexpr opcode operation::minimal_opcode_from_data(
     return opcode_from_size(size);
 }
 
-// Compute the nominal data opcode for a given chunk of data.
+// Compute nominal data opcode for given chunk of data.
 // Restricted to sized data, avoids conversion to numeric opcodes.
 constexpr opcode operation::nominal_opcode_from_data(
     const data_chunk& data) NOEXCEPT
@@ -143,9 +143,9 @@ constexpr opcode operation::nominal_opcode_from_data(
 
 // opcode: [0..96].
 // ****************************************************************************
-// CONSENSUS: this test explicitly includes the satoshi 'reserved' code.
-// This affects the operation count in p2sh script evaluation.
-// Presumably this was an unintended consequence of range testing enums.
+// CONSENSUS: test explicitly includes satoshi 'reserved' code.
+// Affects operation count in p2sh script evaluation.
+// Presumably unintended consequence of range testing enums.
 // ****************************************************************************
 constexpr bool operation::is_relaxed_push(opcode code) NOEXCEPT
 {
@@ -231,20 +231,19 @@ constexpr bool operation::is_counted(opcode code) NOEXCEPT
     return code >= op_97;
 }
 
-// This condition is only applicable with bip342 active. bip342: If any opcode
-// 80, 98, 126-129, 131-134, 137-138, 141-142, 149-153, 187-254 is encountered,
-// validation succeeds. This is most reserved and most invalid, but not all. We
-// are not renaming these codes to op_successX as succested by bip342, because:
+// Applicable only with bip342 active. bip342: If any opcode 80, 98, 126-129,
+// 131-134, 137-138, 141-142, 149-153, 187-254 is encountered, validation
+// succeeds. Most reserved and most invalid, but not all. Codes not renamed to
+// op_successX as suggested by bip342, because:
 // (1) they remain unimplemented.
 // (2) they are not evaluated during script execution.
 // (3) they are only conditionally successful (tapscript).
 // (4) renaming them would lose important historical context.
-// Regarding op_verif and op_vernotif, it seems that these were not promoted
-// because authors failed to recognize that following their demotion from
-// conditionals, these codes became unconditionally invalid, just as others.
-// Regarding reserved_255, there is no good reason to have left this reserved,
-// as op_return already provides that operation, but it's likely the authors
-// felt it exhibits special benavior as the highest value code (it does not).
+// op_verif and op_vernotif likely not promoted because authors failed to
+// recognize that following their demotion from conditionals, these codes became
+// unconditionally invalid, just as others. reserved_255 had no good reason to
+// remain reserved, as op_return already provides that operation, but authors
+// likely felt it exhibits special behavior as highest value code (it does not).
 constexpr bool operation::is_success(opcode code) NOEXCEPT
 {
     constexpr auto op_187 = opcode::reserved_187;
@@ -519,8 +518,8 @@ bool operation::is_oversized() const NOEXCEPT
 }
 
 // ****************************************************************************
-// CONSENSUS: An underflow is sized op-undersized data. Behavior is the same as
-// invalid opcode, invalidating the script if executed and not success coded.
+// CONSENSUS: Underflow is sized op-undersized data. Behavior same as invalid
+// opcode, invalidating script if executed and not success coded.
 // ****************************************************************************
 bool operation::is_underflow() const NOEXCEPT
 {

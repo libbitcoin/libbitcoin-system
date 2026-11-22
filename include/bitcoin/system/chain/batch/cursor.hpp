@@ -25,11 +25,11 @@ namespace libbitcoin {
 namespace system {
 namespace chain {
 
-/// A move-only row cursor for streaming captured signature rows into caller
-/// storage. Opened per capture (script scope). Writes exactly `rows`,
-/// releasing caller state automatically upon the final write. An open cursor
-/// implies pending rows. The matched script pattern guarantees the final
-/// sigop is positionally last, so an opened cursor always completes.
+/// Move-only row cursor streaming captured signature rows into caller storage.
+/// Opened per capture (script scope). Writes exactly `rows`, releasing caller
+/// state automatically upon final write. Open cursor implies pending rows.
+/// Matched script pattern guarantees final sigop is positionally last, so
+/// opened cursor always completes.
 template <typename Writer>
 struct cursor
 {
@@ -50,8 +50,8 @@ struct cursor
     {
         BC_ASSERT(is_open() && (row < rows));
 
-        // Since all rows allocation precedes this, the only possible failure
-        // is non-recoverable in any case, propagated internal to put().
+        // All rows allocation precedes this, so only possible failure is
+        // non-recoverable in any case, propagated internal to put().
         /* bool */ put(std::forward<Args>(args)...);
         if (++row == rows)
             close();

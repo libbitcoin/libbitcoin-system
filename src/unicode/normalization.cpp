@@ -393,11 +393,10 @@ static std::string apply_case(const std::string& in, bool lower) NOEXCEPT
     out.reserve(points.size());
 
     char32_t buffer[3]{};
+    const auto fold = lower ? fold_lower_one : fold_upper_one;
     for (const auto point: points)
     {
-        const auto count = lower ?
-            fold_lower_one(point, &buffer[0]) :
-            fold_upper_one(point, &buffer[0]);
+        const auto count = fold(point, &buffer[0]);
 
         for (size_t index{}; index < count; ++index)
             out.push_back(buffer[index]);
@@ -562,7 +561,7 @@ std::string to_compressed_form(const std::string& value) NOEXCEPT
     // Copy the first character to output.
     std::u32string compressed{ points.front() };
 
-    // Remove a single ascii whitespace between CJK characters.
+    // Remove single ascii whitespace between CJK characters.
     // Front and back cannot be between two characters, so skip them.
     for (auto point{ one }; point < sub1(points.size()); point++)
     {

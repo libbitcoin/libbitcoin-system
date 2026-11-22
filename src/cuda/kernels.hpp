@@ -49,8 +49,8 @@ struct schnorr_arguments
     uint32_t count;
 };
 
-/// Arguments of the compute_silent kernel, columns in device memory. Each
-/// point is the hash times the sum of its row, valid if computed.
+/// Arguments of compute_silent kernel, columns in device memory. Each point is
+/// hash times sum of its row, valid if computed.
 struct silent_arguments
 {
     const ec_compressed* sums;
@@ -74,9 +74,9 @@ struct scan_keys
     using affine = affine_t<uint64_t>;
 };
 
-/// Arguments of the scan_silent kernel, columns in device memory. Each
-/// point has one prefix of the receiver output key, then one of that key
-/// plus each label key, and is valid if its keys are computed.
+/// Arguments of scan_silent kernel, columns in device memory. Each point has
+/// one prefix of receiver output key, then one of that key plus each label key,
+/// valid if its keys computed.
 struct scan_arguments
 {
     const ec_compressed* points;
@@ -89,8 +89,8 @@ struct scan_arguments
     uint32_t count;
 };
 
-/// Arguments of the pool kernels, columns in device memory. Owners is the
-/// row of each input, written by prepare_pool and reduce_pool.
+/// Arguments of pool kernels, columns in device memory. Owners is row of each
+/// input, written by prepare_pool and reduce_pool.
 struct pool_arguments
 {
     uint32_t* cells;

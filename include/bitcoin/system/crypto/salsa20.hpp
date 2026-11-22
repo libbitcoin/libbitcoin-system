@@ -26,8 +26,8 @@ namespace libbitcoin {
 namespace system {
 
 /// Salsa20 stream cipher (Bernstein), 64-bit nonce and 64-bit block counter.
-/// Keystream is continuous across crypt/stream calls. XSalsa20 extends the
-/// nonce to 192 bits by deriving a subkey with HSalsa20 (NaCl convention).
+/// Keystream is continuous across crypt/stream calls. XSalsa20 extends nonce to
+/// 192 bits by deriving subkey with HSalsa20 (NaCl convention).
 class BC_API salsa20
 {
 public:

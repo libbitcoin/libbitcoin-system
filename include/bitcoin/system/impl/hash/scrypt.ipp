@@ -171,11 +171,8 @@ inline size_t CLASS::index(const rblock_t& rblock) NOEXCEPT
     //    where Integerify (B[0] ... B[2 * r - 1]) is defined
     //    as the result of interpreting B[2 * r - 1] as a
     //    little-endian integer.
-    return
-        possible_narrow_cast<size_t>(
-            native_from_little_end(
-                unsafe_byte_cast<uint64_t>(
-                    rblock.back().data())) % W);
+    const auto value = unsafe_byte_cast<uint64_t>(rblock.back().data());
+    return possible_narrow_cast<size_t>(native_from_little_end(value) % W);
 }
 
 TEMPLATE
@@ -196,7 +193,7 @@ TEMPLATE
 inline typename CLASS::block_t& CLASS::
 salsa_8(block_t& block) NOEXCEPT
 {
-    // Save a copy of the block and make a block of working space.
+    // Save copy of block and make block of working space.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (2 * 64)] bytes stack allocated.
     // rfc7914: #define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
@@ -315,7 +312,7 @@ TEMPLATE
 inline bool CLASS::
 block_mix(rblock_t& rblock) NOEXCEPT
 {
-    // Make a working block initialized from rblock.back().
+    // Make working block initialized from rblock.back().
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (1 *  64)] bytes stack allocated.
     // rfc7914
@@ -432,7 +429,7 @@ TEMPLATE
 inline bool CLASS::
 romix(rblock_t& rblock) NOEXCEPT
 {
-    // Make a working set of W rblocks.
+    // Make working set of W rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (W * (R * 128))] bytes heap allocated.
     const auto ptr = to_shared<wrblock_t>();
@@ -475,7 +472,7 @@ bool
 CLASS::hash(data_array<Size>& out, const data_slice& password,
     const data_slice& salt) NOEXCEPT
 {
-    // Make a working set of P rblocks.
+    // Make working set of P rblocks.
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // [P * (R * 128)] bytes heap allocated.
     const auto ptr = to_shared<prblock_t>();

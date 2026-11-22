@@ -222,7 +222,8 @@ bool match_filter(const block_filter& filter,
     const wallet::payment_address& address, uint8_t p2kh_prefixh,
     uint8_t p2sh_prefix) NOEXCEPT
 {
-    return match_filter(filter, address.output_script(p2kh_prefixh, p2sh_prefix));
+    const auto script = address.output_script(p2kh_prefixh, p2sh_prefix);
+    return match_filter(filter, script);
 }
 
 bool match_filter(const block_filter& filter,

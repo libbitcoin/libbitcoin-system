@@ -41,16 +41,16 @@ namespace wallet {
 // maps to 025d2f2d005036911003ca78900ca155c (33 chars)."
 // By word triplet this is: [025d2f2d][00503691][1003ca789][00ca155c], where
 // 'jaw inhale impossible' maps to 1003ca789 (33 bits, overflowing uint32).
-// It is the distance between words that creates the overflow.
-// Electrum v1 failed to catch this overflow, so "old seed" checks presently
-// allow it, despite the invalidity. In other words, any list of 12/24 electrum
-// v1 (en) words is considered valid v1 by later versions of electrum. It
-// passes the decoded entropy to the strecher, creating the master private key
-// despite the error. These seed words cannot be recovered from entropy as the
-// encoding algorithm only parses 32 bits of entropy for each word triplet.
-// But electrum itself cannot round trip these seeds, so we do not support it.
+// Distance between words creates the overflow.
+// Electrum v1 failed to catch this overflow, so "old seed" checks allow it
+// despite invalidity. Any list of 12/24 electrum v1 (en) words is considered
+// valid v1 by later versions of electrum, which pass decoded entropy to the
+// strecher, creating master private key despite error. These seed words
+// cannot be recovered from entropy, as encoding algorithm only parses 32
+// bits of entropy for each word triplet. Electrum itself cannot round trip
+// these seeds, so they are not supported.
 // Electrum concatenates hex characters for each triplet.
-// The result can be an odd number of characters (9 total max).
+// Result can be an odd number of characters (9 total max).
 // print('%08x' % x) emits >= 8 hex characters, and can be odd length.
 
 v1_decoding::v1_decoding() NOEXCEPT
@@ -109,8 +109,8 @@ data_chunk v1_decoding::seed_entropy() const NOEXCEPT
 // ============================================================================
 
 // Guard: decoder 'value' cannot exceed 0x1003ca7a7, safe in int64_t but can
-// overflow int32_t/uint32_t. Only one bit (0x[1][003ca7a7]) can overflow.
-// So we upcast indexes to int64 and later check the result for overflow.
+// overflow int32_t/uint32_t. Only one bit (0x[1][003ca7a7]) can overflow, so
+// indexes are upcast to int64 and result later checked for overflow.
 static_assert((1625 * 1) + (1625 * 1626) + (1625 * 1626 * 1626ll) ==
     0x1003ca7a7, "upper bound on electrum_v1 decoded triplet");
 
@@ -201,7 +201,8 @@ v1_decoding electrum_v1::decoder(const string_list& words,
 
         // Guard: floored modulo with positive divisor is always positive.
         // Casting away a non-zero (overflow bit) will prevent round trip.
-        out.write_4_bytes_big_endian(possible_narrow_sign_cast<uint32_t>(value));
+        const auto chunk = possible_narrow_sign_cast<uint32_t>(value);
+        out.write_4_bytes_big_endian(chunk);
     }
 
     out.flush();
@@ -384,8 +385,8 @@ ec_private electrum_v1::to_seed(const context& context) const NOEXCEPT
     if (!(*this))
         return {};
 
-    // Set public key compression to false as is the electrum convention.
-    // Causes derived payment addresses to use the uncompressed public key.
+    // Public key compression false, per electrum convention.
+    // Causes derived payment addresses to use uncompressed public key.
     constexpr auto compression = false;
 
     // Strech entropy into the seed, which is also the master private key.

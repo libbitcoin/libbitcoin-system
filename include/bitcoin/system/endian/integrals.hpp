@@ -22,12 +22,11 @@
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 
-/// These constexpr implementations are more efficient than the integer
-/// functions, as these are limited to integrals. However swaps are more
-/// efficient than these and should be used for non-constexpr evaluation.
-/// These are unique in that they allow for offsetting into the byte array.
-/// This enables translation to/from an existing data array without needing
-/// to array cast (which is not constexpr).
+/// Constexpr implementations, more efficient than integer functions
+/// as limited to integrals. However swaps are more efficient still
+/// and should be used for non-constexpr evaluation. Unique in
+/// allowing offset into byte array, enabling translation to/from
+/// existing data array without array cast (not constexpr).
 
 namespace libbitcoin {
 namespace system {

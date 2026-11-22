@@ -29,7 +29,7 @@ namespace libbitcoin {
 namespace system {
 namespace aes {
 
-/// Byte views of the 32 bit lane type.
+/// Byte views of 32 bit lane type.
 /// ---------------------------------------------------------------------------
 
 INLINE uint8x16_t bytes_of(xint128_t a) NOEXCEPT
@@ -60,8 +60,8 @@ INLINE xWord replicate(xint128_t key) NOEXCEPT
 
 /// Ciphers.
 /// ---------------------------------------------------------------------------
-/// AESE/AESD add the round key before substitution and shift, so each round
-/// key is applied one round earlier than in the fips197 formulation.
+/// AESE/AESD add round key before substitution and shift, so each round key
+/// applies one round earlier than in fips197 formulation.
 
 /// Encrypt Count blocks (interleaved to cover round latency).
 template <size_t Rounds, typename xWord, size_t Count,
@@ -110,8 +110,8 @@ INLINE void decrypt(std_array<xint128_t, Count>& state,
 
 /// GF(2^128) (ghash).
 /// ---------------------------------------------------------------------------
-/// Operands are byte reflected blocks, as loaded by reflect. The algorithm
-/// is that of intel_aes, expressed in neon.
+/// Operands byte reflected blocks, as loaded by reflect. Algorithm of
+/// intel_aes, expressed in neon.
 
 template <size_t Bytes>
 INLINE uint8x16_t shift_bytes_left(uint8x16_t a) NOEXCEPT

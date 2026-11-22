@@ -31,11 +31,11 @@ namespace libbitcoin {
 namespace system {
 namespace wallet {
 
-/// A share of a master secret, as defined by SLIP39.
+/// Share of master secret, as defined by SLIP39.
 /// Splits a master secret into groups of shares, each share a mnemonic.
 /// Recovers the master secret from a threshold of groups of shares.
-/// The share value is the mnemonic entropy, and the master secret is the
-/// "master binary seed" from which master keys are derived.
+/// Share value is mnemonic entropy, and master secret is "master binary seed"
+/// from which master keys are derived.
 class BC_API slip39
   : public words::languages
 {
@@ -60,13 +60,13 @@ public:
     static constexpr size_t entropy_maximum = bytes<512>;
     static constexpr size_t entropy_multiple = bytes<16>;
 
-    /// Share indexes, thresholds and counts are four bit values, so there
-    /// are at most sixteen groups, of at most sixteen shares each.
+    /// Share indexes, thresholds and counts are four bit values, so at most
+    /// sixteen groups, of at most sixteen shares each.
     static constexpr size_t index_bits = 4;
     static constexpr size_t count_maximum = power2(index_bits);
 
-    /// The share metadata and checksum are fixed length, and the share value
-    /// is zero padded to a multiple of the word size.
+    /// Share metadata and checksum are fixed length, and share value is zero
+    /// padded to multiple of word size.
     static constexpr size_t metadata_words = 4;
     static constexpr size_t checksum_words = shamir::rs1024::checksum_words;
     static constexpr size_t word_bits = shamir::rs1024::word_bits;
@@ -98,7 +98,7 @@ public:
     static size_t entropy_size(size_t secret_size, size_t group_threshold,
         const groups& groups) NOEXCEPT;
 
-    /// Split a master secret into groups of shares, of which group_threshold
+    /// Split master secret into groups of shares, of which group_threshold
     /// groups are required to recover it. Entropy must be entropy_size bytes.
     /// Returns empty if any parameter is invalid.
     static list to_shares(const data_chunk& secret, const groups& groups,
@@ -106,21 +106,21 @@ public:
         uint16_t identifier, bool extendable, uint8_t exponent,
         const std::string& passphrase="") NOEXCEPT;
 
-    /// Recover the master secret from a threshold of groups of shares.
-    /// Returns empty if the shares are inconsistent or insufficient, if a
-    /// share group fails its digest, or if the passphrase is invalid.
+    /// Recover master secret from threshold of groups of shares. Returns empty
+    /// if shares are inconsistent or insufficient, if share group fails its
+    /// digest, or if passphrase is invalid.
     static data_chunk to_secret(const list& shares,
         const std::string& passphrase="") NOEXCEPT;
 
-    /// Derive the "account private key" from a threshold of shares.
-    /// This is also known as the wallet "root key" or "master private key".
+    /// Derive "account private key" from threshold of shares.
+    /// Also known as wallet "root key" or "master private key".
     static hd_private to_key(const list& shares,
         const std::string& passphrase="",
         const context& context=btc_mainnet) NOEXCEPT;
 
     slip39() NOEXCEPT;
 
-    /// Construct from a share mnemonic (sentence or words).
+    /// Construct from share mnemonic (sentence or words).
     /// Validity should be checked after construction.
     slip39(const std::string& sentence) NOEXCEPT;
     slip39(const string_list& words) NOEXCEPT;
@@ -134,8 +134,7 @@ public:
     /// The exponent of the master secret encryption iteration count.
     uint8_t exponent() const NOEXCEPT;
 
-    /// The group that the share belongs to, and the group threshold and
-    /// count of its share set.
+    /// Group share belongs to, and group threshold and count of its share set.
     uint8_t group_index() const NOEXCEPT;
     uint8_t group_threshold() const NOEXCEPT;
     uint8_t group_count() const NOEXCEPT;

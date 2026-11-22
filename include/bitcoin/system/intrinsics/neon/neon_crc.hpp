@@ -31,8 +31,8 @@ namespace libbitcoin {
 namespace system {
 namespace crc {
 
-/// CRC-32 (reflected 0xedb88320) by carryless multiplication. The algorithm
-/// is that of intel_crc, expressed in neon.
+/// CRC-32 (reflected 0xedb88320) by carryless multiplication. Algorithm of
+/// intel_crc, expressed in neon.
 
 INLINE xint128_t constant(uint64_t low, uint64_t high) NOEXCEPT
 {
@@ -61,8 +61,7 @@ INLINE xint128_t fold(xint128_t a, xint128_t k, xint128_t b) NOEXCEPT
     return veorq_u32(veorq_u32(low, high), b);
 }
 
-/// The crc register continued over size bytes, a multiple of 16 of at least
-/// 64.
+/// crc register continued over size bytes, multiple of 16 of at least 64.
 INLINE uint32_t checksum(uint32_t crc, const uint8_t* data,
     size_t size) NOEXCEPT
 {

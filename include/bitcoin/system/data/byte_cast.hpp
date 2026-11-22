@@ -24,11 +24,11 @@
 
 /// C++20: std::bit_cast is a copy, not a cast, these are true casts.
 /// True casts (not projections) of bytes arrays to/from integrals with size
-/// constraints to preclude referencing fractional elements. A const reference
-/// parameter returns a const reference, non-const returns a non-const
-/// reference, and an rvalue parameter returns a cast instance. These enable
-/// C/pointer-style performance (no copies) with full type safety at no cost
-/// (reinterpret_cast does not compile to any CPU instructions).
+/// constraints to preclude referencing fractional elements. Const
+/// reference parameter returns const reference, non-const returns
+/// non-const reference, rvalue parameter returns cast instance. Enables
+/// C/pointer-style performance (no copies) with full type safety at no
+/// cost (reinterpret_cast compiles to no CPU instructions).
 
 namespace libbitcoin {
 namespace system {

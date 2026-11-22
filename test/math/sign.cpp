@@ -32,7 +32,7 @@ static_assert(is_same_type<decltype(negate(0)),  signed>);
 static_assert(is_same_type<decltype(negate(0u)), unsigned>);
 static_assert(is_same_type<decltype(negate(1u)), unsigned>);
 
-// negate(minimum<integral>) overflows the integral domain.
+// negate(minimum<integral>) overflows integral domain.
 // Cannot be represented in 64 bit constexpr.
 static_assert(to_unsigned(negate(min_int8))  == add1(to_unsigned(max_int8)));
 static_assert(to_unsigned(negate(min_int16)) == add1(to_unsigned(max_int16)));
@@ -75,7 +75,7 @@ static_assert(is_same_type<decltype(absolute(0)),  unsigned>);
 static_assert(is_same_type<decltype(absolute(0u)), unsigned>);
 static_assert(is_same_type<decltype(absolute(1u)), unsigned>);
 
-// absolute(minimum<integral>) overflows the integral domain.
+// absolute(minimum<integral>) overflows integral domain.
 // Cannot be represented in 64 bit constexpr.
 static_assert(absolute(min_int8)  == add1(to_unsigned(max_int8)));
 static_assert(absolute(min_int16) == add1(to_unsigned(max_int16)));

@@ -66,9 +66,9 @@ is_buffer_overflow(size_t size) const NOEXCEPT
 {
     // using count_t = typename Algorithm::count_t;
     // count_t is either uint64_t (SHA1/256/RMD) or uint128_t (SHA512).
-    // It is not used in the accumulator, as a performance optimization.
-    // This limits the accumulator to [max_size_t/8 - 8|16] hashed bytes.
-    // This is over 2M TB, so not worth guarding in Bitcoin scenarios.
+    // Not used in accumulator, as performance optimization.
+    // Limits accumulator to [max_size_t/8 - 8|16] hashed bytes.
+    // Over 2M TB, so not worth guarding in Bitcoin scenarios.
     // Checked is on by default in checked builds (NDEBUG) only.
     if constexpr (Checked)
         return size > (Algorithm::limit_bytes - size_);
@@ -160,7 +160,7 @@ serialize(size_t size) NOEXCEPT
     // optimizations set values directly into buffer_t (in the word_t form).
 
     // Optimizes conversion for all rmd/sha except sha512 (uint64_t).
-    // This allows normalized algorithms without sacrificing performance.
+    // Allows normalized algorithms without sacrificing performance.
     if (std::is_constant_evaluated())
     {
         if constexpr (Algorithm::big_end_count)
@@ -204,10 +204,10 @@ TEMPLATE
 consteval typename CLASS::block_t CLASS::
 stream_pad() NOEXCEPT
 {
-    // Specifications call for set of first pad bit in the serialized form,
-    // so as byte_t (for block_t) this is already normalized for endianness.
-    // For RMD (LE) it will deserialize as word_t and represent as 0x00000080.
-    // For SHA (BE) it will deserialize as word_t and represent as 0x80000000.
+    // Specifications call for set of first pad bit in serialized form, so as
+    // byte_t (for block_t) this is already normalized for endianness.
+    // For RMD (LE) it deserializes as word_t and represents as 0x00000080.
+    // For SHA (BE) it deserializes as word_t and represents as 0x80000000.
 
     return { bit_hi<byte_t> };
 }
@@ -302,7 +302,7 @@ write(size_t size, const byte_t* data) NOEXCEPT
         return true;
 
     // False only on overflow.
-    // Accept up to the number of bytes required to fill the buffer.
+    // Accept up to number of bytes required to fill buffer.
     size_t accepted{};
     if (!add_data(accepted, size, data))
         return false;
@@ -400,7 +400,8 @@ TEMPLATE
 void CLASS::
 double_flush(data_chunk& digest) NOEXCEPT
 {
-    double_flush(unsafe_array_cast<byte_t, array_count<digest_t>>(digest.data()));
+    constexpr auto size = array_count<digest_t>;
+    double_flush(unsafe_array_cast<byte_t, size>(digest.data()));
 }
 
 TEMPLATE

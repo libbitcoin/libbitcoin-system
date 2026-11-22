@@ -54,7 +54,7 @@ constexpr data_array<16> key128 = base16_array("2b7e151628aed2a6abf7158809cf4f3c
 constexpr data_array<32> key256 = base16_array("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
 constexpr data_array<64> plain = base16_array("6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411e5fbc1191a0a52eff69f2445df4f9b17ad2b417be66c3710");
 
-// Lane and pass boundaries of the native (8, 16, 32 block) and bitsliced
+// Lane and pass boundaries of native (8, 16, 32 block) and bitsliced
 // (4, 8, 16, 32 block) passes, with remainders.
 constexpr std_array<size_t, 24> sizes
 {
@@ -96,21 +96,24 @@ static data_array<16> block_at(const data_slice& data, size_t index)
 }
 
 template <typename Algorithm>
-constexpr data_array<16> encrypted(const typename Algorithm::key_t& key, data_array<16> block)
+constexpr data_array<16> encrypted(const typename Algorithm::key_t& key,
+    data_array<16> block)
 {
     Algorithm::encrypt(block, key);
     return block;
 }
 
 template <typename Algorithm>
-constexpr data_array<16> decrypted(const typename Algorithm::key_t& key, data_array<16> block)
+constexpr data_array<16> decrypted(const typename Algorithm::key_t& key,
+    data_array<16> block)
 {
     Algorithm::decrypt(block, key);
     return block;
 }
 
 template <typename Algorithm>
-static data_chunk crypt(const typename Algorithm::key_t& key, typename Algorithm::block_t& counter, const_byte_span in)
+static data_chunk crypt(const typename Algorithm::key_t& key,
+    typename Algorithm::block_t& counter, const_byte_span in)
 {
     data_chunk out(in.size());
     Algorithm::ctr(out, in, counter, Algorithm::expand(key));
@@ -135,11 +138,12 @@ constexpr data_array<64> quarter(const data_array<256>& table)
     return slice<Start, Start + 64>(table);
 }
 
-// Each of the 64 bytes occupies one byte position of the eight words, so
-// the transposed planes carry 64 independent bytes.
+// Each of 64 bytes occupies one byte position of eight words, so transposed
+// planes carry 64 independent bytes.
 static data_array<64> substitute(const data_array<64>& bytes)
 {
-    accessor::xplanes_t<uint64_t> q{ from_little_endians(array_cast<uint64_t>(bytes)) };
+    const auto words = from_little_endians(array_cast<uint64_t>(bytes));
+    accessor::xplanes_t<uint64_t> q{ words };
     accessor::ortho(q);
     accessor::sbox(q);
     accessor::ortho(q);
@@ -148,7 +152,8 @@ static data_array<64> substitute(const data_array<64>& bytes)
 
 static data_array<64> inverse_substitute(const data_array<64>& bytes)
 {
-    accessor::xplanes_t<uint64_t> q{ from_little_endians(array_cast<uint64_t>(bytes)) };
+    const auto words = from_little_endians(array_cast<uint64_t>(bytes));
+    accessor::xplanes_t<uint64_t> q{ words };
     accessor::ortho(q);
     accessor::inverse_sbox(q);
     accessor::ortho(q);
@@ -193,7 +198,8 @@ BC_AUTO_TEST_CASE(aes__expand__aes256__fips197_a3)
 // encrypt/decrypt
 
 template <typename Algorithm>
-static void test_cipher(const typename Algorithm::key_t& key, const data_array<16>& in, const data_array<16>& out)
+static void test_cipher(const typename Algorithm::key_t& key,
+    const data_array<16>& in, const data_array<16>& out)
 {
     auto block = in;
     Algorithm::encrypt(block, key);

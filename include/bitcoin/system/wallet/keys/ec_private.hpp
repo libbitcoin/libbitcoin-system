@@ -52,10 +52,9 @@ public:
     static const uint8_t testnet_wif;
     static const uint8_t testnet_p2kh;
 
-    // WIF carries a compression flag for payment address generation but
-    // assumes a mapping to payment address version. This is insufficient
-    // as a parameterized mapping is required, so we use the same technique as
-    // with hd keys, merging the two necessary values into one.
+    // WIF carries compression flag for payment address generation but assumes
+    // mapping to payment address version. Parameterized mapping is required, so
+    // as with hd keys the two necessary values are merged into one.
     static const uint16_t mainnet;
     static const uint16_t testnet;
 
@@ -83,8 +82,8 @@ public:
     ec_private(const wif_uncompressed& wif,
         uint16_t versions=mainnet) NOEXCEPT;
 
-    /// The version is 16 bits. The most significant byte is the WIF prefix and
-    /// the least significant byte is the address perfix. 0x8000 by default.
+    /// Version is 16 bits. Most significant byte is WIF prefix and least
+    /// significant byte is address prefix. 0x8000 by default.
     ec_private(const ec_secret& secret, uint16_t versions=mainnet,
         bool compress=true) NOEXCEPT;
 
@@ -124,7 +123,7 @@ private:
         uint16_t versions) NOEXCEPT;
 
     /// Members.
-    /// These should be const, apart from the need to implement assignment.
+    /// These should be const, apart from need to implement assignment.
     bool compress_;
     uint16_t versions_;
 };

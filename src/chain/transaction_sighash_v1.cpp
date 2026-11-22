@@ -39,10 +39,10 @@ namespace chain {
 // ----------------------------------------------------------------------------
 
 // static
-// Zero-based opcode position of the last executed op_codeseparator before
-// currently executed signature opcode (0xffffffff if none) [bip342]. Previous
-// versions require the next opcode, but this requires the position. Since the
-// op_codeseparator implementation sets offset to next, it must be decremented.
+// Zero-based opcode position of last executed op_codeseparator before currently
+// executed signature opcode (0xffffffff if none) [bip342]. Previous versions
+// require next opcode, but this requires position. Since op_codeseparator
+// implementation sets offset to next, it must be decremented.
 uint32_t transaction::subscript_v1(const script& script) NOEXCEPT
 {
     if (script.ops().empty())

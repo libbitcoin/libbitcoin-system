@@ -116,9 +116,9 @@ BC_AUTO_TEST_CASE(witness__annex__moved_not_annex_pattern__empty)
 // extract_taproot
 
 // Commitments below are derived from bip340/341 reference math, cross-checked
-// against the bip341 wallet test vectors. Each commits the same internal key
-// (d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d) to the
-// same single op leaf script (op_1), varying leaf version and merkle path.
+// against bip341 wallet test vectors. Each commits same internal key
+// (d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d) to same
+// single op leaf script (op_1), varying leaf version and merkle path.
 static const data_chunk tapleaf_script{ 0x51_u8 };
 
 // Leaf version 0xc0 (tapscript), no merkle path, even output key parity.
@@ -173,8 +173,8 @@ BC_AUTO_TEST_CASE(witness__extract_taproot__tapscript_uncommitted__invalid_commi
     BC_REQUIRE_EQUAL(instance.extract_taproot(leaf, out, stack, prevout), error::invalid_commitment);
 }
 
-// The commitment binds all leaf versions, so an undefined version is not
-// unencumbered until its control block commits to the output key [bip341].
+// Commitment binds all leaf versions, so undefined version is not
+// unencumbered until its control block commits to output key [bip341].
 BC_AUTO_TEST_CASE(witness__extract_taproot__undefined_leaf_version_committed__success_unencumbered)
 {
     hash_cptr leaf{};
@@ -408,7 +408,7 @@ BC_AUTO_TEST_CASE(witness__is_reserved_pattern__two_hashes__false)
 
 // skip
 // ----------------------------------------------------------------------------
-// The return is presence (not superfluous).
+// Return is presence (not superfluous).
 
 BC_AUTO_TEST_CASE(witness__skip__prefixed_non_empty__true)
 {
@@ -602,8 +602,10 @@ static chain::witness annexed_script_path(const data_chunk& control) NOEXCEPT
 {
     const auto script_element = to_shared<data_chunk>(tapleaf_script);
     const auto control_element = to_shared<data_chunk>(control);
-    const auto annex_element = to_shared<data_chunk>(data_chunk{ 0x50_u8, 0x42_u8 });
-    return chain::witness{ chunk_cptrs{ script_element, control_element, annex_element } };
+    const data_chunk annex{ 0x50_u8, 0x42_u8 };
+    const auto annex_element = to_shared<data_chunk>(annex);
+    const chunk_cptrs stack{ script_element, control_element, annex_element };
+    return chain::witness{ stack };
 }
 
 // The annex is discarded before the control block is popped [bip341].

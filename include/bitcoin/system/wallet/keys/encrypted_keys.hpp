@@ -55,8 +55,8 @@ static constexpr size_t ek_private_decoded_size = 43;
 typedef data_array<ek_private_decoded_size> encrypted_private;
 
 /// DEPRECATED
-/// An encrypted public key type (checked but not base58 encoded).
-/// This is refered to as a confirmation code in bip38.
+/// Encrypted public key type (checked but not base58 encoded).
+/// Referred to as confirmation code in bip38.
 static constexpr size_t encrypted_public_encoded_size = 75;
 static constexpr size_t encrypted_public_decoded_size = 55;
 typedef data_array<encrypted_public_decoded_size> encrypted_public;
@@ -76,87 +76,87 @@ enum ek_flag : uint8_t
 };
 
 
-/// Create an encrypted private key from an intermediate passphrase.
-/// The `out_point` parameter is always compressed, so to use it it should be
-/// decompressed as necessary to match the state of the `compressed` parameter.
-/// @param[out] out_private  The new encrypted private key.
-/// @param[out] out_point    The ec compressed public key of the new key pair.
-/// @param[in]  token        An intermediate passphrase string.
-/// @param[in]  seed         A random value for use in the encryption.
-/// @param[in]  version      The coin address version byte.
+/// Create encrypted private key from intermediate passphrase.
+/// `out_point` is always compressed, decompress as necessary to match state of
+/// `compressed` parameter.
+/// @param[out] out_private  New encrypted private key.
+/// @param[out] out_point    ec compressed public key of new key pair.
+/// @param[in]  token        Intermediate passphrase string.
+/// @param[in]  seed         Random value for use in encryption.
+/// @param[in]  version      Coin address version byte.
 /// @param[in]  compressed   Set true to associate ec public key compression.
-/// @return false if the token checksum is not valid.
+/// @return false if token checksum is not valid.
 BC_API bool create_key_pair(encrypted_private& out_private,
     ec_compressed& out_point, const encrypted_token& token,
     const ek_seed& seed, uint8_t version, bool compressed=true) NOEXCEPT;
 
 /// DEPRECATED (scenario)
-/// Create an encrypted key pair from an intermediate passphrase.
-/// The `out_point` parameter is always compressed, so to use it it should be
-/// decompressed as necessary to match the state of the `compressed` parameter.
-/// @param[out] out_private  The new encrypted private key.
-/// @param[out] out_public   The new encrypted public key.
-/// @param[out] out_point    The compressed ec public key of the new key pair.
-/// @param[in]  token        An intermediate passphrase string.
-/// @param[in]  seed         A random value for use in the encryption.
-/// @param[in]  version      The coin address version byte.
+/// Create encrypted key pair from intermediate passphrase.
+/// `out_point` is always compressed, decompress as necessary to match state of
+/// `compressed` parameter.
+/// @param[out] out_private  New encrypted private key.
+/// @param[out] out_public   New encrypted public key.
+/// @param[out] out_point    Compressed ec public key of new key pair.
+/// @param[in]  token        Intermediate passphrase string.
+/// @param[in]  seed         Random value for use in encryption.
+/// @param[in]  version      Coin address version byte.
 /// @param[in]  compressed   Set true to associate ec public key compression.
-/// @return false if the token checksum is not valid.
+/// @return false if token checksum is not valid.
 BC_API bool create_key_pair(encrypted_private& out_private,
     encrypted_public& out_public, ec_compressed& out_point,
     const encrypted_token& token, const ek_seed& seed, uint8_t version,
     bool compressed=true) NOEXCEPT;
 
-/// Create an intermediate passphrase for subsequent key pair generation.
-/// @param[out] out_token   The new intermediate passphrase.
-/// @param[in]  passphrase  A passphrase for use in the encryption.
-/// @param[in]  entropy     A random value for use in the encryption.
-/// @return false if the token could not be created from the entropy.
+/// Create intermediate passphrase for subsequent key pair generation.
+/// @param[out] out_token   New intermediate passphrase.
+/// @param[in]  passphrase  Passphrase for use in encryption.
+/// @param[in]  entropy     Random value for use in encryption.
+/// @return false if token could not be created from entropy.
 BC_API bool create_token(encrypted_token& out_token,
     const std::string& passphrase, const ek_entropy& entropy) NOEXCEPT;
 
-/// Create an intermediate passphrase for subsequent key pair generation.
-/// @param[out] out_token   The new intermediate passphrase.
-/// @param[in]  passphrase  A passphrase for use in the encryption.
-/// @param[in]  salt        A random value for use in the encryption.
-/// @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
-/// @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
-/// @return false if the lot and/or sequence are out of range or the token
-/// could not be created from the entropy.
+/// Create intermediate passphrase for subsequent key pair generation.
+/// @param[out] out_token   New intermediate passphrase.
+/// @param[in]  passphrase  Passphrase for use in encryption.
+/// @param[in]  salt        Random value for use in encryption.
+/// @param[in]  lot         Lot, max allowed value 1048575 (2^20-1).
+/// @param[in]  sequence    Sequence, max allowed value 4095 (2^12-1).
+/// @return false if lot and/or sequence are out of range or
+/// token could not be created from entropy.
 BC_API bool create_token(encrypted_token& out_token,
     const std::string& passphrase, const ek_salt& salt, uint32_t lot,
     uint32_t sequence) NOEXCEPT;
 
-/// Encrypt the ec secret to an encrypted public key using the passphrase.
-/// @param[out] out_private  The new encrypted private key.
-/// @param[in]  secret       An ec secret to encrypt.
-/// @param[in]  passphrase   A passphrase for use in the encryption.
-/// @param[in]  version      The coin address version byte.
+/// Encrypt ec secret to encrypted public key using passphrase.
+/// @param[out] out_private  New encrypted private key.
+/// @param[in]  secret       ec secret to encrypt.
+/// @param[in]  passphrase   Passphrase for use in encryption.
+/// @param[in]  version      Coin address version byte.
 /// @param[in]  compressed   Set true to associate ec public key compression.
-/// @return false if the secret could not be converted to a public key.
+/// @return false if secret could not be converted to public key.
 BC_API bool encrypt(encrypted_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version,
     bool compressed=true) NOEXCEPT;
 
-/// Decrypt the ec secret associated with the encrypted private key.
-/// @param[out] out_secret      The decrypted ec secret.
-/// @param[out] out_version     The coin address version.
-/// @param[out] out_compressed  The compression of the associated ec public key.
-/// @param[in]  key             An encrypted private key.
-/// @param[in]  passphrase      The passphrase from the encryption or token.
-/// @return false if the key checksum or passphrase is not valid.
+/// Decrypt ec secret associated with encrypted private key.
+/// @param[out] out_secret      Decrypted ec secret.
+/// @param[out] out_version     Coin address version.
+/// @param[out] out_compressed  Compression of associated ec public key.
+/// @param[in]  key             Encrypted private key.
+/// @param[in]  passphrase      Passphrase from encryption or token.
+/// @return false if key checksum or passphrase is not valid.
 BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
     bool& out_compressed, const encrypted_private& key,
     const std::string& passphrase) NOEXCEPT;
 
 /// DEPRECATED (scenario)
-/// Decrypt the ec point associated with the encrypted public key.
-/// @param[out] out_point       The decrypted ec compressed point.
-/// @param[out] out_version     The coin address version of the public key.
-/// @param[out] out_compressed  The public key specified compression state.
-/// @param[in]  key             An encrypted public key.
-/// @param[in]  passphrase      The passphrase of the associated token.
-/// @return false if the key checksum or passphrase is not valid.
+/// Decrypt ec point associated with encrypted public key.
+/// @param[out] out_point       Decrypted ec compressed point.
+/// @param[out] out_version     Coin address version of public key.
+/// @param[out] out_compressed  Public key specified compression state.
+/// @param[in]  key             Encrypted public key.
+/// @param[in]  passphrase      Passphrase of associated token.
+/// @return false if key checksum or passphrase is not valid.
 BC_API bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     bool& out_compressed, const encrypted_public& key,
     const std::string& passphrase) NOEXCEPT;

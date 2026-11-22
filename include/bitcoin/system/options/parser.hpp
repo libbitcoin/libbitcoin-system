@@ -44,7 +44,7 @@ public:
     const variables_map& variables() const NOEXCEPT;
 
     /// True if set by command line, environment, or configuration file.
-    /// False if unset or obtained from a declared option default value.
+    /// False if unset or obtained from declared option default value.
     bool is_configured(const std::string& name) const NOEXCEPT;
 
     bool get_option(const std::string& name) const NOEXCEPT;

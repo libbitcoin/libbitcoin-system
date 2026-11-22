@@ -26,9 +26,9 @@ namespace words {
 namespace electrum {
 
 // github.com/spesmilo/electrum/tree/master/electrum/wordlist
-// The portuguese wordlist in the Electrum v1 repo is for Electrum v2.
-// The Electrum v1 repo includes en, es, ja, and zh_Hant only.
-// This list has been extended to include all BIP39 word lists.
+// Portuguese wordlist in Electrum v1 repo is for Electrum v2.
+// Electrum v1 repo includes en, es, ja, and zh_Hant only.
+// This list is extended to include all BIP39 word lists.
 
 // Electrum v2 word lists are currently identical to BIP39 word lists.
 const catalog::words& en = mnemonic::en;

@@ -51,8 +51,8 @@ muhash3072::muhash3072(const data_slice& element) NOEXCEPT
     insert(element);
 }
 
-// Elements are the chacha20 expansion of the element hash, one conditional
-// subtraction is the full reduction as the expansion is below 2 * modulus.
+// Elements are chacha20 expansion of element hash, one conditional subtraction
+// is full reduction as expansion is below 2 * modulus.
 muhash3072::element muhash3072::to_element(const hash_digest& hash) NOEXCEPT
 {
     data_array<byte_size> bytes{};
@@ -67,9 +67,9 @@ muhash3072::element muhash3072::to_element(const hash_digest& hash) NOEXCEPT
     return value;
 }
 
-// Fixed width (no allocation), the product is twice the element width and
-// reduced by the special form of the modulus (2^3072 - c), as x = hi * 2^3072
-// + lo is congruent to hi * c + lo. Two folds leave less than 2^3072 + 2^43.
+// Fixed width (no allocation), product is twice element width and reduced by
+// special form of modulus (2^3072 - c), as x = hi * 2^3072 + lo is congruent to
+// hi * c + lo. Two folds leave less than 2^3072 + 2^43.
 muhash3072::element muhash3072::multiply(const element& left,
     const element& right) NOEXCEPT
 {

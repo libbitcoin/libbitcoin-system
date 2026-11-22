@@ -28,10 +28,10 @@ namespace libbitcoin {
 namespace system {
 namespace options {
 
-/// Parse command line arguments (excluding the program name), as long options
+/// Parse command line arguments (excluding program name), as long options
 /// (--name, --name=value, --name value, unique abbreviation of name), short
 /// options (-n, -nvalue, -n value, grouped switches -abc), and positional
-/// arguments, as are all arguments following a "--" terminator.
+/// arguments, as are all arguments following "--" terminator.
 BC_API parsed_options parse_command_line(int argc, const char* argv[],
     const options_description& options,
     const positional_options_description& arguments) THROWS;
@@ -42,8 +42,8 @@ BC_API parsed_options parse_command_line(int argc, const char* argv[],
 BC_API parsed_options parse_config_file(std::istream& stream,
     const options_description& options) THROWS;
 
-/// Parse the environment variables that begin with prefix, named by the
-/// remainder in lower case, ignoring those not declared.
+/// Parse environment variables beginning with prefix, named by remainder in
+/// lower case, ignoring those not declared.
 BC_API parsed_options parse_environment(const options_description& options,
     const std::string& prefix) THROWS;
 

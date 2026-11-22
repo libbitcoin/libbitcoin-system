@@ -27,7 +27,7 @@ namespace system {
 
 /// Native endianness integer to/from big/little endianness integer (byteswap).
 /// ---------------------------------------------------------------------------
-/// The "from" functions are merely convenience aliases for the "to" functions.
+/// "from" functions are merely convenience aliases for "to" functions.
 
 /// Convert a native integral integer to big-endian.
 template <typename Integral, if_integral_integer<Integral> = true>
@@ -47,7 +47,7 @@ INLINE constexpr Integral native_from_little_end(Integral little) NOEXCEPT;
 
 /// Native endianness lanes to/from big/little endianness lanes (byteswap).
 /// ---------------------------------------------------------------------------
-/// Each lane is an Integral of a type with a lane byteswap (f::byteswap).
+/// Each lane is Integral of type with lane byteswap (f::byteswap).
 
 /// True if xWord has a lane byteswap of Integral.
 template <typename Integral, typename xWord>

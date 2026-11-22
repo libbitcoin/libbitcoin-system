@@ -60,8 +60,8 @@ static script::cptr checksig_script_ptr() NOEXCEPT
 // Extract.
 // ----------------------------------------------------------------------------
 
-// out_script is only useful only for sigop counting.
-// program_script is only used to determine witness_program type.
+// out_script useful only for sigop counting.
+// program_script only used to determine witness_program type.
 bool witness::extract_sigop_script(script& out_script,
     const script& program_script) const NOEXCEPT
 {
@@ -90,7 +90,7 @@ bool witness::extract_sigop_script(script& out_script,
             }
         }
 
-        // If bip342 is not activated this behaves as script_version::reserved.
+        // If bip342 not activated, behaves as script_version::reserved.
         // Sigops in tapscripts do not count towards block limit [bip342].
         case script_version::taproot:
             return true;
@@ -127,8 +127,8 @@ code witness::extract_segwit(script::cptr& out_script,
         // output script : <0> <20-byte-hash-of-public-key>
         case short_hash_size:
         {
-            // Create a pay-to-key-hash input script from the program.
-            // The hash160 of public key must match program.
+            // Create pay-to-key-hash input script from program.
+            // Hash160 of public key must match program.
             out_script = to_shared<script>(
                 script::to_pay_key_hash_pattern(program));
 
@@ -156,8 +156,8 @@ code witness::extract_segwit(script::cptr& out_script,
                 error::invalid_witness;
         }
 
-        // If the version byte is 0, but the witness program is neither
-        // 20 nor 32 bytes, the script must fail.
+        // If version byte is 0 but witness program
+        // is neither 20 nor 32 bytes, script must fail.
         default:
             return error::invalid_witness;
     }
@@ -228,8 +228,8 @@ code witness::extract_taproot(hash_cptr& out_leaf, script::cptr& out_script,
         // output script : <1> <32-byte-tweaked-public-key>
         if (is_one(stack_size))
         {
-            // Stack element is a signature that must be valid for q.
-            // Program is q, a 32 byte bip340 public key, so push it.
+            // Stack element is signature that must be valid for q.
+            // Program is q, 32 byte bip340 public key, so push it.
             // out stack  : (empty)
             // out script : <op_checksig>
             out_stack->push_back(program);

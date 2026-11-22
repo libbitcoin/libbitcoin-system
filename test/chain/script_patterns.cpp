@@ -553,8 +553,8 @@ BC_AUTO_TEST_CASE(script__is_pay_tapscript_inscription_pattern__wrong_key_size__
 
 // pay_witness
 
-// The version byte is the opcode that pushes the version value, so version 1
-// serializes as 0x51 (op_1), not 0x01 (a one byte data push) [bip141].
+// Version byte is opcode that pushes version value, so version 1 serializes
+// as 0x51 (op_1), not 0x01 (one byte data push) [bip141].
 static const auto witness_v0_key_hash = base16_chunk("0014a85b2107f791b26a84e7586c28cec7cb61202ed3");
 static const auto witness_v0_script_hash = base16_chunk("0020a85b2107f791b26a84e7586c28cec7cb61202ed3d01944d832500f363782d675");
 static const auto witness_v1_taproot = base16_chunk("5120a85b2107f791b26a84e7586c28cec7cb61202ed3d01944d832500f363782d675");
@@ -1510,7 +1510,7 @@ BC_AUTO_TEST_CASE(script__is_sign_script_hash_pattern__empty__false)
 
 // is_coinbase_pattern
 // -----------------------------------------------------------------------------
-// BIP34 requires a minimally-encoded push of the block height.
+// BIP34 requires minimally-encoded push of block height.
 
 BC_AUTO_TEST_CASE(script__is_coinbase_pattern__empty__false)
 {

@@ -214,8 +214,8 @@ const inputs_cptr block::inputs_ptr() const NOEXCEPT
     return inputs;
 }
 
-// vector<transaction> is not exposed (because we don't have it).
-// This would require a from_shared(txs_) conversion (expensive).
+// vector<transaction> is not exposed (not held).
+// Would require from_shared(txs_) conversion (expensive).
 const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 {
     return txs_;
@@ -224,7 +224,7 @@ const transactions_cptr& block::transactions_ptr() const NOEXCEPT
 hashes block::transaction_hashes(bool witness) const NOEXCEPT
 {
     // Extra allocation for odd count optimizes for merkle root.
-    // Vector capacity is never reduced when resizing to smaller size.
+    // Vector capacity is never reduced when resizing smaller.
     const auto count = txs_->size();
     const auto size = !is_one(count) && is_odd(count) ? add1(count) : count;
     hashes out(size);
@@ -368,15 +368,15 @@ bool block::is_oversized() const NOEXCEPT
     return serialized_size(false) > max_block_size;
 }
 
-// This also precludes the block merkle calculation DoS exploit as it is
-// considered computationally infeasible to produce malleable64 with a
-// valid (null) coinbase input point.
+// Also precludes block merkle calculation DoS exploit, as
+// it is considered computationally infeasible to produce
+// malleable64 with valid (null) coinbase input point.
 bool block::is_first_non_coinbase() const NOEXCEPT
 {
     return !txs_->empty() && !txs_->front()->is_coinbase();
 }
 
-// True if there is another coinbase other than the first tx.
+// True if there is a coinbase other than first tx.
 // No txs or coinbases returns false.
 bool block::is_extra_coinbases() const NOEXCEPT
 {
@@ -392,8 +392,8 @@ bool block::is_extra_coinbases() const NOEXCEPT
 }
 
 //*****************************************************************************
-// CONSENSUS: This is only necessary because satoshi stores and queries as it
-// validates, imposing an otherwise unnecessary partial transaction ordering.
+// CONSENSUS: Only necessary because satoshi stores and queries as it validates,
+// imposing otherwise unnecessary partial transaction ordering.
 //*****************************************************************************
 bool block::is_forward_reference() const NOEXCEPT
 {
@@ -422,8 +422,8 @@ bool block::is_forward_reference(const transaction_cptrs& txs,
     return false;
 }
 
-// This also precludes the block merkle calculation DoS exploit by preventing
-// duplicate txs, as a duplicate non-empty tx implies a duplicate point.
+// Also precludes block merkle calculation DoS exploit by preventing duplicate
+// txs, as duplicate non-empty tx implies duplicate point.
 // bitcointalk.org/?topic=102395
 bool block::is_internal_double_spend() const NOEXCEPT
 {
@@ -587,7 +587,7 @@ bool block::is_malleated32() const NOEXCEPT
 }
 
 // protected
-// The width of the node cloned by a malleation of this block, or zero.
+// Width of node cloned by malleation of this block, or zero.
 size_t block::malleated32_size() const NOEXCEPT
 {
     const auto txids = transaction_hashes(false);
@@ -600,8 +600,8 @@ size_t block::malleated32_size() const NOEXCEPT
 }
 
 // static
-// Merkle clones the last node at each depth with an odd count above one.
-// The tree over set leaves has ceilinged(set / width) nodes at width depth.
+// Merkle clones last node at each depth with odd count above one.
+// Tree over set leaves has ceilinged(set / width) nodes at width depth.
 bool block::is_malleable32(size_t set, size_t width) NOEXCEPT
 {
     if (!is_power2(width))
@@ -612,8 +612,8 @@ bool block::is_malleable32(size_t set, size_t width) NOEXCEPT
 }
 
 // static
-// The last node at a depth covers the trailing count leaves, padded to width
-// by merkle cloning. Returns the leaf at position within the padded node.
+// Last node at a depth covers trailing count leaves, padded to width by merkle
+// cloning. Returns leaf at position within padded node.
 size_t block::merkle_index(size_t position, size_t count,
     size_t width) NOEXCEPT
 {
@@ -656,10 +656,10 @@ bool block::is_malleated32(const hashes& txids) NOEXCEPT
 }
 
 // static
-// A set of tx hashes has the merkle root of a shorter set if and only if at
-// some depth its node count is even and above two and its last two nodes are
-// equal: the shorter set has an odd count at that depth and clones its last
-// node, which the longer set holds. This is the test at width depth.
+// Set of tx hashes has merkle root of a shorter set if and only if at some
+// depth its node count is even and above two and its last two nodes are equal:
+// shorter set has odd count at that depth and clones its last node, which
+// longer set holds. This is the test at width depth.
 bool block::is_malleated32(const hashes& txids, size_t width) NOEXCEPT
 {
     const auto malleated = txids.size();
@@ -690,7 +690,7 @@ bool block::is_malleable64() const NOEXCEPT
 }
 
 // static
-// If all non-witness tx serializations are 64 bytes the id is malleable.
+// If all non-witness tx serializations are 64 bytes, id is malleable.
 bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 {
     const auto two_leaves = [](const auto& tx) NOEXCEPT
@@ -702,8 +702,8 @@ bool block::is_malleable64(const transaction_cptrs& txs) NOEXCEPT
 }
 
 // Malleated64 implies malleable64 and invalid due to non-null coinbase point.
-// It is considered computationally infeasible to produce malleable64 with a
-// valid (null) coinbase input point.
+// Considered computationally infeasible to produce malleable64 with valid
+// (null) coinbase input point.
 bool block::is_malleated64() const NOEXCEPT
 {
     return !txs_->empty() && !txs_->front()->is_coinbase() &&
@@ -735,10 +735,10 @@ size_t block::segregated() const NOEXCEPT
     return std::count_if(txs_->cbegin(), txs_->cend(), count_segregated);
 }
 
-// The witness merkle root is obtained from wtxids, subject to malleation just
-// as the txs commitment. However, since tx duplicates are precluded by the
-// malleable32 (or complete) block check, there is no opportunity for this.
-// Similarly the witness commitment cannot be malleable64.
+// Witness merkle root is obtained from wtxids, subject to malleation just as
+// txs commitment. However, since tx duplicates are precluded by malleable32 (or
+// complete) block check, there is no opportunity for this. Similarly witness
+// commitment cannot be malleable64.
 bool block::is_invalid_witness_commitment() const NOEXCEPT
 {
     return !txs_->empty() && is_invalid_witness_commitment(*txs_->front(),
@@ -772,11 +772,11 @@ bool block::is_invalid_signet_solution(const script& challenge) const NOEXCEPT
 
 //*****************************************************************************
 // CONSENSUS:
-// bip42 compensates for C++ undefined behavior of a right shift of a number of
-// bits greater or equal to the shifted integer width. Yet being undefined, the
-// result of this operation may vary by compiler. The shift_right call below
-// explicitly implements presumed pre-bip42 behavior (shift overflow modulo) by
-// default, and specified bip42 behavior (shift overflow to zero) with bip42.
+// bip42 compensates for C++ undefined behavior of right shift by number of bits
+// greater or equal to shifted integer width. Being undefined, result may vary
+// by compiler. shift_right call below explicitly implements presumed pre-bip42
+// behavior (shift overflow modulo) by default, and specified bip42 behavior
+// (shift overflow to zero) with bip42.
 //*****************************************************************************
 uint64_t block::subsidy(size_t height, size_t subsidy_interval,
     uint64_t initial_block_subsidy_satoshi, bool bip42) NOEXCEPT
@@ -1091,7 +1091,7 @@ code block::accept(const context& ctx, size_t subsidy_interval,
 // forks
 
 // Node performs these checks through database query.
-// This assumes that prevout and metadata caching are completed on all inputs.
+// Assumes prevout and metadata caching are completed on all inputs.
 code block::confirm(const context& ctx) const NOEXCEPT
 {
     // TODO: restore bip30 unspent coinbase collision check from prevout metadata.
@@ -1106,9 +1106,9 @@ code block::connect(const context& ctx) const NOEXCEPT
     return connect_transactions(ctx, {});
 }
 
-// This assumes that prevout caching is completed on all inputs.
+// Assumes prevout caching is completed on all inputs.
 // All captured signatures produced 'true' result in their op_check_sig().
-// If any script fails batch validation the associated block is invalid.
+// If any script fails batch validation, associated block is invalid.
 code block::connect(const context& ctx,
     const signatures& capture) const NOEXCEPT
 {

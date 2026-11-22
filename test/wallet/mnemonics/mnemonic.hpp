@@ -271,8 +271,8 @@ const mnemonic_vectors vectors_en
 // Checksum verification must accommodate input of ideographic spaces.
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
 // github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
-// 22 of 24 BIP39 japanese vectors are (intentionally) not nfkd normalized.
-// The last word of the first vector is not nfkd normalized (exmaple).
+// 22 of 24 BIP39 japanese vectors (intentionally) not nfkd normalized.
+// Last word of first vector not nfkd normalized (example).
 const mnemonic_vectors vectors_ja
 {
     {

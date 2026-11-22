@@ -44,7 +44,7 @@ public:
     bool has_scheme() const NOEXCEPT;
     bool set_scheme(const std::string& scheme) NOEXCEPT;
 
-    /// Obtains the unescaped authority part, if any (user@server:port).
+    /// Obtains the encoded authority part, if any (user@server:port).
     std::string authority() const NOEXCEPT;
     bool has_authority() const NOEXCEPT;
     bool set_authority(const std::string& authority) NOEXCEPT;
@@ -66,10 +66,10 @@ public:
     bool set_fragment(const std::string& fragment) NOEXCEPT;
     void remove_fragment() NOEXCEPT;
 
-    /// Interprets the query string as a sequence of key-value pairs.
-    /// All query strings are valid, so this function cannot fail.
-    /// The results are unescaped. Both keys and values can be zero-length,
-    /// and if the same key is appears multiple times, the final one wins.
+    /// Interprets query string as sequence of key-value pairs.
+    /// All query strings are valid, so cannot fail. Results
+    /// are unescaped. Keys and values can be zero-length, and
+    /// if same key appears multiple times, final one wins.
     query_map decode_query() const NOEXCEPT;
     void encode_query(const query_map& map) NOEXCEPT;
 

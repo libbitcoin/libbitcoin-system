@@ -91,7 +91,7 @@ std::ostream& props::write(std::ostream& stream, format format, size_t depth,
     bool flat, const std::string& name) const NOEXCEPT
 {
     const auto end = flat ? "" : ("\n" + std::string(depth * tab, ' '));
-    const auto start = flat ? "" : (is_zero(depth) ? "" : end);
+    const auto start = (flat || is_zero(depth)) ? std::string{} : end;
 
     // Keep simple values on same line.
     const auto is_simple = [&]() NOEXCEPT
@@ -142,7 +142,7 @@ std::ostream& props::write(std::ostream& stream,
     format format, size_t depth, bool flat) const NOEXCEPT
 {
     const auto end = flat ? "" : ("\n" + std::string(depth * tab, ' '));
-    const auto start = flat ? "" : (is_zero(depth) ? "" : end);
+    const auto start = (flat || is_zero(depth)) ? std::string{} : end;
 
     switch (type_)
     {
@@ -382,7 +382,7 @@ array_props::array_props(const std::string& name) NOEXCEPT
   : props(type::array_, name)
 {
     // Unused value_ member overloaded to store all-element name.
-    // Name is then propagated to each child element upon add.
+    // Name then propagated to each child element upon add.
 }
 
 array_props::array_props(const std::string& name,

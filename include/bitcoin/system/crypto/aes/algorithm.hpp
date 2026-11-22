@@ -69,15 +69,15 @@ public:
     /// Modes.
     /// -----------------------------------------------------------------------
 
-    /// XOR in with the keystream of successive counter blocks into out
-    /// (in/out may be the same, empty in writes keystream). The counter is
-    /// incremented in its low order 32 bits, big-endian (sp800-38d inc32),
-    /// and is advanced past each block used, including a final partial block.
+    /// XOR in with keystream of successive counter blocks into out (in/out may
+    /// be same, empty in writes keystream). Counter is incremented in its low
+    /// order 32 bits, big-endian (sp800-38d inc32), and is advanced past each
+    /// block used, including final partial block.
     static void ctr(byte_span out, const_byte_span in, block_t& counter,
         const schedule_t& schedule) NOEXCEPT;
 
-    /// Decrypt whole blocks in cipher block chaining mode (in/out may be the
-    /// same). The iv is advanced to the last cipher block, for continuation.
+    /// Decrypt whole blocks in cipher block chaining mode (in/out may be same).
+    /// iv is advanced to last cipher block, for continuation.
     static void cbc_decrypt(byte_span out, const_byte_span in, block_t& iv,
         const schedule_t& schedule) NOEXCEPT;
 

@@ -20,9 +20,9 @@
 
 // This is a maintainer file to force rebuild of /system only.
 
-// define.hpp is the common include for /system.
+// define.hpp is common include for /system.
 // All non-system headers include define.hpp.
-// System inclusions are chained as follows.
+// System inclusions chained as follows.
 
 // version        : <generated>
 // have           : version
@@ -39,7 +39,7 @@
 // constraints    : typelets
 // define         : constraints
 
-// Other directory common includes are not internally chained.
+// Other directory common includes not internally chained.
 // Each header includes only its required common headers.
 
 // /intrinsics    : define
@@ -64,8 +64,8 @@
 // /wallet        : /chain
 // /x509          : /crypto
 
-// When a symbol is unexplainably undefined, its defining include is probably
-// creating the circularity.
+// When symbol unexplainably undefined,
+// its defining include probably creates circularity.
 
 DEFINED(LIBBITCOIN_SYSTEM_VERSION)
 

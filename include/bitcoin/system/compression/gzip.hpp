@@ -28,15 +28,15 @@ namespace libbitcoin {
 namespace system {
 
 /// Not thread safe.
-/// gzip (rfc1952) encoder of a member written in parts.
+/// gzip (rfc1952) encoder of member written in parts.
 class BC_API gzip_deflater
 {
 public:
     /// Encode data, appending completed output to out.
     void write(data_chunk& out, const data_slice& data) NOEXCEPT;
 
-    /// Encode the remainder and end the member, appending to out, after
-    /// which another member may be written.
+    /// Encode remainder and end member, appending to out, after which another
+    /// member may be written.
     void flush(data_chunk& out) NOEXCEPT;
 
 private:
@@ -53,9 +53,9 @@ private:
 class BC_API gzip_inflater
 {
 public:
-    /// Decode from in, appending to out, until in is consumed or out has
-    /// grown by at least limit (zero is unlimited), setting the bytes of in
-    /// consumed. False if a member is invalid.
+    /// Decode from in, appending to out, until in is consumed or out has grown
+    /// by at least limit (zero is unlimited), setting bytes of in consumed.
+    /// False if member is invalid.
     bool write(data_chunk& out, size_t& consumed, const data_slice& in,
         size_t limit=zero) NOEXCEPT;
 
@@ -81,8 +81,8 @@ private:
 /// gzip (rfc1952) member of the deflate of the input.
 BC_API data_chunk gzip_deflate(const data_slice& in) NOEXCEPT;
 
-/// Decode of the gzip (rfc1952) members that are the entire input. False if
-/// invalid, or the output would exceed limit (zero is unlimited).
+/// Decode of gzip (rfc1952) members that are entire input. False if invalid, or
+/// output would exceed limit (zero is unlimited).
 BC_API bool gzip_inflate(data_chunk& out, const data_slice& in,
     size_t limit=zero) NOEXCEPT;
 

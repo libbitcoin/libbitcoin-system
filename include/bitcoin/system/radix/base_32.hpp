@@ -29,7 +29,7 @@ namespace system {
 BC_API std::string encode_base32(const data_slice& unencoded) NOEXCEPT;
 
 /// Attempt to decode base32 data (RFC 4648, either case, padding optional).
-/// False if the input contains non-base32 characters or invalid padding.
+/// False if input contains non-base32 characters or invalid padding.
 BC_API bool decode_base32(data_chunk& out, const std::string& in) NOEXCEPT;
 
 } // namespace system

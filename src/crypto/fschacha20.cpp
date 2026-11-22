@@ -38,8 +38,8 @@ void fschacha20::crypt(const_byte_span in, byte_span out) NOEXCEPT
 {
     cipher_.crypt(in, out);
 
-    // The key is rotated after every rekey_interval chunks, to the next 32
-    // keystream bytes, and the nonce set to { 0, rekey counter }.
+    // Key rotated after every rekey_interval chunks, to next 32 keystream
+    // bytes, and nonce set to { 0, rekey counter }.
     if (++chunks_ == interval_)
     {
         chacha20::secret key{};

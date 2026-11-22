@@ -56,7 +56,7 @@ void sha256_writer<OStream>::do_write_bytes(const uint8_t* data,
     size_t size) NOEXCEPT
 {
     // Hash overflow produces update false, which requires (2^64-8)/8 bytes.
-    // The stream could be invalidated, but writers shouldn't have to check it.
+    // Stream could be invalidated, but writers shouldn't have to check it.
     context_.write(size, data);
 }
 

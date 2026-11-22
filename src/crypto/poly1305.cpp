@@ -40,9 +40,9 @@ BC_PUSH_WARNING(NO_DYNAMIC_ARRAY_INDEXING)
 
 constexpr auto word_bits = bits<uint64_t>;
 
-// The prime modulus is 2^130 - prime_delta, with the accumulator (and r) in
-// five 26 bit limbs, so limbs mask to 26 bits and carry out of the top limb
-// is folded back into the bottom, scaled by prime_delta.
+// Prime modulus is 2^130 - prime_delta, with accumulator (and r) in five 26 bit
+// limbs, so limbs mask to 26 bits and carry out of top limb is folded back into
+// bottom, scaled by prime_delta.
 constexpr auto limb_bits = 26_size;
 constexpr auto limb_mask = 0x03ffffff_u32;
 constexpr auto limb_bit = 0x04000000_u32;
@@ -187,9 +187,9 @@ INLINE constexpr void poly1305::reduce(limbs_t<Word>& a,
 
 // vectorization
 // ----------------------------------------------------------------------------
-// One block is computed per 64 bit lane. Each lane accumulates every lanes-th
-// block, advanced between groups by r^lanes, and the lanes are recombined by
-// their remaining (descending) powers of r [Goll, Gueron].
+// One block computed per 64 bit lane. Each lane accumulates every lanes-th
+// block, advanced between groups by r^lanes, and lanes are recombined by their
+// remaining (descending) powers of r [Goll, Gueron].
 
 template <size_t Limb, typename xWord>
 INLINE xWord poly1305::load(const uint8_t* data, uint32_t hibit,
@@ -423,8 +423,8 @@ void poly1305::write(const_byte_span data) NOEXCEPT
         }
     }
 
-    // Process whole blocks and buffer the remainder (offset is zero unless
-    // the fill above consumed all input, leaving size zero).
+    // Process whole blocks and buffer remainder (offset is zero unless fill
+    // above consumed all input, leaving size zero).
     if (!is_zero(size))
     {
         const auto whole = size / block_size;
@@ -504,9 +504,8 @@ void poly1305::flush(tag& out) NOEXCEPT
     h2 = bit_or(shift_right(h2, 12), shift_left(h3, 14));
     h3 = bit_or(shift_right(h3, 18), shift_left(h4,  8));
 
-    // Finally, the value of the secret key s is added to the accumulator,
-    // and the 128 least significant bits are serialized in little-endian
-    // order to form the tag.
+    // Finally, value of secret key s is added to accumulator, and 128 least
+    // significant bits serialized in little-endian order to form tag.
     auto f = wide_cast<uint64_t>(h0) + pad_[0];
     h0 = narrow_cast<uint32_t>(f);
     f = wide_cast<uint64_t>(h1) + pad_[1] + shift_right(f, 32);

@@ -33,7 +33,7 @@ namespace system {
 
 // Called by bc::base85 (for number coding).
 // Called by wallet::electrum_v1 (for number coding).
-// Overflow is allowed behavior as this models a mathematical operator.
+// Overflow is allowed, as this models mathematical operator.
 template <typename Value, typename Base, typename Exponent,
     if_integer<Value> = true,
     if_integer<Base> = true,

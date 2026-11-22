@@ -307,9 +307,8 @@ bool inflater::pull() NOEXCEPT
     return true;
 }
 
-// Fills the buffer to at least 56 bits from eight bytes of input. Bits of the
-// partially taken byte above the count are those that the next refill or pull
-// sets in the same position.
+// Fills buffer to at least 56 bits from eight bytes of input. Bits of partially
+// taken byte above count are those next refill or pull sets in same position.
 void inflater::refill() NOEXCEPT
 {
     const auto bytes = unsafe_from_little_endian<uint64_t>(std::next(in_,
@@ -401,8 +400,8 @@ inflater::step inflater::stored_copy() NOEXCEPT
         return step::next;
     }
 
-    const auto size = std::min({ remaining_, size_ - position_,
-        limit_ - produced_ });
+    const auto available = size_ - position_;
+    const auto size = std::min({ remaining_, available, limit_ - produced_ });
 
     if (is_zero(size))
         return step::more;
@@ -496,8 +495,8 @@ inflater::step inflater::lengths() NOEXCEPT
         if (symbol == repeat_previous && is_zero(index_))
             return step::invalid;
 
-        const auto value = (symbol == repeat_previous) ?
-            lengths_[sub1(index_)] : 0_u8;
+        const auto previous = (symbol == repeat_previous);
+        const auto value = previous ? lengths_[sub1(index_)] : 0_u8;
 
         auto repeat = repeat_base[kind] + possible_narrow_cast<size_t>(
             bit_and<uint64_t>(shift_right(buffer_, length),
@@ -524,8 +523,8 @@ inflater::step inflater::lengths() NOEXCEPT
     return step::next;
 }
 
-// The match of size at distance, copied in whole parts that do not overlap,
-// each the pattern so far (a distance less than the size repeats).
+// Match of size at distance, copied in whole parts that do not overlap, each
+// pattern so far (distance less than size repeats).
 void inflater::copy(size_t size, size_t distance) NOEXCEPT
 {
     const auto end = window_.size();
@@ -545,7 +544,7 @@ void inflater::copy(size_t size, size_t distance) NOEXCEPT
 }
 
 // Literals and length/distance pairs, each decoded whole (rfc1951 3.2.5).
-// Each is decoded from a refilled buffer while eight bytes of input remain.
+// Each decoded from refilled buffer while eight bytes of input remain.
 inflater::step inflater::codes() NOEXCEPT
 {
     while (!full())
@@ -602,9 +601,10 @@ inflater::step inflater::codes() NOEXCEPT
         if (bit_count_ < used + distance_extra_bits)
             return step::more;
 
-        const auto distance = distance_base[code] + possible_narrow_cast<size_t>(
-            bit_and<uint64_t>(shift_right(buffer_, used),
-                sub1(power2(distance_extra_bits))));
+        const auto offset = bit_and<uint64_t>(shift_right(buffer_, used),
+            sub1(power2(distance_extra_bits)));
+        const auto distance = distance_base[code] +
+            possible_narrow_cast<size_t>(offset);
 
         if (distance > window_.size())
             return step::invalid;

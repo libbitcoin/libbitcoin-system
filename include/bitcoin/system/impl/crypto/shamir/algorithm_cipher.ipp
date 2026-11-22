@@ -21,11 +21,11 @@
 
 // Cipher
 // ============================================================================
-// The master secret is encrypted before it is shared, so the shares are
-// useless without the passphrase, and any passphrase decrypts to some secret.
-// The round function is pbkdf2, at an iteration count scaled by the exponent,
-// which is carried by each share. An extendable backup salts the rounds
-// without the identifier, so the same shares extend to another share set.
+// Master secret is encrypted before it is shared, so shares are useless without
+// passphrase, and any passphrase decrypts to some secret. Round function is
+// pbkdf2, at iteration count scaled by exponent, which is carried by each
+// share. Extendable backup salts rounds without identifier, so same shares
+// extend to another share set.
 
 namespace libbitcoin {
 namespace system {

@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace system {
     
-/// Obtain the integer power of given base for given unsigned exponent.
+/// Obtain integer power of given base for given unsigned exponent.
 /// Returns 0 if all undefined operations (base < 2 or value < 1).
 
 /// power(Base, Exponent).

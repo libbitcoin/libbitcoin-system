@@ -32,13 +32,13 @@ class BC_API points_value
 public:
     enum class selection
     {
-        /// The smallest single sufficient unspent output, if one exists, or a
-        /// sufficient set of unspent outputs, if such a set exists. The set is
+        /// Smallest single sufficient unspent output, if one exists, or
+        /// sufficient set of unspent outputs, if such set exists. Set is
         /// minimal by number of outputs but not necessarily by total value.
         greedy,
 
-        /// A set of individually sufficient unspent outputs. Each individual
-        /// member of the set is sufficient. Return ascending order by value.
+        /// Set of individually sufficient unspent outputs. Each member of set
+        /// is sufficient. Return ascending order by value.
         individual
     };
 

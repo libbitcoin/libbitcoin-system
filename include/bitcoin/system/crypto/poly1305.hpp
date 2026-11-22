@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Poly1305 one-time authenticator (rfc8439).
-/// The key must be used to authenticate no more than one message.
+/// Key must be used to authenticate no more than one message.
 class BC_API poly1305
 {
 public:
@@ -53,9 +53,8 @@ public:
     void flush(tag& out) NOEXCEPT;
 
 protected:
-    /// The accumulator and multipliers are five 26 bit limbs, over integral
-    /// or extended integral words, the latter computing one block per 64 bit
-    /// lane.
+    /// Accumulator and multipliers are five 26 bit limbs, over integral or
+    /// extended integral words, latter computing one block per 64 bit lane.
     static constexpr size_t limb_count = 5;
 
     template <typename Word>

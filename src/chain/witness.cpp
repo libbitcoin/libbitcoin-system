@@ -270,8 +270,8 @@ witness witness::from_string(const std::string_view& mnemonic) NOEXCEPT
     // There is always one data element per non-empty string token.
     auto tokens = split(mnemonic);
 
-    // Split always returns at least one token, and when trimming it will be
-    // empty only if there was nothing but whitespace in the mnemonic.
+    // Split always returns at least one token, empty when trimmed only if
+    // mnemonic was all whitespace.
     if (tokens.front().empty())
         tokens.clear();
 
@@ -339,9 +339,9 @@ size_t witness::serialized_size(const chunk_cptrs& stack, bool prefix) NOEXCEPT
 
 size_t witness::serialized_size(bool prefix) const NOEXCEPT
 {
-    // Witness prefix is an element count, not byte length (unlike script).
-    // An empty stack is not a valid witnessed tx (no inputs) but a consistent
-    // serialization is used independently by database so zero stack allowed.
+    // Witness prefix is element count, not byte length (unlike script).
+    // Empty stack is not valid witnessed tx (no inputs), but consistent
+    // serialization is used independently by database, so zero stack allowed.
     return prefix ? ceilinged_add(variable_size(stack_.size()), size_) : size_;
 }
 

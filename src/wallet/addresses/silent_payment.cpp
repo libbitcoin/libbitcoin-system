@@ -277,8 +277,8 @@ const scan::batch::receiver& silent_payment::keys() const NOEXCEPT
 // Scanning.
 // ----------------------------------------------------------------------------
 
-// Each k is satisfied by an unmatched output keyed by B_spend + t_k * G, or by
-// that sum plus one label key, and scanning stops at the first k with neither.
+// Each k satisfied by unmatched output keyed by B_spend + t_k * G, or by that
+// sum plus one label key, and scanning stops at first k with neither.
 bool silent_payment::scan(scan_matches& out, const ec_compressed& summary,
     const scan_outputs& outputs) const NOEXCEPT
 {
@@ -378,8 +378,8 @@ bool silent_payment::match(bool& out, const ec_compressed& summary,
 // protected
 // ----------------------------------------------------------------------------
 
-// The prevouts summary is input_hash * A, where A is the sum of the eligible
-// input keys and input_hash commits to the least serialized outpoint and A.
+// Prevouts summary is input_hash * A, where A is sum of eligible input keys and
+// input_hash commits to least serialized outpoint and A.
 template <typename Iterator>
 bool silent_payment::prepare(ec_compressed& sum, ec_secret& hash,
     const Iterator& begin, const Iterator& end) NOEXCEPT
@@ -551,8 +551,7 @@ bool silent_payment::get_witness_key(ec_compressed& out,
     return true;
 }
 
-// Input scripts are malleable, so the last compressed key that hashes to the
-// prevout's key hash is taken from the serialized input script [bip352].
+// Last compressed key in input script hashing to prevout's key hash [bip352].
 template <typename Input>
 bool silent_payment::get_key_hash_key(ec_compressed& out,
     const Input& input) NOEXCEPT
@@ -578,8 +577,8 @@ bool silent_payment::get_key_hash_key(ec_compressed& out,
     return false;
 }
 
-// The key is the output program, with even y, unless the input is a script
-// path spend with the NUMS internal key [bip352].
+// Key is output program, with even y, unless input is script path spend with
+// NUMS internal key [bip352].
 template <typename Input>
 bool silent_payment::get_taproot_key(ec_compressed& out,
     const Input& input) NOEXCEPT

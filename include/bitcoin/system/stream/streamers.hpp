@@ -55,13 +55,13 @@
 // exceptions. However, the stream buffers which ship with most standard
 // library implementations do not throw exceptions."
 // www.boost.org/doc/libs/1_78_0/libs/iostreams/doc/guide/exceptions.html
-// If a streamer is constructed with a throwing stream, an abort will likely
-// occur upon usage. A stream may be configured to throw, see std::basic_ios:
+// If streamer is constructed with throwing stream, abort will likely occur
+// upon usage. Stream may be configured to throw, see std::basic_ios:
 // "Sets the exception mask to except. If the stream has an error state covered
 // by the exception mask when called, an exception is immediately triggered."
 // en.cppreference.com/w/cpp/io/basic_ios/exceptions
 // Streams may be tested for .exceptions() == std::iostream::goodbit, but this
-// cannot be unset once set. So caller must use non-throwing stream.
+// cannot be unset once set, so caller must use non-throwing stream.
 // ============================================================================
 
 namespace libbitcoin {

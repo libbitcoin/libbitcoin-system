@@ -32,7 +32,7 @@ static constexpr auto ec_success = 1;
 
 // Schnorr parse/sign/verify
 // ----------------------------------------------------------------------------
-// `ec_signature` is a public format for schnorr.
+// `ec_signature` is public format for schnorr.
 
 // It is recommended to verify a signature after signing.
 bool sign(ec_signature& out, const ec_secret& secret,

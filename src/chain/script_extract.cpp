@@ -102,8 +102,8 @@ chunk_cptrs script::endorsements() const NOEXCEPT
     return sigs;
 }
 
-// Caller should test for is_sign_script_hash_pattern when sign_key_hash result
-// as it is possible for an input script to match both patterns.
+// Caller should test for is_sign_script_hash_pattern when sign_key_hash result,
+// as an input script may match both patterns.
 script_pattern script::pattern() const NOEXCEPT
 {
     const auto input = output_pattern();
@@ -111,7 +111,7 @@ script_pattern script::pattern() const NOEXCEPT
 }
 
 // Output patterns are mutually and input unambiguous.
-// The bip141 coinbase pattern is not tested here, must test independently.
+// bip141 coinbase pattern is not tested here, must test independently.
 script_pattern script::output_pattern() const NOEXCEPT
 {
     if (is_pay_key_hash_pattern(ops()))
@@ -148,7 +148,7 @@ script_pattern script::output_pattern() const NOEXCEPT
 }
 
 // A sign_key_hash result always implies sign_script_hash as well.
-// The bip34 coinbase pattern is not tested here, must test independently.
+// bip34 coinbase pattern is not tested here, must test independently.
 script_pattern script::input_pattern() const NOEXCEPT
 {
     if (is_sign_key_hash_pattern(ops()))
@@ -248,8 +248,8 @@ bool script::extract_sigop_script(script& embedded,
     if (ops().empty() || !is_relaxed_push_pattern(ops()))
         return false;
 
-    // Parse the embedded script from the last input script item (data).
-    // This cannot fail because there is no prefix to invalidate the length.
+    // Parse embedded script from last input script item (data).
+    // Cannot fail because there is no prefix to invalidate length.
     embedded = { ops().back().data(), false };
     return true;
 }

@@ -72,7 +72,10 @@ BC_AUTO_TEST_CASE(program__initialize__oversized_witness_element_bip141__invalid
 
 // construction
 
-static const script separated_script{ operations{ { opcode::codeseparator }, { opcode::dup } } };
+static const script separated_script
+{
+    operations{ { opcode::codeseparator }, { opcode::dup } }
+};
 
 BC_AUTO_TEST_CASE(program__construct__input_script_stale_offset__cleared)
 {

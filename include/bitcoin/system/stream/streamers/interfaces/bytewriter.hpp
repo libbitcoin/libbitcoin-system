@@ -79,7 +79,7 @@ public:
     /// Write Bitcoin length-prefixed string (prefixed by write_variable).
     virtual void write_string(const std::string& value) NOEXCEPT = 0;
 
-    /// This is only used for writing Bitcoin command command text.
+    /// Only used for writing Bitcoin command text.
     /// Write string to specified length, padded with nulls as required.
     virtual void write_string_buffer(const std::string& value, size_t size)
         NOEXCEPT = 0;

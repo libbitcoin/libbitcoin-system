@@ -27,7 +27,7 @@ namespace libbitcoin {
 namespace system {
 
 /// Forward-secure ChaCha20 (bip324), rekeys every interval of crypt calls.
-/// Each call encrypts or decrypts one chunk of a fixed-length chunk stream.
+/// Each call encrypts or decrypts one chunk of fixed-length chunk stream.
 class BC_API fschacha20 final
 {
 public:

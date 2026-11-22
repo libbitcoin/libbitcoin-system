@@ -128,7 +128,8 @@ transaction transaction::from_data(const data_chunk& decoded) NOEXCEPT
 transaction transaction::from_string(const std::string& encoded) NOEXCEPT
 {
     data_chunk decoded{};
-    return decode_base64(decoded, encoded) ? transaction(decoded) : transaction{};
+    const auto valid = decode_base64(decoded, encoded);
+    return valid ? transaction(decoded) : transaction{};
 }
 
 // The creator role (BIP174 version 0, BIP370 version 2).
@@ -599,8 +600,8 @@ std::optional<uint32_t> transaction::locktime() const NOEXCEPT
     if (version_ == version_0)
         return tx_.locktime();
 
-    // BIP370: the field available to all constrained inputs is chosen,
-    // preferring height, and its value is the greatest requirement.
+    // BIP370: field available to all constrained inputs is chosen, preferring
+    // height, and its value is greatest requirement.
     uint32_t height{};
     uint32_t time{};
     auto constrained = false;
@@ -926,9 +927,10 @@ bool transaction::finalize() NOEXCEPT
 chain::input::cptr transaction::extract_input(size_t index) const NOEXCEPT
 {
     const auto& in = inputs_.at(index);
-    const auto script_sig = in.final_script_sig ? *in.final_script_sig : script{};
-    const auto script_witness = in.final_script_witness ?
-        *in.final_script_witness : witness{};
+    const auto& final_sig = in.final_script_sig;
+    const auto& final_witness = in.final_script_witness;
+    const auto script_sig = final_sig ? *final_sig : script{};
+    const auto script_witness = final_witness ? *final_witness : witness{};
 
     if (version_ == version_0)
     {
@@ -937,8 +939,9 @@ chain::input::cptr transaction::extract_input(size_t index) const NOEXCEPT
             script_witness, original.sequence());
     }
 
-    const point prevout{ in.previous_txid.value_or(null_hash),
-        in.output_index.value_or(0) };
+    const auto txid = in.previous_txid.value_or(null_hash);
+    const auto output = in.output_index.value_or(0);
+    const point prevout{ txid, output };
     return to_shared<chain::input>(prevout, script_sig, script_witness,
         in.sequence.value_or(max_input_sequence));
 }
@@ -969,8 +972,13 @@ chain::transaction transaction::extract() const NOEXCEPT
                 put.script ? *put.script : script{}));
     }
 
-    return { tx_version(), to_shared(std::move(inputs)),
-        to_shared(std::move(outputs)), time.value() };
+    return
+    {
+        tx_version(),
+        to_shared(std::move(inputs)),
+        to_shared(std::move(outputs)),
+        time.value()
+    };
 }
 
 BC_POP_WARNING()

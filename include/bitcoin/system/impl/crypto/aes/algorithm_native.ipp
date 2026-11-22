@@ -21,9 +21,9 @@
 
 // Native (AES-NI/VAES or Crypto)
 // ============================================================================
-// Round keys are replicated to each 128 bit lane of an extended word, so a
-// VAES word ciphers one block per lane. Decryption applies the equivalent
-// inverse cipher, with inverse mix columns applied to the middle round keys.
+// Round keys are replicated to each 128 bit lane of extended word, so VAES word
+// ciphers one block per lane. Decryption applies equivalent inverse cipher,
+// with inverse mix columns applied to middle round keys.
 
 namespace libbitcoin {
 namespace system {

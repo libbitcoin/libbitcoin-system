@@ -31,8 +31,8 @@
 namespace libbitcoin {
 namespace system {
 
-// Cannot use a data_slice override for data_array/data_chunk because it would
-// pick up string and serialize as bytes vs. chars.
+// Cannot use data_slice override for data_array/data_chunk, as it would pick up
+// string and serialize as bytes vs. chars.
     
 template <typename Value>
 void serialize(std::ostream& output, const Value& value,

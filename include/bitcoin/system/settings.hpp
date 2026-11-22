@@ -106,8 +106,8 @@ public:
     uint32_t bip9_version_bit2;
     uint32_t bip9_version_base;
 
-    /// Block 514 is the first testnet block after date-based activation.
-    /// Block 173805 is the first mainnet block after date-based activation.
+    /// Block 514 is first testnet block after date-based activation.
+    /// Block 173805 is first mainnet block after date-based activation.
     /// First mainnet activation window hardwired in satoshi 0.6.0rc1 failed.
     uint32_t bip16_activation_time{};
 

@@ -843,8 +843,7 @@ BC_AUTO_TEST_CASE(block__check_context__bip54_txsize_off__not_invalid_transactio
     BC_REQUIRE_NE(instance.check(ctx, false), error::invalid_transaction_size);
 }
 
-// bip54 requires the coinbase locktime to be the parent height and the
-// coinbase sequence to be non-final.
+// bip54 requires coinbase locktime of parent height and non-final sequence.
 static transaction locked_coinbase(uint32_t locktime, uint32_t sequence)
 {
     const inputs ins{ input{ point{}, script{}, sequence } };
@@ -946,8 +945,8 @@ static script commitment_script(const hash_digest& commitment) NOEXCEPT
     std::copy(commitment.cbegin(), commitment.cend(),
         std::next(data.begin(), head.size()));
 
-    return script{ operations{ operation{ opcode::op_return },
-        operation{ data, false } } };
+    const operation push{ data, false };
+    return script{ operations{ operation{ opcode::op_return }, push } };
 }
 
 static witness reservation_witness(const hash_digest& reservation) NOEXCEPT
@@ -1103,7 +1102,8 @@ BC_AUTO_TEST_CASE(block__signature_operations__coinbase_checksigs__expected)
 // Sixty four byte non-coinbase transaction, the malleable64 unit.
 static transaction triad_tx64() NOEXCEPT
 {
-    const script dups{ operations{ operation{ opcode::dup }, operation{ opcode::dup } } };
+    const operation dup{ opcode::dup };
+    const script dups{ operations{ dup, dup } };
     const inputs ins{ input{ point{ one_hash, 0 }, dups, 42 } };
     const outputs outs{ output{ 42, dups } };
     return transaction{ 42, ins, outs, 42 };
@@ -1188,8 +1188,10 @@ BC_AUTO_TEST_CASE(block__check__invalid_coinbase_script_size__invalid_coinbase_s
 
 static block triad_block() NOEXCEPT
 {
-    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
-    return block{ header{}, transactions{ coinbase_transaction(0, coinbase_script) } };
+    const operation push{ data_chunk{ 0x01, 0x02 }, false };
+    const script coinbase_script{ operations{ push } };
+    const auto coinbase = coinbase_transaction(0, coinbase_script);
+    return block{ header{}, transactions{ coinbase } };
 }
 
 BC_AUTO_TEST_CASE(block__check_context__minimal_block__block_success)
@@ -1371,16 +1373,20 @@ BC_AUTO_TEST_CASE(block__check_context__locked_transaction__absolute_time_locked
 static transactions witnessed_transactions() NOEXCEPT
 {
     const witness spender{ chunk_cptrs{ to_shared(base16_chunk("01")) } };
-    const inputs ins{ input{ point{ one_hash, 0 }, script{}, spender, 0xffffffff } };
+    const point prevout{ one_hash, 0 };
+    const inputs ins{ input{ prevout, script{}, spender, 0xffffffff } };
     const transaction spend{ 1, ins, outputs{ output{ 0, script{} } }, 0 };
-    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const operation push{ data_chunk{ 0x01, 0x02 }, false };
+    const script coinbase_script{ operations{ push } };
     return transactions{ coinbase_transaction(0, coinbase_script), spend };
 }
 
 static block witnessed_block() NOEXCEPT
 {
     const auto txs = witnessed_transactions();
-    const auto root = bitcoin_hash(txs.front().hash(false), txs.back().hash(false));
+    const auto left = txs.front().hash(false);
+    const auto right = txs.back().hash(false);
+    const auto root = bitcoin_hash(left, right);
     const header head{ 1, hash_digest{}, root, 0, 0, 0 };
     return block{ head, txs };
 }
@@ -1540,7 +1546,8 @@ BC_AUTO_TEST_CASE(block__accept__claim_above_subsidy__coinbase_value_limit)
 
 static transaction populate_coinbase() NOEXCEPT
 {
-    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const operation push{ data_chunk{ 0x01, 0x02 }, false };
+    const script coinbase_script{ operations{ push } };
     const inputs ins{ input{ point{}, coinbase_script, 0xffffffff } };
     return transaction{ 1, ins, outputs{ output{ 42, script{} } }, 0 };
 }
@@ -1762,7 +1769,7 @@ BC_AUTO_TEST_CASE(block__transaction_hashes__block2a__witness_distinguished)
 
 // set_hashes
 // ----------------------------------------------------------------------------
-// Caches the header hash and each transaction hash from the serialization.
+// Caches header hash and each transaction hash from serialization.
 
 BC_AUTO_TEST_CASE(block__set_hashes__genesis__matches_computed)
 {
@@ -1822,9 +1829,11 @@ BC_AUTO_TEST_CASE(block__check__forward_reference__forward_reference)
 
 static block sigops_block(size_t checksigs) NOEXCEPT
 {
-    const script coinbase_script{ operations{ operation{ data_chunk{ 0x01, 0x02 }, false } } };
+    const operation push{ data_chunk{ 0x01, 0x02 }, false };
+    const script coinbase_script{ operations{ push } };
     const inputs ins{ input{ point{}, coinbase_script, max_input_sequence } };
-    const outputs outs{ output{ 5000000000, script{ operations(checksigs, operation{ opcode::checksig }) } } };
+    const operations sigops(checksigs, operation{ opcode::checksig });
+    const outputs outs{ output{ 5000000000, script{ sigops } } };
     return block{ header{}, transactions{ transaction{ 1, ins, outs, 0 } } };
 }
 

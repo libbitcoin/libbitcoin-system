@@ -276,8 +276,8 @@ sliced_ctr(byte_span out, const_byte_span in, size_t start,
             xencrypt<Word>(xstream, wide);
 
             // Whole passes are applied directly to out, in bytes, as caller
-            // buffers are not word aligned. A loop over word casts of them
-            // may be vectorized with aligned stores, which fault.
+            // buffers are not word aligned. Loop over word casts of them may be
+            // vectorized with aligned stores, which fault.
             if ((out.size() - byte) >= size)
             {
                 const auto& keystream = array_cast<uint8_t>(xstream);

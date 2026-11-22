@@ -21,7 +21,7 @@
 
 // Midstate input/output.
 // ============================================================================
-// These bypass endianness, used for padding and state reintroduction.
+// Bypass endianness, used for padding and state reintroduction.
 
 namespace libbitcoin {
 namespace system {

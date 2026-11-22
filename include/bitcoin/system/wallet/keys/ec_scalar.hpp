@@ -25,9 +25,9 @@
 namespace libbitcoin {
 namespace system {
     
-/// ec_scalar is initialized to zero.
+/// ec_scalar initialized to zero.
 /// Failed operations return zero.
-/// The bool operator reflects the zero state (validity).
+/// Bool operator reflects zero state (validity).
 /// Does not implement string serialization.
 class BC_API ec_scalar
 {

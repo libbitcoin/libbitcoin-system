@@ -39,7 +39,7 @@ using pems = std::vector<pem>;
 BC_API std::string encode_pem(const std::string& label,
     const_byte_span data) NOEXCEPT;
 
-/// Decode all blocks of the text, ignoring text between blocks.
+/// Decode all blocks of text, ignoring text between blocks.
 /// False if any block is malformed or has encapsulated headers.
 BC_API bool decode_pem(pems& out, const std::string& text) NOEXCEPT;
 

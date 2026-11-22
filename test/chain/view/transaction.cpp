@@ -414,7 +414,7 @@ BC_AUTO_TEST_CASE(transaction_view__to_data__tx4_overloads__match_transaction)
 
 // input_table_size/output_table_size
 // ----------------------------------------------------------------------------
-// Store sizes, computed over the buffer during construction.
+// Store sizes, computed over buffer during construction.
 
 // One byte input script and two byte output script, value of 42.
 static system::chain::transaction table_tx()

@@ -119,7 +119,7 @@ BC_AUTO_TEST_CASE(png__to_image__perfect_square__expected_true)
         0x49, 0x44, 0x41, 0x54, // "IDAT"
         0x78, 0x9c,             // zlib header (deflate, default)
 
-        // Final fixed block of the scanlines, each prefixed by filter type,
+        // Final fixed block of scanlines, each prefixed by filter type,
         // inverted: 00 df (1101 1111), 00 5f (0101 1111), 00 df, 00 4f.
         0x63, 0xb8, 0xcf, 0x10,
         0x0f, 0xc4, 0xfe, 0x00,
