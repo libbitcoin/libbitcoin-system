@@ -67,6 +67,18 @@ constexpr size_t template_outcomes = 1'024;
 constexpr uint32_t template_sigop_bytes = 20;
 constexpr size_t template_blocks = 6;
 
+// The blocks of each fee estimate from the projection, and the chargeable
+// bytes arriving a block at a rate of 1,000 (less in proportion above it).
+constexpr std_array<size_t, 4> template_targets{ 1, 2, 3, 6 };
+constexpr uint64_t template_arrivals = 500'000;
+
+// A pool of chains: its rows alone, its chains and their greatest length, and
+// its parents with children.
+constexpr size_t chains_alone = 3'000;
+constexpr size_t chains_count = 2'300;
+constexpr size_t chains_length = 25;
+constexpr size_t chains_parents = 500;
+
 // One ring is started at one in this many of the eligible inputs.
 constexpr uint32_t uncontested = max_uint32;
 constexpr uint32_t sparse = 2'000;
@@ -257,6 +269,157 @@ struct pooled
         {
             total.fee = 100u + (payer() % 10'000u);
             total.size = 100u + (payer() % 400u);
+        }
+
+        cells = initial;
+        pool::algorithm::initialize<link_t>(columns());
+        while (pool::algorithm::propagate<link_t>(columns()));
+        initial = cells;
+    }
+};
+
+// A pool of chains, as mainnet on 21 November 2026 (ancestor counts of 1 to
+// 25 about equally common, one tx in twenty alone): confirmed rows, then rows
+// alone, chains of 20 to 25 rows laid out by depth, and parents of one to
+// four children. A row has one input, or two at one in three, the first
+// spending its parent if it has one and any other a confirmed row or none
+// with equal odds. One in two hundred of the live first inputs that spend no
+// row starts a ring of two or three. Seven rows in ten pay 1,000 to 1,299 a
+// virtual kilobyte, two up to 3,299 and one up to 32,999, for 110 to 409
+// virtual bytes. A chain pays one rate, varied by row in one chain of three,
+// and a parent of children pays 500 to 1,499.
+struct chained
+  : table
+{
+    chained(size_t confirmed, uint32_t seed) NOEXCEPT
+    {
+        std::mt19937 generator(seed);
+        links_t free{};
+
+        const auto draw = [&](uint32_t below) NOEXCEPT
+        {
+            return possible_narrow_cast<uint32_t>(generator() % below);
+        };
+
+        const auto spend = [&](link_t up) NOEXCEPT
+        {
+            const auto input = possible_narrow_cast<link_t>(rows.size());
+            rows.push_back(up);
+            rivals.push_back(none);
+            siblings.push_back(up == none ? none : children[up]);
+            if (up != none)
+                children[up] = input;
+        };
+
+        const auto settled = [&]() NOEXCEPT
+        {
+            const auto spent = is_nonzero(confirmed) && is_zero(draw(2));
+            return spent ? possible_narrow_cast<link_t>(
+                generator() % confirmed) : none;
+        };
+
+        const auto rate = [&]() NOEXCEPT -> uint64_t
+        {
+            const auto odds = draw(10);
+            if (odds < 7u)
+                return 1'000u + draw(300);
+
+            return odds < 9u ? 1'300u + draw(2'000) : 3'000u + draw(30'000);
+        };
+
+        // A live row spending the parent, a confirmed row or none.
+        const auto add = [&](link_t parent, uint64_t pays,
+            uint32_t size) NOEXCEPT
+        {
+            const auto row = possible_narrow_cast<link_t>(edges.size());
+            const auto first = possible_narrow_cast<link_t>(rows.size());
+            const auto inputs = is_zero(draw(3)) ? 2u : 1u;
+            edges.push_back({ first, inputs });
+            children.push_back(none);
+            initial.push_back(unlabeled);
+            totals.push_back({ pays * size / 1'000u, size, add1(draw(4)) });
+            spend(parent == none ? settled() : parent);
+            if (inputs == 2u)
+                spend(settled());
+
+            if (rows[first] == none)
+                free.push_back(first);
+
+            return row;
+        };
+
+        for (size_t row{}; row < confirmed; ++row)
+        {
+            const auto first = possible_narrow_cast<link_t>(rows.size());
+            edges.push_back({ first, 1u });
+            children.push_back(none);
+            initial.push_back(boundary);
+            totals.push_back({ 10, 100, 1 });
+            spend(none);
+        }
+
+        for (size_t row{}; row < chains_alone; ++row)
+        {
+            const auto pays = rate();
+            add(none, pays, 110u + draw(300));
+        }
+
+        struct chain
+        {
+            link_t last;
+            size_t length;
+            uint64_t pays;
+            uint32_t size;
+            bool varied;
+        };
+
+        std_vector<chain> chains(chains_count);
+        for (auto& next: chains)
+        {
+            next.last = none;
+            next.length = chains_length - draw(6);
+            next.pays = rate();
+            next.size = 110u + draw(200);
+            next.varied = is_zero(draw(3));
+        }
+
+        for (size_t depth{}; depth < chains_length; ++depth)
+        {
+            for (auto& next: chains)
+            {
+                if (depth >= next.length)
+                    continue;
+
+                const auto pays = next.pays + (next.varied ? draw(200) : 0u);
+                next.last = add(next.last, pays, next.size);
+            }
+        }
+
+        for (size_t parent{}; parent < chains_parents; ++parent)
+        {
+            const auto low = 500u + draw(1'000);
+            const auto up = add(none, low, 150u + draw(300));
+            const auto count = add1(draw(4));
+            for (uint32_t child{}; child < count; ++child)
+            {
+                const auto pays = rate() * add1(draw(3));
+                add(up, pays, 110u + draw(200));
+            }
+        }
+
+        for (size_t at{}; at + 3u <= free.size();)
+        {
+            const auto size = 2u + draw(2);
+            if (is_nonzero(draw(200)))
+            {
+                ++at;
+                continue;
+            }
+
+            for (size_t member{}; member < size; ++member)
+                rivals[free[at + member]] = free[at + (add1(member) % size)];
+
+            at += size;
         }
 
         cells = initial;
@@ -682,15 +845,17 @@ static bool report_walk(const std::string& name, size_t count) NOEXCEPT
     return in && out;
 }
 
-// One template of the pool, and a fee projection of blocks from it.
-static bool report_template(const std::string& name, size_t count) NOEXCEPT
+// One template of the pool, a fee projection of blocks from it, and the fee
+// estimates from a projection.
+static bool report_template(const std::string& name, table& columns,
+    size_t live) NOEXCEPT
 {
     using algorithm = pool::algorithm;
-    pooled columns{ count, pool_live, table_seed };
+    const auto count = columns.cells.size();
     const auto spans = columns.columns();
 
-    std::cout << "template " << name << ": " << count << " rows, "
-        << pool_live << " live" << std::endl;
+    std::cout << "template " << name << ": " << count << " rows, " << live
+        << " live" << std::endl;
 
     const auto one_block = measure(columns, [&]() NOEXCEPT
     {
@@ -718,10 +883,38 @@ static bool report_template(const std::string& name, size_t count) NOEXCEPT
         return projection.blocks.size();
     });
 
+    links_t out{};
+    algorithm::projection_t projection{};
+    projection.marks.resize(count);
+    algorithm::resolve(projection.marks, spans, template_outcomes, 0,
+        template_sigop_bytes);
+    for (size_t block{}; block < template_blocks; ++block)
+        algorithm::project(out, projection, spans, template_budget,
+            template_depth, template_sigop_bytes);
+
+    const auto arrivals = [](uint64_t rate) NOEXCEPT
+    {
+        return template_arrivals * 1'000u / greater(rate, 1'000_u64);
+    };
+
+    const auto estimates = measure(columns, [&]() NOEXCEPT
+    {
+        size_t reached{};
+        for (const auto target: template_targets)
+            if (algorithm::estimate(projection, target, template_budget.size,
+                arrivals) != max_uint64)
+                ++reached;
+
+        return reached;
+    });
+
     std::cout << "  template: " << one_block.time << " ms, "
         << one_block.passes << " rows taken" << std::endl;
     std::cout << "  projection: " << blocks.time << " ms, " << blocks.passes
         << " blocks" << std::endl;
+    std::cout << "  estimates: " << estimates.time << " ms, "
+        << estimates.passes << " of " << template_targets.size()
+        << " targets reached" << std::endl;
 
     return is_nonzero(one_block.passes) && is_nonzero(blocks.passes);
 }
@@ -851,12 +1044,21 @@ BC_AUTO_TEST_CASE(pool_performance__walk__ten_million__reported)
 
 BC_AUTO_TEST_CASE(pool_performance__template__one_million__reported)
 {
-    BC_REQUIRE(report_template("1M", 1'000'000));
+    pooled columns{ 1'000'000, pool_live, table_seed };
+    BC_REQUIRE(report_template("1M", columns, pool_live));
 }
 
 BC_AUTO_TEST_CASE(pool_performance__template__ten_million__reported)
 {
-    BC_REQUIRE(report_template("10M", 10'000'000));
+    pooled columns{ 10'000'000, pool_live, table_seed };
+    BC_REQUIRE(report_template("10M", columns, pool_live));
+}
+
+BC_AUTO_TEST_CASE(pool_performance__template__chains__reported)
+{
+    constexpr size_t confirmed = 1'000'000;
+    chained columns{ confirmed, table_seed };
+    BC_REQUIRE(report_template("chains", columns, columns.cells.size() - confirmed));
 }
 
 // find
