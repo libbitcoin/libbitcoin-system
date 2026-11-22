@@ -243,6 +243,9 @@ public:
     static constexpr uint64_t fee_rate(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
+    /// Fee rate of a fee over chargeable bytes (satoshis per kilobyte).
+    static constexpr uint64_t fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT;
+
     /// Column values (stored little-endian).
     /// -----------------------------------------------------------------------
 
@@ -438,6 +441,12 @@ protected:
     static constexpr void each_rival(const graph_t& graph, link_t input,
         const Visitor& visit) NOEXCEPT;
 
+    /// Each row joined to the row in a component (by parent, rival or child),
+    /// false once a visit is.
+    template <typename Visitor>
+    static constexpr bool each_member(const graph_t& graph, link_t row,
+        const Visitor& visit) NOEXCEPT;
+
     /// The row is in a clique (has a present rival).
     static constexpr bool contested(const graph_t& graph, link_t row) NOEXCEPT;
 
@@ -482,26 +491,80 @@ protected:
         const totals_t& budget, size_t depth,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The rate is taken within the count of blocks.
+    /// The takes of each of the count of blocks by ascending rate, the size
+    /// of each that of the takes at or above its rate.
+    static std::vector<takes_t> levels(const projection_t& projection,
+        size_t count) NOEXCEPT;
+
+    /// The rate is taken within the count of blocks, by their levels.
     template <typename Arrivals>
-    static bool reaches(const projection_t& projection, size_t count,
-        uint64_t space, uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
+    static bool reaches(const projection_t& projection,
+        const std::vector<takes_t>& levels, size_t count, uint64_t space,
+        uint64_t rate, const Arrivals& arrivals) NOEXCEPT;
+
+    /// The rows from the first met by a walk, forgotten by the next.
+    struct visits_t
+    {
+        std::vector<link_t> walks{};
+        link_t first{};
+        link_t walk{};
+    };
+
+    /// A new walk, with no row met.
+    static void restart(visits_t& visits) NOEXCEPT;
+
+    /// The row is met by the walk.
+    static bool visited(const visits_t& visits, link_t row) NOEXCEPT;
+
+    /// The row is first met by the walk.
+    static bool visit(visits_t& visits, link_t row) NOEXCEPT;
 
     /// The rows and totals of the chunk of the row, false if none fits.
     static bool chunk(std::vector<link_t>& out, totals_t& sum,
-        const std::span<const mark>& marks, const graph_t& graph, link_t row,
-        size_t depth, const totals_t& available) NOEXCEPT;
+        visits_t& visits, const std::span<const mark>& marks,
+        const graph_t& graph, link_t row, size_t depth,
+        const totals_t& available) NOEXCEPT;
 
-    /// The untaken rows connected to the row by parent and child, false if
-    /// one has an excluded parent or they exceed maximum_members.
-    static bool cluster(std::vector<link_t>& out,
+    /// Untaken rows connected to row by parent and child, false if one has
+    /// excluded parent or exceeds maximum_members (where walk ends).
+    static bool cluster(std::vector<link_t>& out, visits_t& visits,
         const std::span<const mark>& marks, const graph_t& graph,
         link_t row) NOEXCEPT;
 
-    /// The highest rate ancestry closed subset of the cluster, ascending.
+    /// What is left to flow from the source, to the sink and over each link.
+    template <typename Capacity>
+    struct residual_t
+    {
+        std_array<Capacity, maximum_members> source{};
+        std_array<Capacity, maximum_members> sink{};
+        std::vector<Capacity> flows{};
+    };
+
+    /// Rows of cluster as nodes, flow from fees to sizes leaving best closure.
+    struct flow_t
+    {
+        std_array<link_t, maximum_members> rows{};
+        std_array<uint64_t, maximum_members> fees{};
+        std_array<uint64_t, maximum_members> sizes{};
+        std_array<mask_t, maximum_members> parents{};
+        std_array<mask_t, maximum_members> fed{};
+        std_array<size_t, maximum_members> links{};
+        std_array<size_t, maximum_members> before{};
+        std_array<size_t, maximum_members> queue{};
+        residual_t<uint64_t> narrow{};
+        residual_t<uint128_t> wide{};
+    };
+
+    /// Nodes of highest rate closure of flow by capacities holding fee x size.
+    template <typename Capacity>
+    static mask_t closure_(flow_t& flow, residual_t<Capacity>& residual,
+        size_t count, size_t links, uint64_t fee, uint64_t size) NOEXCEPT;
+
+    /// The highest rate ancestry closed subset of the cluster, ascending,
+    /// the cluster of no more than maximum_members.
     static void closure(std::vector<link_t>& out, totals_t& sum,
-        const graph_t& graph, const std::vector<link_t>& cluster,
-        uint32_t bytes_per_sigop) NOEXCEPT;
+        flow_t& flow, const graph_t& graph,
+        const std::vector<link_t>& cluster, uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// The cell of the row with its derived causes recomputed.
     static link_t resolved(const graph_t& graph, link_t row) NOEXCEPT;

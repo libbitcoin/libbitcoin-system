@@ -103,8 +103,12 @@ constexpr uint64_t algorithm::chargeable(mask_t outcome,
 constexpr uint64_t algorithm::fee_rate(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
-    const auto size = greater(chargeable(totals, bytes_per_sigop), one);
-    return ceilinged_multiply(totals.fee, 1'000_u64) / size;
+    return fee_rate(totals.fee, chargeable(totals, bytes_per_sigop));
+}
+
+constexpr uint64_t algorithm::fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT
+{
+    return ceilinged_multiply(fee, 1'000_u64) / greater(bytes, 1_u64);
 }
 
 // Column values.
@@ -204,38 +208,8 @@ constexpr bool algorithm::collect(component_t& out, const graph_t& graph,
         return false;
 
     for (size_t at{}; at < out.count; ++at)
-    {
-        const auto member = out.rows[at];
-        const auto slice = edges(graph, member);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-        {
-            const auto up = parent(graph, input);
-            if (up != none && is_labeled(cell(graph, up)) && !add(up))
-                return false;
-
-            auto added = true;
-            each_rival(graph, input, [&](link_t other) NOEXCEPT
-            {
-                const auto rival_row = owner(graph, other);
-                if (is_present(cell(graph, rival_row)) && !add(rival_row))
-                    added = false;
-            });
-
-            if (!added)
-                return false;
-        }
-
-        auto added = true;
-        each_child(graph, member, [&](link_t down) NOEXCEPT
-        {
-            if (is_present(cell(graph, down)) && !add(down))
-                added = false;
-        });
-
-        if (!added)
+        if (!each_member(graph, out.rows[at], add))
             return false;
-    }
 
     std::sort(out.rows.begin(), std::next(out.rows.begin(), out.count));
     return true;
@@ -373,8 +347,8 @@ inline bool algorithm::family(uint64_t& fee, uint64_t& bytes,
     uint64_t limit, uint32_t bytes_per_sigop,
     size_t maximum_outcomes) NOEXCEPT
 {
-    fee = zero;
-    bytes = zero;
+    fee = 0_u64;
+    bytes = 0_u64;
     std::vector<link_t> found{};
     std::unordered_set<link_t> visited{};
     const auto push = [&](link_t row) NOEXCEPT
@@ -672,14 +646,15 @@ inline uint64_t algorithm::estimate(const projection_t& projection,
 {
     uint64_t low{};
     auto high = max_uint64;
-    if (!reaches(projection, count, space, high, arrivals))
+    const auto sized = levels(projection, count);
+    if (!reaches(projection, sized, count, space, high, arrivals))
         return high;
 
     // A rate that is taken implies that each higher rate is taken.
     while (low < high)
     {
         const auto middle = low + to_half(high - low);
-        if (reaches(projection, count, space, middle, arrivals))
+        if (reaches(projection, sized, count, space, middle, arrivals))
             high = middle;
         else
             low = add1(middle);
@@ -838,6 +813,35 @@ constexpr void algorithm::each_rival(const graph_t& graph, link_t input,
     while (at != none && at != start);
 }
 
+template <typename Visitor>
+constexpr bool algorithm::each_member(const graph_t& graph, link_t row,
+    const Visitor& visit) NOEXCEPT
+{
+    auto all = true;
+    const auto slice = edges(graph, row);
+    for (auto input = slice.first; input < slice.first + slice.count; ++input)
+    {
+        const auto up = parent(graph, input);
+        if (up != none && is_labeled(cell(graph, up)))
+            all = all && visit(up);
+
+        each_rival(graph, input, [&](link_t other) NOEXCEPT
+        {
+            const auto rival_row = owner(graph, other);
+            if (is_present(cell(graph, rival_row)))
+                all = all && visit(rival_row);
+        });
+    }
+
+    each_child(graph, row, [&](link_t down) NOEXCEPT
+    {
+        if (is_present(cell(graph, down)))
+            all = all && visit(down);
+    });
+
+    return all;
+}
+
 constexpr bool algorithm::contested(const graph_t& graph, link_t row) NOEXCEPT
 {
     auto out = false;
@@ -913,7 +917,7 @@ constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
     each_fee<Word>(zero, outcomes, component, graph,
         [&](size_t index, uint64_t fee) NOEXCEPT
         {
-            const auto size = is_zero(rate) ? zero : chargeable(
+            const auto size = is_zero(rate) ? 0_u64 : chargeable(
                 outcomes[index], component, graph, bytes_per_sigop);
 
             if (first || worth(fee, size, most, least, rate))
@@ -1004,33 +1008,12 @@ inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
     {
         if (std::ranges::find(found, next) == found.end())
             found.push_back(next);
+
+        return true;
     };
 
     for (size_t at{}; at < found.size(); ++at)
-    {
-        const auto member = found[at];
-        const auto slice = edges(graph, member);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-        {
-            const auto up = parent(graph, input);
-            if (up != none && is_labeled(cell(graph, up)))
-                add(up);
-
-            each_rival(graph, input, [&](link_t other) NOEXCEPT
-            {
-                const auto rival_row = owner(graph, other);
-                if (is_present(cell(graph, rival_row)))
-                    add(rival_row);
-            });
-        }
-
-        each_child(graph, member, [&](link_t down) NOEXCEPT
-        {
-            if (is_present(cell(graph, down)))
-                add(down);
-        });
-    }
+        each_member(graph, found[at], add);
 
     for (const auto member: found)
         discard(marks, graph, member);
@@ -1040,24 +1023,44 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::span<mark> marks, const columns_t& columns, const totals_t& budget,
     size_t depth, uint32_t bytes_per_sigop) NOEXCEPT
 {
+    // The chunk of the row, or the closure of its cluster (count rows from
+    // first of the closed rows).
     struct score_t
     {
         link_t row{};
+        link_t count{};
+        size_t first{};
+        size_t order{};
         uint64_t rate{};
         totals_t sum{};
-        std::vector<link_t> rows{};
-        bool closed{};
     };
 
+    // A size or sigops of a row.
+    using least_t = std::pair<uint32_t, link_t>;
+
+    // No row before the first unmarked row is met by a walk.
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
+    const auto end = std::next(marks.begin(), count);
+    const auto start = std::find(marks.begin(), end, mark::unmarked);
+    const auto offset = to_unsigned(std::distance(marks.begin(), start));
+    const auto base = possible_narrow_cast<link_t>(offset);
+    const auto live = count - offset;
     std::vector<score_t> scores{};
+    std::vector<least_t> sizes{};
+    std::vector<least_t> sigops{};
+    std::vector<link_t> closed{};
     std::vector<link_t> rows{};
     std::vector<link_t> group{};
+    std::vector<link_t> descent{};
     std::vector<link_t> seeds{};
-    std::vector<size_t> seen(count);
-    std::vector<size_t> below(count);
-    size_t epoch{};
+    std::vector<link_t> places(live);
+    visits_t seen{ std::vector<link_t>(live), base };
+    visits_t below{ std::vector<link_t>(live), base };
+    visits_t walk{ std::vector<link_t>(live), base };
+    flow_t flow{};
+    size_t offers{};
+    auto heaped = false;
     totals_t used{};
     out.clear();
     takes.clear();
@@ -1088,96 +1091,248 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         };
     };
 
-    // The highest rate is on top, the lowest row of equal rates.
-    const auto lower = [](const score_t& left, const score_t& right) NOEXCEPT
+    const auto alone = [&](link_t row) NOEXCEPT
     {
-        return left.rate == right.rate ? left.row > right.row :
-            left.rate < right.rate;
+        return fits(totals(graph, row), available());
     };
 
+    // Chargeable size of the rows, each charged alone.
+    const auto charged = [&](const std::vector<link_t>& members) NOEXCEPT
+    {
+        uint64_t bytes{};
+        for (const auto member: members)
+            bytes = ceilinged_add(bytes, chargeable(totals(graph, member),
+                bytes_per_sigop));
+
+        return bytes;
+    };
+
+    // An unmarked row of no more than the value is left (least on top).
+    const auto remains = [&](std::vector<least_t>& least,
+        uint32_t value) NOEXCEPT
+    {
+        while (!least.empty() && !unmarked(least.front().second))
+        {
+            std::pop_heap(least.begin(), least.end(), std::greater<>{});
+            least.pop_back();
+        }
+
+        return !least.empty() && least.front().first <= value;
+    };
+
+    // The highest rate is on top, the lowest row of equal rates, and the
+    // latest offer of the same row.
+    const auto lower = [](const score_t& left, const score_t& right) NOEXCEPT
+    {
+        if (left.rate != right.rate)
+            return left.rate < right.rate;
+
+        return left.row == right.row ? left.order < right.order :
+            left.row > right.row;
+    };
+
+    // The first offers are heaped at once.
     const auto push = [&](score_t&& score) NOEXCEPT
     {
-        scores.push_back(std::move(score));
-        std::push_heap(scores.begin(), scores.end(), lower);
+        score.order = offers++;
+        scores.push_back(score);
+        if (heaped)
+            std::push_heap(scores.begin(), scores.end(), lower);
     };
 
     const auto score_row = [&](link_t row) NOEXCEPT
     {
         totals_t sum{};
-        if (chunk(rows, sum, marks, graph, row, depth, available()))
-            push({ row, fee_rate(sum, bytes_per_sigop), sum, {}, false });
+        if (chunk(rows, sum, walk, marks, graph, row, depth, available()))
+            push({ row, {}, {}, {}, fee_rate(sum.fee, charged(rows)), sum });
     };
 
-    // A whole cluster offers its best closure, else each of its rows its
-    // chunk, of a partial cluster only those below the take.
-    const auto offer = [&](link_t row, bool all) NOEXCEPT
+    // Each row of the group offers its chunk (unless every, only the rows
+    // below the take), none of which fits unless one of the rows does.
+    const auto score_rows = [&](bool every) NOEXCEPT
     {
-        const auto whole = cluster(group, marks, graph, row);
-        for (const auto member: group)
-            seen[member] = epoch;
-
-        totals_t sum{};
-        if (whole)
-            closure(rows, sum, graph, group, bytes_per_sigop);
-
-        if (whole && fits(sum, available()))
-        {
-            const auto rate = fee_rate(sum, bytes_per_sigop);
-            push({ rows.front(), rate, sum, rows, true });
+        if (!std::ranges::any_of(group, alone))
             return;
-        }
 
         for (const auto member: group)
-            if (all || whole || below[member] == epoch)
+            if (every || visited(below, member))
                 score_row(member);
     };
 
-    ++epoch;
-    for (size_t at{}; at < count; ++at)
+    // A whole cluster offers its best closure (itself if one row), else each
+    // of its rows its chunk, of a partial cluster of a take only those below
+    // the take.
+    const auto propose = [&](bool whole, bool every) NOEXCEPT
+    {
+        totals_t sum{};
+        if (whole && is_one(group.size()))
+        {
+            rows.assign(one, group.front());
+            sum = totals(graph, group.front());
+        }
+        else if (whole)
+        {
+            closure(rows, sum, flow, graph, group, bytes_per_sigop);
+        }
+
+        if (whole && fits(sum, available()))
+        {
+            const auto first = closed.size();
+            const auto size = possible_narrow_cast<link_t>(rows.size());
+            const auto rate = fee_rate(sum.fee, charged(rows));
+            closed.insert(closed.end(), rows.begin(), rows.end());
+            push({ rows.front(), size, first, {}, rate, sum });
+            return;
+        }
+
+        score_rows(every || whole);
+    };
+
+    // The cluster of a row below a take, false if over maximum_members with
+    // nothing offered.
+    const auto offer = [&](link_t row) NOEXCEPT
+    {
+        const auto whole = cluster(group, walk, marks, graph, row);
+        if (group.size() > maximum_members)
+            return false;
+
+        for (const auto member: group)
+            visit(seen, member);
+
+        propose(whole, false);
+        return true;
+    };
+
+    // The unmarked rows in order, each with its place among them.
+    for (auto at = offset; at < count; ++at)
     {
         const auto row = possible_narrow_cast<link_t>(at);
-        if (unmarked(row) && seen[row] != epoch)
-            offer(row, true);
+        if (!unmarked(row))
+            continue;
+
+        const auto own = totals(graph, row);
+        places[row - base] = possible_narrow_cast<link_t>(sizes.size());
+        sizes.emplace_back(own.size, row);
+        sigops.emplace_back(own.sigops, row);
     }
+
+    // Each place is joined to an earlier place of its cluster (the first to
+    // itself) and is in a ring of the places of its cluster, which is partial
+    // (at its first place) if a row of it has an excluded parent.
+    const auto candidates = possible_narrow_cast<link_t>(sizes.size());
+    std::vector<link_t> joined(candidates);
+    std::vector<link_t> ring(candidates);
+    std::vector<bool> partial(candidates);
+    for (link_t place{}; place < candidates; ++place)
+        joined[place] = ring[place] = place;
+
+    const auto lowest = [&](link_t place) NOEXCEPT
+    {
+        while (joined[place] != place)
+        {
+            joined[place] = joined[joined[place]];
+            place = joined[place];
+        }
+
+        return place;
+    };
+
+    for (link_t place{}; place < candidates; ++place)
+    {
+        const auto slice = edges(graph, sizes[place].second);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            const auto up = parent(graph, input);
+            if (up == none || is_boundary(cell(graph, up)) ||
+                marks[up] == mark::taken)
+                continue;
+
+            auto low = lowest(place);
+            if (marks[up] == mark::excluded)
+            {
+                partial[low] = true;
+                continue;
+            }
+
+            auto high = lowest(places[up - base]);
+            if (high == low)
+                continue;
+
+            if (high < low)
+                std::swap(low, high);
+
+            joined[high] = low;
+            std::swap(ring[low], ring[high]);
+            partial[low] = partial[low] || partial[high];
+        }
+    }
+
+    for (link_t place{}; place < candidates; ++place)
+    {
+        if (joined[place] != place)
+            continue;
+
+        group.clear();
+        auto member = place;
+        do
+        {
+            group.push_back(sizes[member].second);
+            member = ring[member];
+        }
+        while (member != place);
+
+        propose(!partial[place] && group.size() <= maximum_members, true);
+    }
+
+    std::make_heap(scores.begin(), scores.end(), lower);
+    std::make_heap(sizes.begin(), sizes.end(), std::greater<>{});
+    std::make_heap(sigops.begin(), sigops.end(), std::greater<>{});
+    heaped = true;
 
     while (!scores.empty())
     {
+        // A take holds an unmarked row, so none is left when none fits.
+        const auto space = available();
+        if (!remains(sizes, space.size) || !remains(sigops, space.sigops))
+            break;
+
         std::pop_heap(scores.begin(), scores.end(), lower);
-        auto score = std::move(scores.back());
+        const auto score = scores.back();
         scores.pop_back();
 
         totals_t sum{};
-        const auto space = available();
-        if (score.closed)
+        if (is_nonzero(score.count))
         {
-            if (!std::ranges::all_of(score.rows, unmarked))
+            const auto held = std::span<const link_t>{ closed }.subspan(
+                score.first, score.count);
+
+            if (!std::ranges::all_of(held, unmarked))
                 continue;
 
             // A closure that no longer fits falls back to the chunks of its
             // cluster.
             if (!fits(score.sum, space))
             {
-                cluster(group, marks, graph, score.row);
-                for (const auto member: group)
-                    score_row(member);
-
+                cluster(group, walk, marks, graph, score.row);
+                score_rows(true);
                 continue;
             }
 
-            rows = std::move(score.rows);
+            rows.assign(held.begin(), held.end());
             sum = score.sum;
         }
         else
         {
-            if (!unmarked(score.row) ||
-                !chunk(rows, sum, marks, graph, score.row, depth, space))
+            if (!unmarked(score.row) || !chunk(rows, sum, walk, marks, graph,
+                score.row, depth, space))
                 continue;
 
             // A changed chunk competes again at its current rate.
             if (!same(sum, score.sum))
             {
-                push({ score.row, fee_rate(sum, bytes_per_sigop), sum, {},
-                    false });
+                push({ score.row, {}, {}, {}, fee_rate(sum.fee,
+                    charged(rows)), sum });
                 continue;
             }
         }
@@ -1186,59 +1341,99 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             marks[row] = mark::taken;
 
         out.insert(out.end(), rows.begin(), rows.end());
-        takes.push_back({ score.rate, chargeable(sum, bytes_per_sigop) });
-        used.fee = ceilinged_add(used.fee, sum.fee);
+        takes.push_back({ score.rate, charged(rows) });
         used.size = ceilinged_add(used.size, sum.size);
         used.sigops = ceilinged_add(used.sigops, sum.sigops);
 
         // The untaken descendants of the take have changed chunks, and the
         // untaken remainder of its cluster competes again from its children.
-        ++epoch;
+        restart(seen);
+        restart(below);
         seeds.clear();
-        group.assign(rows.begin(), rows.end());
-        for (size_t at{}; at < group.size(); ++at)
+        descent.assign(rows.begin(), rows.end());
+        const auto taken = descent.size();
+        for (size_t at{}; at < descent.size(); ++at)
         {
-            each_child(graph, group[at], [&](link_t down) NOEXCEPT
+            each_child(graph, descent[at], [&](link_t down) NOEXCEPT
             {
-                if (!unmarked(down) || below[down] == epoch)
+                if (!unmarked(down) || !visit(below, down))
                     return;
 
-                below[down] = epoch;
-                group.push_back(down);
-                if (marks[group[at]] == mark::taken)
+                descent.push_back(down);
+                if (marks[descent[at]] == mark::taken)
                     seeds.push_back(down);
             });
         }
 
+        auto walked = true;
         for (const auto seed: seeds)
-            if (seen[seed] != epoch)
-                offer(seed, false);
+            if (!visited(seen, seed) && !offer(seed))
+                walked = false;
+
+        // Each descendant that no walk met is of a cluster not walked.
+        if (!walked)
+            for (auto at = taken; at < descent.size(); ++at)
+                if (!visited(seen, descent[at]))
+                    score_row(descent[at]);
     }
 
     std::sort(out.begin(), out.end());
 }
 
-template <typename Arrivals>
-inline bool algorithm::reaches(const projection_t& projection, size_t count,
-    uint64_t space, uint64_t rate, const Arrivals& arrivals) NOEXCEPT
+// Takes are in about descending order of rate as taken.
+inline std::vector<algorithm::takes_t> algorithm::levels(
+    const projection_t& projection, size_t count) NOEXCEPT
 {
     const auto& blocks = projection.blocks;
-    const auto arriving = arrivals(rate);
+    std::vector<takes_t> out(std::min(count, blocks.size()));
+    for (size_t block{}; block < out.size(); ++block)
+    {
+        auto& level = out[block];
+        level.assign(blocks[block].rbegin(), blocks[block].rend());
+        if (!std::ranges::is_sorted(level, {}, &take_t::rate))
+            std::ranges::sort(level, {}, &take_t::rate);
+
+        uint64_t size{};
+        for (auto take = level.rbegin(); take != level.rend(); ++take)
+            take->size = size = ceilinged_add(size, take->size);
+    }
+
+    return out;
+}
+
+template <typename Arrivals>
+inline bool algorithm::reaches(const projection_t& projection,
+    const std::vector<takes_t>& levels, size_t count, uint64_t space,
+    uint64_t rate, const Arrivals& arrivals) NOEXCEPT
+{
+    const auto blocks = projection.blocks.size();
+    uint64_t arriving{};
     uint64_t carry{};
 
     // A block that leaves rows is full, so its takes are its capacity.
     for (size_t block{}; block < count; ++block)
     {
-        std::span<const take_t> takes{};
-        if (block < blocks.size())
-            takes = blocks[block];
+        std::span<const take_t> level{};
+        if (block < levels.size())
+            level = levels[block];
 
-        const auto last = add1(block) >= blocks.size();
-        const auto full = !takes.empty() && !(last && projection.exhausted);
-        const auto capacity = full ? above(takes, zero) : space;
-        const auto demand = ceilinged_add(carry, above(takes, rate));
+        const auto from = std::ranges::lower_bound(level, rate, {},
+            &take_t::rate);
+
+        const auto last = add1(block) >= blocks;
+        const auto full = !level.empty() && !(last && projection.exhausted);
+        const auto capacity = full ? level.front().size : space;
+        const auto over = from == level.end() ? 0_u64 : from->size;
+        const auto demand = ceilinged_add(carry, over);
         if (demand < capacity)
             return true;
+
+        // Arrivals join what the first block leaves, and each block after.
+        if (add1(block) == count)
+            break;
+
+        if (is_zero(block))
+            arriving = arrivals(rate);
 
         const auto excess = floored_subtract(demand, capacity);
         carry = ceilinged_add(excess, arriving);
@@ -1247,12 +1442,39 @@ inline bool algorithm::reaches(const projection_t& projection, size_t count,
     return false;
 }
 
+inline void algorithm::restart(visits_t& visits) NOEXCEPT
+{
+    if (is_nonzero(++visits.walk))
+        return;
+
+    std::ranges::fill(visits.walks, link_t{});
+    visits.walk = 1_u32;
+}
+
+inline bool algorithm::visited(const visits_t& visits, link_t row) NOEXCEPT
+{
+    return visits.walks[row - visits.first] == visits.walk;
+}
+
+inline bool algorithm::visit(visits_t& visits, link_t row) NOEXCEPT
+{
+    auto& walk = visits.walks[row - visits.first];
+    if (walk == visits.walk)
+        return false;
+
+    walk = visits.walk;
+    return true;
+}
+
 inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
-    const std::span<const mark>& marks, const graph_t& graph, link_t row,
-    size_t depth, const totals_t& available) NOEXCEPT
+    visits_t& visits, const std::span<const mark>& marks,
+    const graph_t& graph, link_t row, size_t depth,
+    const totals_t& available) NOEXCEPT
 {
     sum = {};
     out.assign(one, row);
+    restart(visits);
+    visit(visits, row);
 
     // Each level holds the untaken parents of the previous level.
     for (size_t level{}, begin{}; begin < out.size(); ++level)
@@ -1272,7 +1494,7 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
                 if (marks[up] == mark::excluded)
                     return false;
 
-                if (std::ranges::find(out, up) != out.end())
+                if (!visit(visits, up))
                     continue;
 
                 if (level == depth)
@@ -1304,23 +1526,25 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
     return !out.empty();
 }
 
-inline bool algorithm::cluster(std::vector<link_t>& out,
+inline bool algorithm::cluster(std::vector<link_t>& out, visits_t& visits,
     const std::span<const mark>& marks, const graph_t& graph,
     link_t row) NOEXCEPT
 {
     out.assign(one, row);
+    restart(visits);
+    visit(visits, row);
     auto whole = true;
     const auto push = [&](link_t found) NOEXCEPT
     {
-        if (marks[found] != mark::unmarked ||
-            std::ranges::find(out, found) != out.end())
-            return;
-
-        out.push_back(found);
+        if (marks[found] == mark::unmarked && visit(visits, found))
+            out.push_back(found);
     };
 
     for (size_t at{}; at < out.size(); ++at)
     {
+        if (out.size() > maximum_members)
+            return false;
+
         const auto member = out[at];
         const auto slice = edges(graph, member);
         for (auto input = slice.first; input < slice.first + slice.count;
@@ -1345,122 +1569,191 @@ inline bool algorithm::cluster(std::vector<link_t>& out,
     return whole && out.size() <= maximum_members;
 }
 
-// Dinkelbach: the maximum weight closure at the rate of the best closure
-// found (fee times its size less size times its fee, a minimum cut) is
-// positive until no closure has a higher rate.
 inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
-    const graph_t& graph, const std::vector<link_t>& cluster,
+    flow_t& flow, const graph_t& graph, const std::vector<link_t>& cluster,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
+    // A node is a row in ascending order, a link a node to a parent node.
     const auto count = cluster.size();
-    const auto source = count;
-    const auto sink = add1(count);
-    const auto nodes = count + two;
-    std::vector<uint64_t> fees(count);
-    std::vector<uint64_t> sizes(count);
-    std::vector<std::vector<size_t>> parents(count);
+    const auto end = std::next(flow.rows.begin(), count);
+    std::copy(cluster.begin(), cluster.end(), flow.rows.begin());
+    std::sort(flow.rows.begin(), end);
+
+    size_t links{};
+    uint64_t fee{};
+    uint64_t size{};
     for (size_t node{}; node < count; ++node)
     {
-        const auto& row = totals(graph, cluster[node]);
-        fees[node] = row.fee;
-        sizes[node] = chargeable(row, bytes_per_sigop);
+        const auto row = flow.rows[node];
+        const auto own = totals(graph, row);
+        flow.fees[node] = own.fee;
+        flow.sizes[node] = chargeable(own, bytes_per_sigop);
+        fee = ceilinged_add(fee, flow.fees[node]);
+        size = ceilinged_add(size, flow.sizes[node]);
 
-        const auto slice = edges(graph, cluster[node]);
+        mask_t parents{};
+        const auto slice = edges(graph, row);
         for (auto input = slice.first; input < slice.first + slice.count;
             ++input)
         {
-            const auto it = std::ranges::find(cluster, parent(graph, input));
-            if (it != cluster.end())
-                parents[node].push_back(std::distance(cluster.begin(), it));
+            const auto up = parent(graph, input);
+            const auto it = std::lower_bound(flow.rows.begin(), end, up);
+            if (it != end && *it == up)
+                set_right_into(parents, to_unsigned(std::distance(
+                    flow.rows.begin(), it)));
         }
+
+        flow.parents[node] = parents;
+        flow.links[node] = links;
+        links += ones_count(parents);
     }
 
-    const auto weigh = [&](const std::vector<bool>& in, uint64_t& fee,
-        uint64_t& size) NOEXCEPT
+    // No capacity exceeds the fee of the cluster times its size.
+    auto best = is_multiply_overflow(fee, size) ?
+        closure_(flow, flow.wide, count, links, fee, size) :
+        closure_(flow, flow.narrow, count, links, fee, size);
+
+    out.clear();
+    sum = {};
+    for (; is_nonzero(best); best &= sub1(best))
     {
-        fee = zero;
-        size = zero;
-        for (size_t node{}; node < count; ++node)
+        const auto row = flow.rows[right_zeros(best)];
+        const auto own = totals(graph, row);
+        out.push_back(row);
+        sum.fee = ceilinged_add(sum.fee, own.fee);
+        sum.size = ceilinged_add(sum.size, own.size);
+        sum.sigops = ceilinged_add(sum.sigops, own.sigops);
+    }
+}
+
+// Dinkelbach: the maximum weight closure at the rate of the best closure
+// found (fee times its size less size times its fee, a minimum cut) is
+// positive until no closure has a higher rate.
+template <typename Capacity>
+inline algorithm::mask_t algorithm::closure_(flow_t& flow,
+    residual_t<Capacity>& residual, size_t count, size_t links, uint64_t fee,
+    uint64_t size) NOEXCEPT
+{
+    const auto link = [&](size_t node, size_t up) NOEXCEPT
+    {
+        const auto before = unmask_right<mask_t>(up);
+        return flow.links[node] + ones_count(bit_and(flow.parents[node],
+            before));
+    };
+
+    const auto weigh = [&](mask_t nodes, uint64_t& fees,
+        uint64_t& sizes) NOEXCEPT
+    {
+        fees = 0_u64;
+        sizes = 0_u64;
+        for (; is_nonzero(nodes); nodes &= sub1(nodes))
         {
-            if (in[node])
-            {
-                fee = ceilinged_add(fee, fees[node]);
-                size = ceilinged_add(size, sizes[node]);
-            }
+            const auto node = right_zeros(nodes);
+            fees = ceilinged_add(fees, flow.fees[node]);
+            sizes = ceilinged_add(sizes, flow.sizes[node]);
         }
     };
 
-    std::vector<bool> best(count, true);
-    uint64_t fee{}, size{};
-    weigh(best, fee, size);
-
-    std::vector<uint128_t> capacity(nodes * nodes);
-    std::vector<size_t> from(nodes);
-    std::vector<bool> reached(nodes);
-    std::vector<size_t> queue{};
-    const auto at = [&](size_t left, size_t right) NOEXCEPT -> uint128_t&
+    // The source feeds each node its fee at the size, each node feeds the
+    // sink its size at the fee, and a node feeds its parents without limit.
+    // The nodes reached from the source when no more can flow are the
+    // closure, and a node passes at once what its own two limits allow.
+    const auto cut = [&]() NOEXCEPT
     {
-        return capacity[left * nodes + right];
-    };
-
-    // Reachability from the source in the residual, the path in from.
-    const auto search = [&]() NOEXCEPT
-    {
-        reached.assign(nodes, false);
-        reached[source] = true;
-        queue.assign(one, source);
-        for (size_t next{}; next < queue.size(); ++next)
+        residual.flows.assign(links, Capacity{});
+        for (size_t node{}; node < count; ++node)
         {
-            const auto node = queue[next];
-            for (size_t other{}; other < nodes; ++other)
+            const auto gain = Capacity{ flow.fees[node] } * size;
+            const auto cost = Capacity{ flow.sizes[node] } * fee;
+            const auto both = std::min(gain, cost);
+            residual.source[node] = gain - both;
+            residual.sink[node] = cost - both;
+            flow.fed[node] = {};
+        }
+
+        while (true)
+        {
+            // The path to each node reached is by the node before it, the
+            // source if count.
+            mask_t reached{};
+            size_t head{};
+            size_t tail{};
+            for (size_t node{}; node < count; ++node)
             {
-                if (!reached[other] && at(node, other) != uint128_t{})
+                if (residual.source[node] != Capacity{})
                 {
-                    reached[other] = true;
-                    from[other] = node;
-                    queue.push_back(other);
+                    set_right_into(reached, node);
+                    flow.before[node] = count;
+                    flow.queue[tail++] = node;
                 }
             }
-        }
 
-        return reached[sink];
-    };
-
-    while (count > one && size > zero)
-    {
-        uint128_t infinite{ one };
-        std::ranges::fill(capacity, uint128_t{});
-        for (size_t node{}; node < count; ++node)
-        {
-            at(source, node) = uint128_t{ fees[node] } * size;
-            at(node, sink) = uint128_t{ sizes[node] } * fee;
-            infinite += at(source, node);
-        }
-
-        for (size_t node{}; node < count; ++node)
-            for (const auto up: parents[node])
-                at(node, up) = infinite;
-
-        while (search())
-        {
-            auto flow = infinite;
-            for (auto node = sink; node != source; node = from[node])
-                flow = std::min(flow, at(from[node], node));
-
-            for (auto node = sink; node != source; node = from[node])
+            auto last = count;
+            while (head < tail && last == count)
             {
-                at(from[node], node) -= flow;
-                at(node, from[node]) += flow;
+                const auto node = flow.queue[head++];
+                if (residual.sink[node] != Capacity{})
+                {
+                    last = node;
+                    break;
+                }
+
+                // Flow moves to a parent, or back to a child that fed it.
+                const auto next = bit_or(flow.parents[node], flow.fed[node]);
+                for (auto more = bit_and(next, bit_not(reached));
+                    is_nonzero(more); more &= sub1(more))
+                {
+                    const auto other = right_zeros(more);
+                    set_right_into(reached, other);
+                    flow.before[other] = node;
+                    flow.queue[tail++] = other;
+                }
+            }
+
+            if (last == count)
+                return reached;
+
+            auto amount = residual.sink[last];
+            auto node = last;
+            for (; flow.before[node] != count; node = flow.before[node])
+            {
+                const auto from = flow.before[node];
+                if (!get_right(flow.parents[from], node))
+                    amount = std::min(amount,
+                        residual.flows[link(node, from)]);
+            }
+
+            amount = std::min(amount, residual.source[node]);
+            residual.source[node] -= amount;
+            residual.sink[last] -= amount;
+            for (node = last; flow.before[node] != count;
+                node = flow.before[node])
+            {
+                const auto from = flow.before[node];
+                if (get_right(flow.parents[from], node))
+                {
+                    residual.flows[link(from, node)] += amount;
+                    set_right_into(flow.fed[node], from);
+                    continue;
+                }
+
+                auto& back = residual.flows[link(node, from)];
+                back -= amount;
+                if (back == Capacity{})
+                    flow.fed[from] = set_right(flow.fed[from], node, false);
             }
         }
+    };
 
-        const std::vector<bool> found(reached.begin(),
-            std::next(reached.begin(), count));
-
-        uint64_t found_fee{}, found_size{};
+    auto best = unmask_right<mask_t>(count);
+    while (count > one && is_nonzero(size))
+    {
+        uint64_t found_fee{};
+        uint64_t found_size{};
+        const auto found = cut();
         weigh(found, found_fee, found_size);
-        if (is_zero(found_size) || uint128_t{ found_fee } * size <=
-            uint128_t{ found_size } * fee)
+        if (is_zero(found_size) || Capacity{ found_fee } * size <=
+            Capacity{ found_size } * fee)
             break;
 
         best = found;
@@ -1468,21 +1761,7 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
         size = found_size;
     }
 
-    out.clear();
-    sum = {};
-    for (size_t node{}; node < count; ++node)
-    {
-        if (best[node])
-        {
-            const auto& add = totals(graph, cluster[node]);
-            out.push_back(cluster[node]);
-            sum.fee = ceilinged_add(sum.fee, add.fee);
-            sum.size = ceilinged_add(sum.size, add.size);
-            sum.sigops = ceilinged_add(sum.sigops, add.sigops);
-        }
-    }
-
-    std::sort(out.begin(), out.end());
+    return best;
 }
 
 inline algorithm::link_t algorithm::resolved(const graph_t& graph,
