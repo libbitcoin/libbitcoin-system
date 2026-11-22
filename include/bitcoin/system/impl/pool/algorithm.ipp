@@ -103,8 +103,12 @@ constexpr uint64_t algorithm::chargeable(mask_t outcome,
 constexpr uint64_t algorithm::fee_rate(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
-    const auto size = greater(chargeable(totals, bytes_per_sigop), one);
-    return ceilinged_multiply(totals.fee, 1'000_u64) / size;
+    return fee_rate(totals.fee, chargeable(totals, bytes_per_sigop));
+}
+
+constexpr uint64_t algorithm::fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT
+{
+    return ceilinged_multiply(fee, 1'000_u64) / greater(bytes, one);
 }
 
 // Column values.
@@ -1112,6 +1116,17 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return fits(totals(graph, row), available());
     };
 
+    // Chargeable size of the rows, each charged alone.
+    const auto charged = [&](const std::vector<link_t>& members) NOEXCEPT
+    {
+        uint64_t bytes{};
+        for (const auto member: members)
+            bytes = ceilinged_add(bytes, chargeable(totals(graph, member),
+                bytes_per_sigop));
+
+        return bytes;
+    };
+
     // An unmarked row of no more than the value is left (least on top).
     const auto remains = [&](std::vector<least_t>& least, uint32_t value) NOEXCEPT
     {
@@ -1148,7 +1163,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     {
         totals_t sum{};
         if (chunk(rows, sum, walk, marks, graph, row, depth, available()))
-            push({ row, {}, {}, {}, fee_rate(sum, bytes_per_sigop), sum });
+            push({ row, {}, {}, {}, fee_rate(sum.fee, charged(rows)), sum });
     };
 
     // A whole cluster offers its best closure (itself if one row), else each
@@ -1179,7 +1194,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         {
             const auto first = closed.size();
             const auto size = possible_narrow_cast<link_t>(rows.size());
-            const auto rate = fee_rate(sum, bytes_per_sigop);
+            const auto rate = fee_rate(sum.fee, charged(rows));
             closed.insert(closed.end(), rows.begin(), rows.end());
             push({ rows.front(), size, first, {}, rate, sum });
             return true;
@@ -1256,8 +1271,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             // A changed chunk competes again at its current rate.
             if (!same(sum, score.sum))
             {
-                push({ score.row, {}, {}, {}, fee_rate(sum, bytes_per_sigop),
-                    sum });
+                push({ score.row, {}, {}, {}, fee_rate(sum.fee,
+                    charged(rows)), sum });
                 continue;
             }
         }
@@ -1266,7 +1281,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             marks[row] = mark::taken;
 
         out.insert(out.end(), rows.begin(), rows.end());
-        takes.push_back({ score.rate, chargeable(sum, bytes_per_sigop) });
+        takes.push_back({ score.rate, charged(rows) });
         used.fee = ceilinged_add(used.fee, sum.fee);
         used.size = ceilinged_add(used.size, sum.size);
         used.sigops = ceilinged_add(used.sigops, sum.sigops);

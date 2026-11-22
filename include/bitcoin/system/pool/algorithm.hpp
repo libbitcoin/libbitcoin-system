@@ -243,6 +243,9 @@ public:
     static constexpr uint64_t fee_rate(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
+    /// Fee rate of a fee over chargeable bytes (satoshis per kilobyte).
+    static constexpr uint64_t fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT;
+
     /// Column values (stored little-endian).
     /// -----------------------------------------------------------------------
 

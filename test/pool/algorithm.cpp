@@ -283,6 +283,48 @@ struct partial_state
     }
 };
 
+// Rows: X=0, P=1, C=2 (spends P), D=3 (spends P and X), E=4.
+// Inputs: 0 X spends W:0, 1 P spends W:1, 2 C spends P:0, 3 D spends P:1,
+// 4 D spends X:0, 5 E spends W:2. C is charged for its sigops.
+struct charged_state
+{
+    charged_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 5> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled, unlabeled }
+    };
+    std_array<link_t, 5> children{ { 4, 2, none, none, none } };
+    std_array<edges_t, 5> edges
+    {
+        { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 2 }, { 5, 1 } }
+    };
+    std_array<totals_t, 5> totals
+    {
+        {
+            { 0, 100, 0 }, { 1'000, 1'000, 0 }, { 500, 10, 50 },
+            { 1, 100, 0 }, { 1'200, 1'000, 0 }
+        }
+    };
+    std_array<link_t, 6> parents{ { none, none, 1, 1, 0, none } };
+    std_array<link_t, 6> siblings{ { none, none, 3, none, none, none } };
+    std_array<link_t, 6> rivals{ { none, none, none, none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
 // Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
 // 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
@@ -1812,6 +1854,38 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__chunk_descendant__outrates_next_cluster)
     BC_REQUIRE_EQUAL(out[2], 3u);
     BC_REQUIRE(marks[4] == mark::unmarked);
     BC_REQUIRE(marks[5] == mark::unmarked);
+}
+
+// The chunk of C with P (750, each row charged alone) is outrated by E
+// (1200) and by P alone (1000), which fill the block.
+BC_AUTO_TEST_CASE(pool_algorithm__pack__sigop_charged_child__chunk_rated_by_rows)
+{
+    charged_state charged{};
+    std_array<mark, 5> marks{ { mark::excluded, mark::unmarked, mark::unmarked, mark::unmarked, mark::unmarked } };
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, charged.columns(), { 0, 2'000, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 2u);
+    BC_REQUIRE_EQUAL(out[0], 1u);
+    BC_REQUIRE_EQUAL(out[1], 4u);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__project__sigop_charged_child__takes_sized_by_rows)
+{
+    charged_state charged{};
+    projection_t out{};
+    std::vector<link_t> rows{};
+    out.marks = { mark::excluded, mark::unmarked, mark::unmarked, mark::unmarked, mark::unmarked };
+    accessor::project(rows, out, charged.columns(), { 0, 3'000, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(rows.size(), 3u);
+    BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
+    BC_REQUIRE_EQUAL(out.blocks[0].size(), 3u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 1'200u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].size, 1'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 1'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].size, 1'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][2].rate, 500u);
+    BC_REQUIRE_EQUAL(out.blocks[0][2].size, 1'000u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__project__shared_parent__closure_then_row)
