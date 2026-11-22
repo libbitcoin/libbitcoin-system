@@ -525,9 +525,8 @@ protected:
         const graph_t& graph, link_t row, size_t depth,
         const totals_t& available) NOEXCEPT;
 
-    /// The untaken rows connected to the row by parent and child, false if
-    /// one has an excluded parent or they exceed maximum_members (where the
-    /// walk ends).
+    /// Untaken rows connected to row by parent and child, false if one has
+    /// excluded parent or exceeds maximum_members (where walk ends).
     static bool cluster(std::vector<link_t>& out, visits_t& visits,
         const std::span<const mark>& marks, const graph_t& graph,
         link_t row) NOEXCEPT;
@@ -541,8 +540,7 @@ protected:
         std::vector<Capacity> flows{};
     };
 
-    /// The rows of a cluster as nodes, with the flow from their fees to
-    /// their sizes that leaves its best closure.
+    /// Rows of cluster as nodes, flow from fees to sizes leaving best closure.
     struct flow_t
     {
         std_array<link_t, maximum_members> rows{};
@@ -557,8 +555,7 @@ protected:
         residual_t<uint128_t> wide{};
     };
 
-    /// The nodes of the highest rate closure of the flow, by capacities that
-    /// hold the fee times the size.
+    /// Nodes of highest rate closure of flow by capacities holding fee x size.
     template <typename Capacity>
     static mask_t closure_(flow_t& flow, residual_t<Capacity>& residual,
         size_t count, size_t links, uint64_t fee, uint64_t size) NOEXCEPT;
