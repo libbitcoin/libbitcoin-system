@@ -441,6 +441,12 @@ protected:
     static constexpr void each_rival(const graph_t& graph, link_t input,
         const Visitor& visit) NOEXCEPT;
 
+    /// Each row joined to the row in a component (by parent, rival or child),
+    /// false once a visit is.
+    template <typename Visitor>
+    static constexpr bool each_member(const graph_t& graph, link_t row,
+        const Visitor& visit) NOEXCEPT;
+
     /// The row is in a clique (has a present rival).
     static constexpr bool contested(const graph_t& graph, link_t row) NOEXCEPT;
 

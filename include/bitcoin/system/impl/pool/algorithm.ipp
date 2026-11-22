@@ -208,38 +208,8 @@ constexpr bool algorithm::collect(component_t& out, const graph_t& graph,
         return false;
 
     for (size_t at{}; at < out.count; ++at)
-    {
-        const auto member = out.rows[at];
-        const auto slice = edges(graph, member);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-        {
-            const auto up = parent(graph, input);
-            if (up != none && is_labeled(cell(graph, up)) && !add(up))
-                return false;
-
-            auto added = true;
-            each_rival(graph, input, [&](link_t other) NOEXCEPT
-            {
-                const auto rival_row = owner(graph, other);
-                if (is_present(cell(graph, rival_row)) && !add(rival_row))
-                    added = false;
-            });
-
-            if (!added)
-                return false;
-        }
-
-        auto added = true;
-        each_child(graph, member, [&](link_t down) NOEXCEPT
-        {
-            if (is_present(cell(graph, down)) && !add(down))
-                added = false;
-        });
-
-        if (!added)
+        if (!each_member(graph, out.rows[at], add))
             return false;
-    }
 
     std::sort(out.rows.begin(), std::next(out.rows.begin(), out.count));
     return true;
@@ -842,6 +812,35 @@ constexpr void algorithm::each_rival(const graph_t& graph, link_t input,
     while (at != none && at != start);
 }
 
+template <typename Visitor>
+constexpr bool algorithm::each_member(const graph_t& graph, link_t row,
+    const Visitor& visit) NOEXCEPT
+{
+    auto all = true;
+    const auto slice = edges(graph, row);
+    for (auto input = slice.first; input < slice.first + slice.count; ++input)
+    {
+        const auto up = parent(graph, input);
+        if (up != none && is_labeled(cell(graph, up)))
+            all = all && visit(up);
+
+        each_rival(graph, input, [&](link_t other) NOEXCEPT
+        {
+            const auto rival_row = owner(graph, other);
+            if (is_present(cell(graph, rival_row)))
+                all = all && visit(rival_row);
+        });
+    }
+
+    each_child(graph, row, [&](link_t down) NOEXCEPT
+    {
+        if (is_present(cell(graph, down)))
+            all = all && visit(down);
+    });
+
+    return all;
+}
+
 constexpr bool algorithm::contested(const graph_t& graph, link_t row) NOEXCEPT
 {
     auto out = false;
@@ -1008,33 +1007,12 @@ inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
     {
         if (std::ranges::find(found, next) == found.end())
             found.push_back(next);
+
+        return true;
     };
 
     for (size_t at{}; at < found.size(); ++at)
-    {
-        const auto member = found[at];
-        const auto slice = edges(graph, member);
-        for (auto input = slice.first; input < slice.first + slice.count;
-            ++input)
-        {
-            const auto up = parent(graph, input);
-            if (up != none && is_labeled(cell(graph, up)))
-                add(up);
-
-            each_rival(graph, input, [&](link_t other) NOEXCEPT
-            {
-                const auto rival_row = owner(graph, other);
-                if (is_present(cell(graph, rival_row)))
-                    add(rival_row);
-            });
-        }
-
-        each_child(graph, member, [&](link_t down) NOEXCEPT
-        {
-            if (is_present(cell(graph, down)))
-                add(down);
-        });
-    }
+        each_member(graph, found[at], add);
 
     for (const auto member: found)
         discard(marks, graph, member);
@@ -1167,6 +1145,18 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             push({ row, {}, {}, {}, fee_rate(sum.fee, charged(rows)), sum });
     };
 
+    // Each row of the group offers its chunk (unless every, only the rows
+    // below the take), none of which fits unless one of the rows does.
+    const auto score_rows = [&](bool every) NOEXCEPT
+    {
+        if (!std::ranges::any_of(group, alone))
+            return;
+
+        for (const auto member: group)
+            if (every || visited(below, member))
+                score_row(member);
+    };
+
     // A whole cluster offers its best closure (itself if one row), else each
     // of its rows its chunk, of a partial cluster only those below the take.
     // False if the cluster of a take is over maximum_members, with nothing
@@ -1201,10 +1191,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             return true;
         }
 
-        for (const auto member: group)
-            if (all || whole || visited(below, member))
-                score_row(member);
-
+        score_rows(all || whole);
         return true;
     };
 
@@ -1242,25 +1229,22 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         totals_t sum{};
         if (is_nonzero(score.count))
         {
-            const auto taken = std::span<const link_t>{ closed }.subspan(
+            const auto held = std::span<const link_t>{ closed }.subspan(
                 score.first, score.count);
 
-            if (!std::ranges::all_of(taken, unmarked))
+            if (!std::ranges::all_of(held, unmarked))
                 continue;
 
             // A closure that no longer fits falls back to the chunks of its
-            // cluster, of which none fits unless one of its rows does.
+            // cluster.
             if (!fits(score.sum, space))
             {
                 cluster(group, walk, marks, graph, score.row, false);
-                if (std::ranges::any_of(group, alone))
-                    for (const auto member: group)
-                        score_row(member);
-
+                score_rows(true);
                 continue;
             }
 
-            rows.assign(taken.begin(), taken.end());
+            rows.assign(held.begin(), held.end());
             sum = score.sum;
         }
         else
@@ -1283,7 +1267,6 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
         out.insert(out.end(), rows.begin(), rows.end());
         takes.push_back({ score.rate, charged(rows) });
-        used.fee = ceilinged_add(used.fee, sum.fee);
         used.size = ceilinged_add(used.size, sum.size);
         used.sigops = ceilinged_add(used.sigops, sum.sigops);
 
