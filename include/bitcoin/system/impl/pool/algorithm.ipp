@@ -1053,6 +1053,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::vector<link_t> group{};
     std::vector<link_t> descent{};
     std::vector<link_t> seeds{};
+    std::vector<link_t> places(live);
     visits_t seen{ std::vector<link_t>(live), base };
     visits_t below{ std::vector<link_t>(live), base };
     visits_t walk{ std::vector<link_t>(live), base };
@@ -1158,23 +1159,15 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     };
 
     // A whole cluster offers its best closure (itself if one row), else each
-    // of its rows its chunk, of a partial cluster only those below the take.
-    // False if the cluster of a take is over maximum_members, with nothing
-    // offered.
-    const auto offer = [&](link_t row, bool all) NOEXCEPT
+    // of its rows its chunk, of a partial cluster of a take only those below
+    // the take.
+    const auto propose = [&](bool whole, bool every) NOEXCEPT
     {
-        const auto whole = cluster(group, walk, marks, graph, row, !all);
-        if (!all && group.size() > maximum_members)
-            return false;
-
-        for (const auto member: group)
-            visit(seen, member);
-
         totals_t sum{};
         if (whole && is_one(group.size()))
         {
-            rows.assign(one, row);
-            sum = totals(graph, row);
+            rows.assign(one, group.front());
+            sum = totals(graph, group.front());
         }
         else if (whole)
         {
@@ -1188,15 +1181,28 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             const auto rate = fee_rate(sum.fee, charged(rows));
             closed.insert(closed.end(), rows.begin(), rows.end());
             push({ rows.front(), size, first, {}, rate, sum });
-            return true;
+            return;
         }
 
-        score_rows(all || whole);
+        score_rows(every || whole);
+    };
+
+    // The cluster of a row below a take, false if over maximum_members with
+    // nothing offered.
+    const auto offer = [&](link_t row) NOEXCEPT
+    {
+        const auto whole = cluster(group, walk, marks, graph, row);
+        if (group.size() > maximum_members)
+            return false;
+
+        for (const auto member: group)
+            visit(seen, member);
+
+        propose(whole, false);
         return true;
     };
 
-    restart(seen);
-    restart(below);
+    // The unmarked rows in order, each with its place among them.
     for (auto at = offset; at < count; ++at)
     {
         const auto row = possible_narrow_cast<link_t>(at);
@@ -1204,10 +1210,78 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             continue;
 
         const auto own = totals(graph, row);
+        places[row - base] = possible_narrow_cast<link_t>(sizes.size());
         sizes.emplace_back(own.size, row);
         sigops.emplace_back(own.sigops, row);
-        if (!visited(seen, row))
-            offer(row, true);
+    }
+
+    // Each place is joined to an earlier place of its cluster (the first to
+    // itself) and is in a ring of the places of its cluster, which is partial
+    // (at its first place) if a row of it has an excluded parent.
+    const auto candidates = possible_narrow_cast<link_t>(sizes.size());
+    std::vector<link_t> joined(candidates);
+    std::vector<link_t> ring(candidates);
+    std::vector<bool> partial(candidates);
+    for (link_t place{}; place < candidates; ++place)
+        joined[place] = ring[place] = place;
+
+    const auto lowest = [&](link_t place) NOEXCEPT
+    {
+        while (joined[place] != place)
+        {
+            joined[place] = joined[joined[place]];
+            place = joined[place];
+        }
+
+        return place;
+    };
+
+    for (link_t place{}; place < candidates; ++place)
+    {
+        const auto slice = edges(graph, sizes[place].second);
+        for (auto input = slice.first; input < slice.first + slice.count;
+            ++input)
+        {
+            const auto up = parent(graph, input);
+            if (up == none || is_boundary(cell(graph, up)) ||
+                marks[up] == mark::taken)
+                continue;
+
+            auto low = lowest(place);
+            if (marks[up] == mark::excluded)
+            {
+                partial[low] = true;
+                continue;
+            }
+
+            auto high = lowest(places[up - base]);
+            if (high == low)
+                continue;
+
+            if (high < low)
+                std::swap(low, high);
+
+            joined[high] = low;
+            std::swap(ring[low], ring[high]);
+            partial[low] = partial[low] || partial[high];
+        }
+    }
+
+    for (link_t place{}; place < candidates; ++place)
+    {
+        if (joined[place] != place)
+            continue;
+
+        group.clear();
+        auto member = place;
+        do
+        {
+            group.push_back(sizes[member].second);
+            member = ring[member];
+        }
+        while (member != place);
+
+        propose(!partial[place] && group.size() <= maximum_members, true);
     }
 
     std::make_heap(scores.begin(), scores.end(), lower);
@@ -1239,7 +1313,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             // cluster.
             if (!fits(score.sum, space))
             {
-                cluster(group, walk, marks, graph, score.row, false);
+                cluster(group, walk, marks, graph, score.row);
                 score_rows(true);
                 continue;
             }
@@ -1292,7 +1366,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
         auto walked = true;
         for (const auto seed: seeds)
-            if (!visited(seen, seed) && !offer(seed, false))
+            if (!visited(seen, seed) && !offer(seed))
                 walked = false;
 
         // Each descendant that no walk met is of a cluster not walked.
@@ -1419,8 +1493,8 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
 }
 
 inline bool algorithm::cluster(std::vector<link_t>& out, visits_t& visits,
-    const std::span<const mark>& marks, const graph_t& graph, link_t row,
-    bool bounded) NOEXCEPT
+    const std::span<const mark>& marks, const graph_t& graph,
+    link_t row) NOEXCEPT
 {
     out.assign(one, row);
     restart(visits);
@@ -1434,7 +1508,7 @@ inline bool algorithm::cluster(std::vector<link_t>& out, visits_t& visits,
 
     for (size_t at{}; at < out.size(); ++at)
     {
-        if (bounded && out.size() > maximum_members)
+        if (out.size() > maximum_members)
             return false;
 
         const auto member = out[at];

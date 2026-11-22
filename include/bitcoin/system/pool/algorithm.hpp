@@ -520,11 +520,11 @@ protected:
         const totals_t& available) NOEXCEPT;
 
     /// The untaken rows connected to the row by parent and child, false if
-    /// one has an excluded parent or they exceed maximum_members (where a
-    /// bounded walk ends).
+    /// one has an excluded parent or they exceed maximum_members (where the
+    /// walk ends).
     static bool cluster(std::vector<link_t>& out, visits_t& visits,
-        const std::span<const mark>& marks, const graph_t& graph, link_t row,
-        bool bounded) NOEXCEPT;
+        const std::span<const mark>& marks, const graph_t& graph,
+        link_t row) NOEXCEPT;
 
     /// What is left to flow from the source, to the sink and over each link.
     template <typename Capacity>
