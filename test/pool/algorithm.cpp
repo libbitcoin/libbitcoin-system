@@ -209,6 +209,47 @@ struct fork_state
     }
 };
 
+// Rows: P=0 (no fee), A=1, B=2 and C=3 (spend P), Z=4. Inputs: 0 P spends X:0,
+// 1 A spends P:0, 2 B spends P:1, 3 C spends P:2, 4 Z spends Y:0.
+struct tail_state
+{
+    tail_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 5> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled, unlabeled }
+    };
+    std_array<link_t, 5> children{ { 1, none, none, none, none } };
+    std_array<edges_t, 5> edges
+    {
+        { { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 }, { 4, 1 } }
+    };
+    std_array<totals_t, 5> totals
+    {
+        {
+            { 0, 100, 0 }, { 300, 50, 0 }, { 300, 50, 0 }, { 300, 50, 0 },
+            { 200, 80, 0 }
+        }
+    };
+    std_array<link_t, 5> parents{ { none, 0, 0, 0, none } };
+    std_array<link_t, 5> siblings{ { none, 2, 3, none, none } };
+    std_array<link_t, 5> rivals{ { none, none, none, none, none } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: A=0, B=1 spends A:0, Q=2. Inputs: 0 A spends X:0, 1 B spends A:0,
 // 2 Q spends Y:0.
 struct deferred_state
@@ -1962,6 +2003,21 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__shared_parent__closure_outrates_row)
     BC_REQUIRE_EQUAL(out[1], 1u);
     BC_REQUIRE_EQUAL(out[2], 2u);
     BC_REQUIRE(marks[3] == mark::unmarked);
+}
+
+// Cluster (250) over space (230) offers P, A, B (3,000), over Z (2,500).
+BC_AUTO_TEST_CASE(pool_algorithm__pack__cluster_over_space__closure_that_fits)
+{
+    tail_state tail{};
+    std_array<mark, 5> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, tail.columns(), { 0, 230, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+    BC_REQUIRE(marks[3] == mark::unmarked);
+    BC_REQUIRE(marks[4] == mark::unmarked);
 }
 
 // The closure of A (700) leaves B (600), which outrates Q (500).

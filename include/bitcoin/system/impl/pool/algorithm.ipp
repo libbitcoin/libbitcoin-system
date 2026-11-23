@@ -1109,6 +1109,8 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     std::vector<link_t> lost{};
     std::vector<link_t> descent{};
     std::vector<link_t> seeds{};
+    std::vector<link_t> work{};
+    std::vector<link_t> drop{};
     visits_t seen{ std::vector<link_t>(live), base };
     visits_t below{ std::vector<link_t>(live), base };
     visits_t walk{ std::vector<link_t>(live), base };
@@ -1212,6 +1214,80 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
                 score_row(member);
     };
 
+    // The closure offered with its sum, held for the take.
+    const auto hold = [&](const totals_t& sum) NOEXCEPT
+    {
+        auto& held = heaped ? closed : kept.closed;
+        const auto first = held.size();
+        const auto size = possible_narrow_cast<link_t>(rows.size());
+        const auto rate = fee_rate(sum.fee, charged(rows));
+        held.insert(held.end(), rows.begin(), rows.end());
+        push({ rows.front(), size, first, {}, rate, sum });
+    };
+
+    // Least rate leaf of the closure and its descendants leave the work.
+    const auto shed = [&]() NOEXCEPT
+    {
+        auto leaf = none;
+        totals_t least{};
+        for (const auto row: rows)
+        {
+            auto parent_of_row = false;
+            each_child(graph, row, [&](link_t down) NOEXCEPT
+            {
+                parent_of_row = parent_of_row ||
+                    std::ranges::find(rows, down) != rows.end();
+            });
+
+            if (parent_of_row)
+                continue;
+
+            const auto own = totals(graph, row);
+            const auto bytes = chargeable(own, bytes_per_sigop);
+            const auto least_bytes = chargeable(least, bytes_per_sigop);
+            if (leaf == none || ceilinged_multiply(own.fee, least_bytes) <=
+                ceilinged_multiply(least.fee, bytes))
+            {
+                leaf = row;
+                least = own;
+            }
+        }
+
+        drop.assign(one, leaf);
+        for (size_t at{}; at < drop.size(); ++at)
+            each_child(graph, drop[at], [&](link_t down) NOEXCEPT
+            {
+                if (std::ranges::find(drop, down) == drop.end())
+                    drop.push_back(down);
+            });
+
+        std::erase_if(work, [&](link_t row) NOEXCEPT
+        {
+            return std::ranges::find(drop, row) != drop.end();
+        });
+    };
+
+    // Whole cluster over the space offers its best closure that fits.
+    const auto fit = [&]() NOEXCEPT
+    {
+        totals_t sum{};
+        work.assign(group.begin(), group.end());
+        while (!work.empty())
+        {
+            closure(rows, sum, flow, graph, work, bytes_per_sigop);
+            if (rows.empty())
+                return;
+
+            if (fits(sum, available()))
+            {
+                hold(sum);
+                return;
+            }
+
+            shed();
+        }
+    };
+
     // Whole cluster offers its best closure (itself if one row), else each of
     // its rows its chunk, of partial cluster of take only those below take.
     const auto propose = [&](bool whole, bool every) NOEXCEPT
@@ -1229,14 +1305,12 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
         if (whole && fits(sum, available()))
         {
-            auto& held = heaped ? closed : kept.closed;
-            const auto first = held.size();
-            const auto size = possible_narrow_cast<link_t>(rows.size());
-            const auto rate = fee_rate(sum.fee, charged(rows));
-            held.insert(held.end(), rows.begin(), rows.end());
-            push({ rows.front(), size, first, {}, rate, sum });
+            hold(sum);
             return;
         }
+
+        if (whole && !is_one(group.size()))
+            fit();
 
         score_rows(every || whole);
     };
@@ -1443,7 +1517,10 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             // Closure that no longer fits falls back to chunks of its cluster.
             if (!fits(score.sum, space))
             {
-                cluster(group, walk, marks, graph, score.row);
+                if (cluster(group, walk, marks, graph, score.row) &&
+                    !is_one(group.size()) && group.size() <= maximum_members)
+                    fit();
+
                 score_rows(true);
                 continue;
             }
