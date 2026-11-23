@@ -1678,7 +1678,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__family__connected__best_outcome_all_bytes)
     const graph_t graph{ labeled.columns() };
     const std_array<link_t, 1> rows{ { 4 } };
     uint64_t fee{}, size{};
-    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, 500, 20, 1'024));
+    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, 500, 0, 20, 1'024));
     BC_REQUIRE_EQUAL(fee, 650u);
     BC_REQUIRE_EQUAL(size, 500u);
 }
@@ -1689,16 +1689,27 @@ BC_AUTO_TEST_CASE(pool_algorithm__family__over_limit__false)
     const graph_t graph{ labeled.columns() };
     const std_array<link_t, 1> rows{ { 4 } };
     uint64_t fee{}, size{};
-    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, 499, 20, 1'024));
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, 499, 0, 20, 1'024));
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__family__outcomes_over_bound__false)
+BC_AUTO_TEST_CASE(pool_algorithm__family__outcomes_over_bound__first_and_greedy)
 {
     auto labeled = label<link_t>();
     const graph_t graph{ labeled.columns() };
     const std_array<link_t, 1> rows{ { 4 } };
     uint64_t fee{}, size{};
-    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, max_uint64, 20, 1));
+    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, max_uint64, 0, 20, 1));
+    BC_REQUIRE_EQUAL(fee, 500u);
+    BC_REQUIRE_EQUAL(size, 500u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__family__no_outcomes__false)
+{
+    auto labeled = label<link_t>();
+    const graph_t graph{ labeled.columns() };
+    const std_array<link_t, 1> rows{ { 4 } };
+    uint64_t fee{}, size{};
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, max_uint64, 0, 20, 0));
 }
 
 
@@ -1728,6 +1739,40 @@ BC_AUTO_TEST_CASE(pool_algorithm__greedy__scenario__winner_per_clique)
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b01010u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__leaves__within_limit__each_outcome)
+{
+    auto labeled = label<link_t>();
+    const auto scenario = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std::vector<mask_t> out{};
+    accessor::leaves(out, scenario, graph, 1'024, 0, 20);
+    BC_REQUIRE_EQUAL(out.size(), 4u);
+    BC_REQUIRE_EQUAL(out[3], accessor::outcome(scenario, 3));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__leaves__past_limit__first_and_greedy)
+{
+    auto labeled = label<link_t>();
+    const auto scenario = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std::vector<mask_t> out{};
+    accessor::leaves(out, scenario, graph, 2, 0, 20);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], accessor::outcome(scenario, 0));
+    BC_REQUIRE_EQUAL(out[1], accessor::outcome(scenario, 1));
+    BC_REQUIRE_EQUAL(out[2], 0b01010u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__leaves__zero_limit__empty)
+{
+    auto labeled = label<link_t>();
+    const auto scenario = component(labeled);
+    const graph_t graph{ labeled.columns() };
+    std::vector<mask_t> out{ 42 };
+    accessor::leaves(out, scenario, graph, 0, 0, 20);
+    BC_REQUIRE(out.empty());
 }
 
 // Row 2 (500) wins second clique but descends from row 1, lost to row 0.

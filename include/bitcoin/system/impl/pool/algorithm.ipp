@@ -345,7 +345,7 @@ inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
 template <typename Word>
 inline bool algorithm::family(uint64_t& fee, uint64_t& bytes,
     const graph_t& graph, const std::span<const link_t>& rows,
-    uint64_t limit, uint32_t bytes_per_sigop,
+    uint64_t limit, uint64_t rate, uint32_t bytes_per_sigop,
     size_t maximum_outcomes) NOEXCEPT
 {
     fee = 0_u64;
@@ -404,13 +404,10 @@ inline bool algorithm::family(uint64_t& fee, uint64_t& bytes,
         if (!collect(component, graph, row) || !relate(component, graph))
             return false;
 
-        const auto leaves = outcomes(component);
-        if (leaves > maximum_outcomes)
+        leaves(masks, component, graph, maximum_outcomes, rate,
+            bytes_per_sigop);
+        if (masks.empty())
             return false;
-
-        masks.resize(leaves);
-        for (size_t index{}; index < leaves; ++index)
-            masks[index] = outcome(component, index);
 
         fee = ceilinged_add(fee, evaluate<Word>(masks, component, graph));
         for (size_t member{}; member < component.count; ++member)
@@ -460,6 +457,20 @@ constexpr uint64_t algorithm::evaluate(const std::span<const mask_t>& outcomes,
         });
 
     return best;
+}
+
+inline void algorithm::leaves(std::vector<mask_t>& out,
+    const component_t& component, const graph_t& graph, size_t limit,
+    uint64_t rate, uint32_t bytes_per_sigop) NOEXCEPT
+{
+    const auto count = outcomes(component);
+    const auto total = std::min(count, limit);
+    out.resize(total);
+    for (size_t index{}; index < total; ++index)
+        out[index] = outcome(component, index);
+
+    if (is_nonzero(total) && count > total)
+        out.push_back(greedy(component, graph, rate, bytes_per_sigop));
 }
 
 constexpr uint64_t algorithm::chargeable(const component_t& component,
@@ -579,22 +590,12 @@ inline void algorithm::resolve(std::span<mark> marks,
         const auto collected = collect(component, graph, row);
         const auto related = collected && relate(component, graph);
         const auto limit = related ? maximum_outcomes : zero;
-        const auto leaves = outcomes(component);
-        const auto total = std::min(leaves, limit);
-
-        if (is_zero(total))
+        leaves(masks, component, graph, limit, rate, bytes_per_sigop);
+        if (masks.empty())
         {
             forfeit(marks, graph, row);
             continue;
         }
-
-        masks.resize(total);
-        for (size_t index{}; index < total; ++index)
-            masks[index] = outcome(component, index);
-
-        // Leaves past the bound are represented by a greedy leaf.
-        if (leaves > total)
-            masks.push_back(greedy(component, graph, rate, bytes_per_sigop));
 
         const auto chosen = masks[best<Word>(masks, component, graph, rate,
             bytes_per_sigop)];

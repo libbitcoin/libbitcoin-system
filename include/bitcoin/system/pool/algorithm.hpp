@@ -335,7 +335,7 @@ public:
     /// not resolvable within bounds.
     template <typename Word = xint512_t>
     static bool family(uint64_t& fee, uint64_t& bytes, const graph_t& graph,
-        const std::span<const link_t>& rows, uint64_t limit,
+        const std::span<const link_t>& rows, uint64_t limit, uint64_t rate,
         uint32_t bytes_per_sigop, size_t maximum_outcomes) NOEXCEPT;
 
     /// Outcomes.
@@ -352,6 +352,11 @@ public:
     template <typename Word = xint512_t>
     static constexpr uint64_t evaluate(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
+
+    /// Outcomes scored: first within limit, then greedy leaf past it.
+    static void leaves(std::vector<mask_t>& out, const component_t& component,
+        const graph_t& graph, size_t limit, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// Chargeable size of every member of the component, conflicts included.
     static constexpr uint64_t chargeable(const component_t& component,
