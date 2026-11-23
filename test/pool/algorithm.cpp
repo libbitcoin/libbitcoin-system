@@ -360,6 +360,42 @@ struct apart_state
     }
 };
 
+// Rows: A=0, B=1, C=2 (spends B), D=3. Inputs: 0 A spends X:0,
+// 1 B spends X:0, 2 C spends B:0, 3 C spends Y:0, 4 D spends Y:0.
+// Rings: X:0 (0, 1), Y:0 (3, 4).
+struct descent_state
+{
+    descent_state() NOEXCEPT
+    {
+        cells = stored(cells);
+        children = stored(children);
+        edges = stored(edges);
+        totals = stored(totals);
+        parents = stored(parents);
+        siblings = stored(siblings);
+        rivals = stored(rivals);
+    }
+
+    std_array<link_t, 4> cells
+    {
+        { unlabeled, unlabeled, unlabeled, unlabeled }
+    };
+    std_array<link_t, 4> children{ { none, 2, none, none } };
+    std_array<edges_t, 4> edges{ { { 0, 1 }, { 1, 1 }, { 2, 2 }, { 4, 1 } } };
+    std_array<totals_t, 4> totals
+    {
+        { { 300, 100, 1 }, { 100, 100, 1 }, { 500, 100, 1 }, { 200, 100, 1 } }
+    };
+    std_array<link_t, 5> parents{ { none, none, 1, none, none } };
+    std_array<link_t, 5> siblings{ { none, none, none, none, none } };
+    std_array<link_t, 5> rivals{ { 1, 0, none, 4, 3 } };
+
+    columns_t columns() NOEXCEPT
+    {
+        return { cells, children, edges, totals, parents, siblings, rivals };
+    }
+};
+
 // Rows: U=0, V=1, W=2, Z=3, K=4. Confirmed X and Y are not rows.
 // Inputs: 0 U spends X:0, 1 V spends X:0, 2 W spends Y:0, 3 Z spends Y:0,
 // 4 K spends U:0, 5 K spends W:0. Rings: X:0 (0, 1), Y:0 (2, 3).
@@ -1629,11 +1665,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
-    uint64_t expected{};
-    for (size_t member{}; member < out.count; ++member)
-        expected += accessor::chargeable(accessor::totals(graph, out.rows[member]), 20);
-
-    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 20), expected);
+    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 20), 500u);
+    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 200), 1'000u);
 }
 
 // template
@@ -1642,25 +1675,21 @@ BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
 BC_AUTO_TEST_CASE(pool_algorithm__family__connected__best_outcome_all_bytes)
 {
     auto labeled = label<link_t>();
-    const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     const std_array<link_t, 1> rows{ { 4 } };
-    const auto bytes = accessor::chargeable(out, graph, 20);
     uint64_t fee{}, size{};
-    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, bytes, 20, 1'024));
+    BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, 500, 20, 1'024));
     BC_REQUIRE_EQUAL(fee, 650u);
-    BC_REQUIRE_EQUAL(size, bytes);
+    BC_REQUIRE_EQUAL(size, 500u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__family__over_limit__false)
 {
     auto labeled = label<link_t>();
-    const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     const std_array<link_t, 1> rows{ { 4 } };
-    const auto bytes = accessor::chargeable(out, graph, 20);
     uint64_t fee{}, size{};
-    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, sub1(bytes), 20, 1'024));
+    BC_REQUIRE(!accessor::family<uint64_t>(fee, size, graph, rows, 499, 20, 1'024));
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__family__outcomes_over_bound__false)
@@ -1701,6 +1730,17 @@ BC_AUTO_TEST_CASE(pool_algorithm__greedy__scenario__winner_per_clique)
     BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b01010u);
 }
 
+// Row 2 (500) wins second clique but descends from row 1, lost to row 0.
+BC_AUTO_TEST_CASE(pool_algorithm__greedy__winner_descends_from_loser__clique_unfilled)
+{
+    auto labeled = label_of<link_t, descent_state>();
+    const graph_t graph{ labeled.columns() };
+    component_t out{};
+    BC_REQUIRE(accessor::collect(out, graph, 0));
+    BC_REQUIRE(accessor::relate(out, graph));
+    BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b0001u);
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__worth__fee_less_rate_on_size__expected)
 {
     BC_REQUIRE(accessor::worth(500, 200, 650, 300, 2'000));
@@ -1738,6 +1778,20 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit__best_of_first)
     BC_REQUIRE(marks[2] == mark::excluded);
     BC_REQUIRE(marks[3] == mark::excluded);
     BC_REQUIRE(marks[4] == mark::unmarked);
+}
+
+// Row 3 at 300, greedy rows 1 and 3 (600) outbid first outcome (500).
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit_greedy_outbids__greedy_leaf)
+{
+    auto labeled = label<link_t>();
+    labeled.totals[3] = accessor::to_column(totals_t{ 300, 100, 1 });
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, labeled.columns(), 1, 0, 20);
+    BC_REQUIRE(marks[0] == mark::excluded);
+    BC_REQUIRE(marks[1] == mark::unmarked);
+    BC_REQUIRE(marks[2] == mark::excluded);
+    BC_REQUIRE(marks[3] == mark::unmarked);
+    BC_REQUIRE(marks[4] == mark::excluded);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__resolve__no_outcomes__component_excluded)
