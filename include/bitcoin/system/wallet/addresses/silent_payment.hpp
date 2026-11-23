@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_SILENT_PAYMENT_HPP
 #define LIBBITCOIN_SYSTEM_WALLET_ADDRESSES_SILENT_PAYMENT_HPP
 
-#include <functional>
 #include <bitcoin/system/chain/chain.hpp>
 #include <bitcoin/system/crypto/crypto.hpp>
 #include <bitcoin/system/define.hpp>

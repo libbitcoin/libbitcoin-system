@@ -19,7 +19,6 @@
 #ifndef LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_SILENT_HPP
 #define LIBBITCOIN_SYSTEM_CRYPTO_SECP256K1_BATCH_SILENT_HPP
 
-#include <functional>
 #include <span>
 #include <bitcoin/system/crypto/secp256k1.hpp>
 #include <bitcoin/system/data/data.hpp>
