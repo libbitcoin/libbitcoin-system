@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_POOL_ALGORITHM_HPP
 
 #include <span>
+#include <bitcoin/system/chain/enums/enums.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
@@ -275,7 +276,7 @@ public:
     static constexpr bool is_sufficient(const context_t& stored,
         const context_t& current, uint32_t required) NOEXCEPT;
 
-    /// Chargeable size of a row (virtual size or sigops at bytes per sigop).
+    /// Chargeable size of row, greater of virtual size and sigop weight.
     static constexpr uint64_t chargeable(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 

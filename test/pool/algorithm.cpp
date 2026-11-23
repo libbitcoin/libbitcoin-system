@@ -311,7 +311,7 @@ struct charged_state
     std_array<totals_t, 5> totals
     {
         {
-            { 0, 100, 0 }, { 1'000, 1'000, 0 }, { 500, 10, 50 },
+            { 0, 100, 0 }, { 1'000, 1'000, 0 }, { 500, 10, 200 },
             { 1, 100, 0 }, { 1'200, 1'000, 0 }
         }
     };
@@ -892,13 +892,14 @@ BC_AUTO_TEST_CASE(pool_algorithm__cells__states__expected)
 BC_AUTO_TEST_CASE(pool_algorithm__chargeable__size_or_sigops__maximum)
 {
     BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 1 }, 20), 100u);
-    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 6 }, 20), 120u);
+    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 24 }, 20), 120u);
+    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 21 }, 20), 105u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__fee_rate__size_sigops_or_empty__per_chargeable_kilobyte)
 {
     BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 100, 1 }, 20), 10'000u);
-    BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 100, 10 }, 20), 5'000u);
+    BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 100, 40 }, 20), 5'000u);
     BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 0, 0 }, 20), 1'000'000u);
 }
 
@@ -1666,7 +1667,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 20), 500u);
-    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 200), 1'000u);
+    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 800), 1'000u);
 }
 
 // template
@@ -1997,7 +1998,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__sigop_charged_child__chunk_rated_by_rows
     charged_state charged{};
     std_array<mark, 5> marks{ { mark::excluded, mark::unmarked, mark::unmarked, mark::unmarked, mark::unmarked } };
     std::vector<link_t> out{};
-    accessor::pack(out, marks, charged.columns(), { 0, 2'000, 100 }, 25, 20);
+    accessor::pack(out, marks, charged.columns(), { 0, 2'000, 1'000 }, 25, 20);
     BC_REQUIRE_EQUAL(out.size(), 2u);
     BC_REQUIRE_EQUAL(out[0], 1u);
     BC_REQUIRE_EQUAL(out[1], 4u);
@@ -2010,7 +2011,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__sigop_charged_child__takes_sized_by_r
     projection_t out{};
     std::vector<link_t> rows{};
     out.marks = { mark::excluded, mark::unmarked, mark::unmarked, mark::unmarked, mark::unmarked };
-    accessor::project(rows, out, charged.columns(), { 0, 3'000, 100 }, 25, 20);
+    accessor::project(rows, out, charged.columns(), { 0, 3'000, 1'000 }, 25, 20);
     BC_REQUIRE_EQUAL(rows.size(), 3u);
     BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
     BC_REQUIRE_EQUAL(out.blocks[0].size(), 3u);

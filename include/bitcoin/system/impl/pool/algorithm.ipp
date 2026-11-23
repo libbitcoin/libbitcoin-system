@@ -76,12 +76,13 @@ constexpr algorithm::link_t algorithm::lowered(link_t cell,
     return left == absent ? unlabeled : left;
 }
 
+// Sigop cost at bytes per sigop is weight, as is four times virtual size.
 constexpr uint64_t algorithm::chargeable(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
-    const auto sigops = totals.sigops;
-    const auto cost = ceilinged_multiply<uint64_t>(sigops, bytes_per_sigop);
-    return greater(totals.size, cost);
+    const auto weight = ceilinged_multiply<uint64_t>(totals.sigops, bytes_per_sigop);
+    const auto ratio = ceilinged_divide<uint64_t>(weight, chain::light_weight_factor);
+    return greater(totals.size, ratio);
 }
 
 constexpr uint64_t algorithm::chargeable(mask_t outcome,
