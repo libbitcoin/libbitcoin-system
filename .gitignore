@@ -17,6 +17,7 @@
 
 # gnu
 .deps
+.dirstamp
 Makefile
 Makefile.in
 .libs
@@ -28,7 +29,10 @@ builds/gnu/build-aux
 builds/gnu/config.*
 builds/gnu/configure
 builds/gnu/libtool
-builds/gnu/.dirstamp
+builds/gnu/console
+builds/gnu/test
+builds/gnu/*.log
+builds/gnu/*.trs
 
 # pkg-config pc file from .pc.in
 builds/gnu/*.pc
