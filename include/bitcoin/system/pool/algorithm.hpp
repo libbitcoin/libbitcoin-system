@@ -518,7 +518,7 @@ protected:
         const component_t& component, const graph_t& graph, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The outcome of a winner per clique by fee less the rate on its size.
+    /// Members by value, each with ancestors unless one lost; rivals lose.
     static constexpr mask_t greedy(const component_t& component,
         const graph_t& graph, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;

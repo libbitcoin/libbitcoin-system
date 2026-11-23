@@ -1700,7 +1700,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__family__outcomes_over_bound__first_and_greedy)
     const std_array<link_t, 1> rows{ { 4 } };
     uint64_t fee{}, size{};
     BC_REQUIRE(accessor::family<uint64_t>(fee, size, graph, rows, max_uint64, 0, 20, 1));
-    BC_REQUIRE_EQUAL(fee, 500u);
+    BC_REQUIRE_EQUAL(fee, 650u);
     BC_REQUIRE_EQUAL(size, 500u);
 }
 
@@ -1733,13 +1733,13 @@ BC_AUTO_TEST_CASE(pool_algorithm__best__scenario_at_rate__highest_net_index)
     BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph, 2'000, 20), 0u);
 }
 
-// Row 1 (300) wins both cliques, so rows 0 and 2 lose and row 4 with row 0.
-BC_AUTO_TEST_CASE(pool_algorithm__greedy__scenario__winner_per_clique)
+// P (400) takes Q, so A loses and B is taken alone: rows 0, 2, 4 (650).
+BC_AUTO_TEST_CASE(pool_algorithm__greedy__scenario__winners_by_value)
 {
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
-    BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b01010u);
+    BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b10101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__leaves__within_limit__each_outcome)
@@ -1763,7 +1763,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__leaves__past_limit__first_and_greedy)
     BC_REQUIRE_EQUAL(out.size(), 3u);
     BC_REQUIRE_EQUAL(out[0], accessor::outcome(scenario, 0));
     BC_REQUIRE_EQUAL(out[1], accessor::outcome(scenario, 1));
-    BC_REQUIRE_EQUAL(out[2], 0b01010u);
+    BC_REQUIRE_EQUAL(out[2], 0b10101u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__leaves__zero_limit__empty)
@@ -1776,15 +1776,15 @@ BC_AUTO_TEST_CASE(pool_algorithm__leaves__zero_limit__empty)
     BC_REQUIRE(out.empty());
 }
 
-// Row 2 (500) wins second clique but descends from row 1, lost to row 0.
-BC_AUTO_TEST_CASE(pool_algorithm__greedy__winner_descends_from_loser__clique_unfilled)
+// Row 2 (500) is taken with its ancestor row 1, so rows 0 and 3 lose.
+BC_AUTO_TEST_CASE(pool_algorithm__greedy__winner_with_ancestor__ancestor_rival_lost)
 {
     auto labeled = label_of<link_t, descent_state>();
     const graph_t graph{ labeled.columns() };
     component_t out{};
     BC_REQUIRE(accessor::collect(out, graph, 0));
     BC_REQUIRE(accessor::relate(out, graph));
-    BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b0001u);
+    BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b0110u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__worth__fee_less_rate_on_size__expected)
@@ -1814,30 +1814,31 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__scenario__highest_fee_outcome)
     BC_REQUIRE(marks[4] == mark::unmarked);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit__best_of_first)
+// Greedy leaf rows 0, 2, 4 (650) outbid first two outcomes (500).
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit__greedy_leaf_best)
 {
     auto labeled = label<link_t>();
     std_array<mark, rows> marks{};
     accessor::resolve<link_t>(marks, labeled.columns(), 2, 0, 20);
     BC_REQUIRE(marks[0] == mark::unmarked);
     BC_REQUIRE(marks[1] == mark::excluded);
-    BC_REQUIRE(marks[2] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::unmarked);
     BC_REQUIRE(marks[3] == mark::excluded);
     BC_REQUIRE(marks[4] == mark::unmarked);
 }
 
-// Row 3 at 300, greedy rows 1 and 3 (600) outbid first outcome (500).
+// Row 3 at 300, greedy rows 0, 2, 4 (650) outbid rows 1 and 3 (600).
 BC_AUTO_TEST_CASE(pool_algorithm__resolve__outcome_limit_greedy_outbids__greedy_leaf)
 {
     auto labeled = label<link_t>();
     labeled.totals[3] = accessor::to_column(totals_t{ 300, 100, 1 });
     std_array<mark, rows> marks{};
     accessor::resolve<link_t>(marks, labeled.columns(), 1, 0, 20);
-    BC_REQUIRE(marks[0] == mark::excluded);
-    BC_REQUIRE(marks[1] == mark::unmarked);
-    BC_REQUIRE(marks[2] == mark::excluded);
-    BC_REQUIRE(marks[3] == mark::unmarked);
-    BC_REQUIRE(marks[4] == mark::excluded);
+    BC_REQUIRE(marks[0] == mark::unmarked);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::unmarked);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__resolve__no_outcomes__component_excluded)

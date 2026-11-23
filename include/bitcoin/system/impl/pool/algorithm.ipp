@@ -941,32 +941,69 @@ constexpr size_t algorithm::best(const std::span<const mask_t>& outcomes,
 constexpr algorithm::mask_t algorithm::greedy(const component_t& component,
     const graph_t& graph, uint64_t rate, uint32_t bytes_per_sigop) NOEXCEPT
 {
-    mask_t lost{};
-    for (size_t contest{}; contest < component.contests; ++contest)
+    struct value_t
     {
-        mask_t winner{};
-        uint64_t fee{};
-        uint64_t size{};
-        const auto clique = component.cliques[contest];
-        for (size_t member{}; member < component.count; ++member)
-        {
-            if (!get_right(clique, member) || get_right(lost, member))
-                continue;
+        uint64_t fee;
+        uint64_t bytes;
+        size_t member;
+    };
 
-            const auto row = totals(graph, component.rows[member]);
-            const auto bytes = chargeable(row, bytes_per_sigop);
-            if (is_zero(winner) || worth(row.fee, bytes, fee, size, rate))
-            {
-                winner = set_right(mask_t{}, member);
-                fee = row.fee;
-                size = bytes;
-            }
-        }
-
-        lost |= bit_and(clique, bit_not(winner));
+    std_array<value_t, maximum_members> values{};
+    for (size_t member{}; member < component.count; ++member)
+    {
+        const auto row = totals(graph, component.rows[member]);
+        values[member] = { row.fee, chargeable(row, bytes_per_sigop), member };
     }
 
-    auto out = bit_and(unmask_right<mask_t>(component.count), bit_not(lost));
+    const auto end = std::next(values.begin(), component.count);
+    std::sort(values.begin(), end, [rate](const value_t& left,
+        const value_t& right) NOEXCEPT
+    {
+        if (worth(left.fee, left.bytes, right.fee, right.bytes, rate))
+            return true;
+
+        if (worth(right.fee, right.bytes, left.fee, left.bytes, rate))
+            return false;
+
+        return left.member < right.member;
+    });
+
+    mask_t won{};
+    mask_t lost{};
+    mask_t contested{};
+    for (size_t contest{}; contest < component.contests; ++contest)
+        contested |= component.cliques[contest];
+
+    for (auto value = values.begin(); value != end; ++value)
+    {
+        const auto need = set_right(component.ancestors[value->member], value->member);
+        if (is_nonzero(bit_and(need, lost)))
+            continue;
+
+        auto taken = true;
+        mask_t losers{};
+        for (size_t contest{}; taken && contest < component.contests;
+            ++contest)
+        {
+            const auto clique = component.cliques[contest];
+            const auto mine = bit_and(clique, need);
+            if (is_zero(mine))
+                continue;
+
+            const auto others = bit_and(clique, bit_not(need));
+            taken = is_one(ones_count(mine)) && is_zero(bit_and(others, won));
+            losers |= others;
+        }
+
+        if (!taken)
+            continue;
+
+        won |= need;
+        lost |= losers;
+    }
+
+    const auto all = unmask_right<mask_t>(component.count);
+    auto out = bit_or(won, bit_and(all, bit_not(bit_or(lost, contested))));
     for (size_t member{}; member < component.count; ++member)
         if (is_nonzero(bit_and(component.ancestors[member], lost)))
             out = set_right(out, member, false);
