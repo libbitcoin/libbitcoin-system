@@ -63,7 +63,8 @@ constexpr bool algorithm::suffice(const columns_t& columns, link_t row,
     const context_t& context, uint32_t required) NOEXCEPT
 {
     const auto own = from_column(columns.cells[row]);
-    if (is_boundary(own))
+    const auto gone = is_absent(own) && is_nonzero(bit_and(own, purged));
+    if (gone || is_boundary(own))
         return false;
 
     const context_t stored
