@@ -1431,6 +1431,16 @@ BC_AUTO_TEST_CASE(pool_algorithm__suffice__confirmed__unchanged_and_uncounted)
     BC_REQUIRE_EQUAL(cell(out.cells, 2), boundary);
 }
 
+BC_AUTO_TEST_CASE(pool_algorithm__suffice__purged__unchanged_and_uncounted)
+{
+    context_state out{};
+    const auto purged = bit_or(absent, accessor::purged);
+    out.cells[2] = accessor::to_column(purged);
+    BC_REQUIRE_EQUAL(accessor::suffice<link_t>(out.columns(), validated, required), 3u);
+    BC_REQUIRE_EQUAL(accessor::suffice<xint512_t>(out.columns(), validated, required), 3u);
+    BC_REQUIRE_EQUAL(cell(out.cells, 2), purged);
+}
+
 BC_AUTO_TEST_CASE(pool_algorithm__suffice__conflicted__cause_kept)
 {
     context_state out{};

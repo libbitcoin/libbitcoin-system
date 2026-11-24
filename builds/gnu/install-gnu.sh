@@ -30,6 +30,8 @@
 # --build-skip-tests            Skip test compilation and execution.
 # --build-skip-test-run         Compile tests without executing them.
 # --build-valgrind=<filter>     Also run the tests matching the filter under valgrind.
+# --build-web                   Also test, regenerate and compare the embedded web pages.
+# --build-smoke                 Also sync each network and smoke test the nodes.
 # --build-parallel=<int>        Number of jobs to run simultaneously.
 #                                 Default: supported platforms use nproc/sysctl
 # --build-use-local-src         Use existing sources in relevant paths.
@@ -147,6 +149,8 @@ main()
             (--build-skip-tests)            BUILD_SKIP_TESTS="yes";;
             (--build-skip-test-run)         BUILD_SKIP_TEST_RUN="yes";;
             (--build-valgrind=*)            BUILD_VALGRIND="${OPTION#*=}";;
+            (--build-web)                   BUILD_WEB="yes";;
+            (--build-smoke)                 BUILD_SMOKE="yes";;
             (--build-parallel=*)            PARALLEL="${OPTION#*=}";;
             (--build-use-local-src)         BUILD_USE_LOCAL_SRC="yes";;
             (--prefix=*)                    PREFIX="${OPTION#*=}";;
@@ -171,6 +175,8 @@ main()
     remove_configure_option "--build-skip-tests"
     remove_configure_option "--build-skip-test-run"
     remove_configure_option "--build-valgrind=*"
+    remove_configure_option "--build-web"
+    remove_configure_option "--build-smoke"
     remove_configure_option "--build-parallel=*"
     remove_configure_option "--build-use-local-src"
     remove_configure_option "--prefix=*"
@@ -978,6 +984,33 @@ test_gnu()
         fi
     fi
 
+    if [[ "${BUILD_WEB}" == "yes" && "${BUILD_SKIP_TEST_RUN}" != "yes" && "${PROJECT}" == "libbitcoin-system" ]]; then
+        msg "Testing ${PROJECT} embedded web pages"
+        push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+        python3 tools/generate_embedded_pages.py && git diff --exit-code -- console/embedded
+
+        RESULT=$?
+        pop_directory
+        if [[ ${RESULT} -ne 0 ]]; then
+            msg_error "Embedded web pages failed tests or differ from those committed."
+            exit ${RESULT}
+        fi
+    fi
+
+    if [[ "${BUILD_SMOKE}" == "yes" && "${BUILD_SKIP_TEST_RUN}" != "yes" && "${PROJECT}" == "libbitcoin-system" ]]; then
+        msg "Smoke testing ${PROJECT} nodes"
+        local BS="$(pwd)/console/bs"
+        push_directory "${BUILD_SRC_DIR}/${PROJECT}"
+        python3 tools/sync_networks.py "${BS}"
+
+        RESULT=$?
+        pop_directory
+        if [[ ${RESULT} -ne 0 ]]; then
+            msg_error "Encountered node smoke test failure, please see report above."
+            exit ${RESULT}
+        fi
+    fi
+
     enable_exit_on_error
 
     pop_directory # BUILD_OBJ_DIR
@@ -1004,6 +1037,8 @@ display_build_variables()
     msg "BUILD_SKIP_TESTS                : ${BUILD_SKIP_TESTS}"
     msg "BUILD_SKIP_TEST_RUN             : ${BUILD_SKIP_TEST_RUN}"
     msg "BUILD_VALGRIND                  : ${BUILD_VALGRIND}"
+    msg "BUILD_WEB                       : ${BUILD_WEB}"
+    msg "BUILD_SMOKE                     : ${BUILD_SMOKE}"
     msg "PARALLEL                        : ${PARALLEL}"
     msg "PREFIX                          : ${PREFIX}"
     msg "DISPLAY_VERBOSE                 : ${DISPLAY_VERBOSE}"
@@ -1069,6 +1104,8 @@ help()
     msg "--build-skip-tests            Skip test compilation and execution."
     msg "--build-skip-test-run         Compile tests without executing them."
     msg "--build-valgrind=<filter>     Also run the tests matching the filter under valgrind."
+    msg "--build-web                   Also test, regenerate and compare the embedded web pages."
+    msg "--build-smoke                 Also sync each network and smoke test the nodes."
     msg "--build-parallel=<int>        Number of jobs to run simultaneously."
     msg "                                Default: supported platforms use nproc/sysctl"
     msg "--build-use-local-src         Use existing sources in relevant paths."
