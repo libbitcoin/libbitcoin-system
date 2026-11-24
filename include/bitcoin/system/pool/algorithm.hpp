@@ -43,11 +43,11 @@ public:
     /// Members of a component, one bit each.
     using mask_t = uint64_t;
 
-    /// Fee, virtual size and sigops of a row.
+    /// Fee, weight and sigops of a row.
     struct totals_t
     {
         uint64_t fee{};
-        uint32_t size{};
+        uint32_t weight{};
         uint32_t sigops{};
     };
 
@@ -139,11 +139,11 @@ public:
         taken
     };
 
-    /// Rate and chargeable size of a chunk.
+    /// Rate and chargeable weight of a chunk.
     struct take_t
     {
         uint64_t rate{};
-        uint64_t size{};
+        uint64_t weight{};
     };
 
     /// The chunks taken by a block.
@@ -223,6 +223,9 @@ public:
     /// A component holds at most one member, and one clique, per mask bit.
     static constexpr size_t maximum_members = bits<mask_t>;
 
+    /// Fee factor of a rate per virtual kilobyte over weight.
+    static constexpr uint64_t per_weight = 1'000_u64 * chain::light_weight_factor;
+
     /// No row or input.
     static constexpr link_t none = max_uint32;
 
@@ -276,21 +279,21 @@ public:
     static constexpr bool is_sufficient(const context_t& stored,
         const context_t& current, uint32_t required) NOEXCEPT;
 
-    /// Chargeable size of row, greater of virtual size and sigop weight.
+    /// Chargeable weight of row, greater of weight and sigop weight.
     static constexpr uint64_t chargeable(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// Chargeable size of the members of the outcome.
+    /// Chargeable weight of the members of the outcome.
     static constexpr uint64_t chargeable(mask_t outcome,
         const component_t& component, const graph_t& graph,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// Fee rate of a row (satoshis per chargeable kilobyte).
+    /// Fee rate of a row (satoshis per chargeable virtual kilobyte).
     static constexpr uint64_t fee_rate(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// Fee rate of a fee over chargeable bytes (satoshis per kilobyte).
-    static constexpr uint64_t fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT;
+    /// Fee rate of a fee over chargeable weight (satoshis per virtual kilobyte).
+    static constexpr uint64_t fee_rate(uint64_t fee, uint64_t weight) NOEXCEPT;
 
     /// Column values (stored little-endian).
     /// -----------------------------------------------------------------------
@@ -359,12 +362,12 @@ public:
         const graph_t& graph, size_t limit, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// Chargeable size of every member of the component, conflicts included.
+    /// Chargeable weight of every member of the component, conflicts included.
     static constexpr uint64_t chargeable(const component_t& component,
         const graph_t& graph, uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The fee covers the bytes at the rate.
-    static constexpr bool covered(uint64_t fee, uint64_t bytes,
+    /// The fee covers the weight at the rate.
+    static constexpr bool covered(uint64_t fee, uint64_t weight,
         uint64_t rate) NOEXCEPT;
 
     /// Transitions (frontier, table columns).
@@ -415,11 +418,11 @@ public:
     /// Estimate (projected blocks).
     /// -----------------------------------------------------------------------
 
-    /// Chargeable size of the takes at or above the rate.
+    /// Chargeable weight of the takes at or above the rate.
     static constexpr uint64_t above(const std::span<const take_t>& takes,
         uint64_t rate) NOEXCEPT;
 
-    /// Lowest rate with room (bytes) within count of blocks, else max_uint64.
+    /// Lowest rate with room (weight) within count of blocks, else max_uint64.
     template <typename Arrivals>
     static uint64_t estimate(const projection_t& projection, size_t count,
         uint64_t space, uint64_t room, const Arrivals& arrivals) NOEXCEPT;
@@ -523,9 +526,9 @@ protected:
         const graph_t& graph, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The first fee and size are worth more than the second at the rate.
-    static constexpr bool worth(uint64_t fee, uint64_t size, uint64_t other_fee,
-        uint64_t other_size, uint64_t rate) NOEXCEPT;
+    /// The first fee and weight are worth more than the second at the rate.
+    static constexpr bool worth(uint64_t fee, uint64_t weight, uint64_t other_fee,
+        uint64_t other_weight, uint64_t rate) NOEXCEPT;
 
     /// The row and its descendants marked excluded.
     static void discard(std::span<mark> marks, const graph_t& graph,
