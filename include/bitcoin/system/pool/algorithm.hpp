@@ -20,6 +20,7 @@
 #define LIBBITCOIN_SYSTEM_POOL_ALGORITHM_HPP
 
 #include <span>
+#include <bitcoin/system/chain/enums/enums.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
@@ -275,7 +276,7 @@ public:
     static constexpr bool is_sufficient(const context_t& stored,
         const context_t& current, uint32_t required) NOEXCEPT;
 
-    /// Chargeable size of a row (virtual size or sigops at bytes per sigop).
+    /// Chargeable size of row, greater of virtual size and sigop weight.
     static constexpr uint64_t chargeable(const totals_t& totals,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
@@ -335,7 +336,7 @@ public:
     /// not resolvable within bounds.
     template <typename Word = xint512_t>
     static bool family(uint64_t& fee, uint64_t& bytes, const graph_t& graph,
-        const std::span<const link_t>& rows, uint64_t limit,
+        const std::span<const link_t>& rows, uint64_t limit, uint64_t rate,
         uint32_t bytes_per_sigop, size_t maximum_outcomes) NOEXCEPT;
 
     /// Outcomes.
@@ -352,6 +353,11 @@ public:
     template <typename Word = xint512_t>
     static constexpr uint64_t evaluate(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
+
+    /// Outcomes scored: first within limit, then greedy leaf past it.
+    static void leaves(std::vector<mask_t>& out, const component_t& component,
+        const graph_t& graph, size_t limit, uint64_t rate,
+        uint32_t bytes_per_sigop) NOEXCEPT;
 
     /// Chargeable size of every member of the component, conflicts included.
     static constexpr uint64_t chargeable(const component_t& component,
@@ -512,7 +518,7 @@ protected:
         const component_t& component, const graph_t& graph, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;
 
-    /// The outcome of a winner per clique by fee less the rate on its size.
+    /// Members by value, each with ancestors unless one lost; rivals lose.
     static constexpr mask_t greedy(const component_t& component,
         const graph_t& graph, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;

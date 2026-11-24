@@ -22,8 +22,6 @@
 // Pulls in all /system headers (except settings.hpp).
 #include <bitcoin/system/have.hpp>
 
-#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_SYSTEM_VERSION "/"
-
 /// LCOV (known symbols for code coverage exclusion).
 /// ---------------------------------------------------------------------------
 #define LCOV_EXCL_START(comment)
