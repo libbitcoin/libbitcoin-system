@@ -632,6 +632,14 @@ jobs:
             ./emulation
           fi
 
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\s:(][^:(]*):(\\d+):(\\d+):\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning\\s+(C\\d+)\\s*:\\s*(.*?)(?:\\s+\\[[^\\]]+\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
+
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
@@ -768,6 +776,14 @@ jobs:
           if [[ "${{ matrix.link }}" == "dynamic" ]]; then
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
+
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\s:(][^:(]*):(\\d+):(\\d+):\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning\\s+(C\\d+)\\s*:\\s*(.*?)(?:\\s+\\[[^\\]]+\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
 
       - name: Execute installation
         shell: bash
@@ -1273,6 +1289,14 @@ jobs:
           chmod -R u+rwX /tmp/sysroot
           find /tmp/sysroot -name '*.la' -delete
 
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\s:(][^:(]*):(\\d+):(\\d+):\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning\\s+(C\\d+)\\s*:\\s*(.*?)(?:\\s+\\[[^\\]]+\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
+
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
@@ -1698,6 +1722,14 @@ jobs:
               echo "LDFLAGS=-Wl,-rpath,${{ github.workspace }}/prefix/lib" >> $GITHUB_ENV
           fi
 
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\s:(][^:(]*):(\\d+):(\\d+):\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning\\s+(C\\d+)\\s*:\\s*(.*?)(?:\\s+\\[[^\\]]+\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
+
       - name: Execute installation
         shell: bash
         working-directory: 'libbitcoin-system'
@@ -1874,6 +1906,14 @@ jobs:
           persist-credentials: false
           repository: ${{ github.repository }}
 
+      - name: Register warning matcher
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/warning-matcher.json" << 'EOF'
+          {"problemMatcher":[{"owner":"gcc-warning","severity":"warning","pattern":[{"regexp":"^([^\\s:(][^:(]*):(\\d+):(\\d+):\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]},{"owner":"msvc-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning\\s+(C\\d+)\\s*:\\s*(.*?)(?:\\s+\\[[^\\]]+\\])?$","file":1,"line":2,"column":3,"code":4,"message":5}]},{"owner":"clang-cl-warning","severity":"warning","pattern":[{"regexp":"^\\s*(?:\\d+>)?([^\\s(][^(]*)\\((\\d+)(?:,(\\d+))?\\)\\s*:\\s+warning:\\s+(.*?)(?:\\s+\\[(-W[^\\]]+)\\])?$","file":1,"line":2,"column":3,"message":4,"code":5}]}]}
+          EOF
+          echo "::add-matcher::$RUNNER_TEMP/warning-matcher.json"
+
       - name: Force clean nuget package repository
         shell: cmd
         working-directory: 'libbitcoin-system'
@@ -1914,3 +1954,40 @@ jobs:
             exit $ERR;
           }
           Write-Host "Test execution complete." -ForegroundColor Green;
+
+  warnings:
+    needs: [ gnu, musl, cmake, presets, msvc ]
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.action != 'closed') }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      checks: read
+
+    steps:
+      - name: Count compiler warnings
+        id: count
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SUITE=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" --jq .check_suite_id)
+          RUNS=$(gh api --paginate "repos/${{ github.repository }}/check-suites/${SUITE}/check-runs?per_page=100" --jq '.check_runs[] | select(.output.annotations_count > 0) | .id')
+          COUNT=0
+          for RUN in ${RUNS}; do
+            FOUND=$(gh api --paginate "repos/${{ github.repository }}/check-runs/${RUN}/annotations?per_page=100" --jq '[.[] | select(.annotation_level == "warning" and .path != ".github")] | length' | awk '{ sum += $1 } END { print sum + 0 }')
+            COUNT=$((COUNT + FOUND))
+          done
+          echo "Compiler warnings: ${COUNT}" | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p warnings
+          echo "${COUNT}" > warnings/count
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload warning count
+        if: steps.count.outputs.count != '0'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: warnings-${{ steps.count.outputs.count }}
+          path: warnings/count
+          retention-days: 90
