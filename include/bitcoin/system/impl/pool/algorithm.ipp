@@ -76,13 +76,12 @@ constexpr algorithm::link_t algorithm::lowered(link_t cell,
     return left == absent ? unlabeled : left;
 }
 
-// Sigop cost at bytes per sigop is weight, as is four times virtual size.
+// Sigop cost at bytes per sigop is weight.
 constexpr uint64_t algorithm::chargeable(const totals_t& totals,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
-    const auto weight = ceilinged_multiply<uint64_t>(totals.sigops, bytes_per_sigop);
-    const auto ratio = ceilinged_divide<uint64_t>(weight, chain::light_weight_factor);
-    return greater(totals.size, ratio);
+    const auto sigop = ceilinged_multiply<uint64_t>(totals.sigops, bytes_per_sigop);
+    return greater(totals.weight, sigop);
 }
 
 constexpr uint64_t algorithm::chargeable(mask_t outcome,
@@ -108,9 +107,9 @@ constexpr uint64_t algorithm::fee_rate(const totals_t& totals,
     return fee_rate(totals.fee, chargeable(totals, bytes_per_sigop));
 }
 
-constexpr uint64_t algorithm::fee_rate(uint64_t fee, uint64_t bytes) NOEXCEPT
+constexpr uint64_t algorithm::fee_rate(uint64_t fee, uint64_t weight) NOEXCEPT
 {
-    return ceilinged_multiply(fee, 1'000_u64) / greater(bytes, 1_u64);
+    return ceilinged_multiply(fee, per_weight) / greater(weight, 1_u64);
 }
 
 // Column values.
@@ -133,7 +132,7 @@ constexpr algorithm::totals_t algorithm::to_column(
     return
     {
         native_to_little_end(value.fee),
-        native_to_little_end(value.size),
+        native_to_little_end(value.weight),
         native_to_little_end(value.sigops)
     };
 }
@@ -155,7 +154,7 @@ constexpr algorithm::totals_t algorithm::from_column(
     return
     {
         native_from_little_end(value.fee),
-        native_from_little_end(value.size),
+        native_from_little_end(value.weight),
         native_from_little_end(value.sigops)
     };
 }
@@ -313,7 +312,7 @@ inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
     {
         const auto& add = totals(graph, row);
         out.fee = ceilinged_add(out.fee, add.fee);
-        out.size = ceilinged_add(out.size, add.size);
+        out.weight = ceilinged_add(out.weight, add.weight);
         out.sigops = ceilinged_add(out.sigops, add.sigops);
 
         const auto slice = edges(graph, row);
@@ -325,7 +324,7 @@ inline bool algorithm::ancestry(totals_t& out, const graph_t& graph,
                 push(up);
         }
 
-        return out.size <= limit.size && out.sigops <= limit.sigops;
+        return out.weight <= limit.weight && out.sigops <= limit.sigops;
     };
 
     for (size_t member{}; member < component.count; ++member)
@@ -487,12 +486,11 @@ constexpr uint64_t algorithm::chargeable(const component_t& component,
     return bytes;
 }
 
-constexpr bool algorithm::covered(uint64_t fee, uint64_t bytes,
+constexpr bool algorithm::covered(uint64_t fee, uint64_t weight,
     uint64_t rate) NOEXCEPT
 {
-    // Compared in satoshis per virtual kilobyte.
-    return ceilinged_multiply(fee, 1'000_u64) >=
-        ceilinged_multiply(rate, bytes);
+    return ceilinged_multiply(fee, per_weight) >=
+        ceilinged_multiply(rate, weight);
 }
 
 // Transitions (frontier, table columns).
@@ -640,7 +638,7 @@ constexpr uint64_t algorithm::above(const std::span<const take_t>& takes,
     uint64_t size{};
     for (const auto& take: takes)
         if (take.rate >= rate)
-            size = ceilinged_add(size, take.size);
+            size = ceilinged_add(size, take.weight);
 
     return size;
 }
@@ -1011,14 +1009,14 @@ constexpr algorithm::mask_t algorithm::greedy(const component_t& component,
     return out;
 }
 
-constexpr bool algorithm::worth(uint64_t fee, uint64_t size,
-    uint64_t other_fee, uint64_t other_size, uint64_t rate) NOEXCEPT
+constexpr bool algorithm::worth(uint64_t fee, uint64_t weight,
+    uint64_t other_fee, uint64_t other_weight, uint64_t rate) NOEXCEPT
 {
-    // Fee less the rate on size, compared in satoshis per virtual kilobyte.
-    const auto value = ceilinged_add(ceilinged_multiply(fee, 1'000_u64),
-        ceilinged_multiply(rate, other_size));
-    const auto other = ceilinged_add(ceilinged_multiply(other_fee, 1'000_u64),
-        ceilinged_multiply(rate, size));
+    // Fee less the rate on weight.
+    const auto value = ceilinged_add(ceilinged_multiply(fee, per_weight),
+        ceilinged_multiply(rate, other_weight));
+    const auto other = ceilinged_add(ceilinged_multiply(other_fee, per_weight),
+        ceilinged_multiply(rate, weight));
     return value > other;
 }
 
@@ -1068,7 +1066,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 {
     const auto same = [](const totals_t& left, const totals_t& right) NOEXCEPT
     {
-        return left.fee == right.fee && left.size == right.size &&
+        return left.fee == right.fee && left.weight == right.weight &&
             left.sigops == right.sigops;
     };
 
@@ -1123,7 +1121,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
     const auto fits = [](const totals_t& sum, const totals_t& space) NOEXCEPT
     {
-        return sum.size <= space.size && sum.sigops <= space.sigops;
+        return sum.weight <= space.weight && sum.sigops <= space.sigops;
     };
 
     const auto unmarked = [&](link_t row) NOEXCEPT
@@ -1136,7 +1134,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return
         {
             {},
-            floored_subtract(budget.size, used.size),
+            floored_subtract(budget.weight, used.weight),
             floored_subtract(budget.sigops, used.sigops)
         };
     };
@@ -1427,7 +1425,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             const auto own = totals(graph, row);
             places[row - base] = place;
             open[place] = row;
-            kept.sizes[place] = { own.size, row };
+            kept.sizes[place] = { own.weight, row };
             kept.sigops[place] = { own.sigops, row };
             ++place;
         }
@@ -1483,7 +1481,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
     {
         // A take holds an unmarked row, so none is left when none fits.
         const auto space = available();
-        if (!remains(kept.sizes, space.size) ||
+        if (!remains(kept.sizes, space.weight) ||
             !remains(kept.sigops, space.sigops))
             break;
 
@@ -1548,7 +1546,7 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
 
         out.insert(out.end(), rows.begin(), rows.end());
         takes.push_back({ score.rate, charged(rows) });
-        used.size = ceilinged_add(used.size, sum.size);
+        used.weight = ceilinged_add(used.weight, sum.weight);
         used.sigops = ceilinged_add(used.sigops, sum.sigops);
 
         // Untaken descendants of take have changed chunks, and untaken
@@ -1602,7 +1600,7 @@ inline std::vector<algorithm::takes_t> algorithm::levels(
 
         uint64_t size{};
         for (auto take = level.rbegin(); take != level.rend(); ++take)
-            take->size = size = ceilinged_add(size, take->size);
+            take->weight = size = ceilinged_add(size, take->weight);
     }
 
     return out;
@@ -1629,8 +1627,8 @@ inline bool algorithm::reaches(const projection_t& projection,
 
         const auto last = add1(block) >= blocks;
         const auto full = !level.empty() && !(last && projection.exhausted);
-        const auto capacity = full ? level.front().size : space;
-        const auto over = from == level.end() ? 0_u64 : from->size;
+        const auto capacity = full ? level.front().weight : space;
+        const auto over = from == level.end() ? 0_u64 : from->weight;
         const auto demand = ceilinged_add(carry, over);
         if (floored_subtract(capacity, demand) >= room)
             return true;
@@ -1719,13 +1717,13 @@ inline bool algorithm::chunk(std::vector<link_t>& out, totals_t& sum,
     for (; cut != out.end(); ++cut)
     {
         const auto& add = totals(graph, *cut);
-        const auto size = ceilinged_add(sum.size, add.size);
+        const auto size = ceilinged_add(sum.weight, add.weight);
         const auto sigops = ceilinged_add(sum.sigops, add.sigops);
-        if (size > available.size || sigops > available.sigops)
+        if (size > available.weight || sigops > available.sigops)
             break;
 
         sum.fee = ceilinged_add(sum.fee, add.fee);
-        sum.size = size;
+        sum.weight = size;
         sum.sigops = sigops;
     }
 
@@ -1828,7 +1826,7 @@ inline void algorithm::closure(std::vector<link_t>& out, totals_t& sum,
         const auto own = totals(graph, row);
         out.push_back(row);
         sum.fee = ceilinged_add(sum.fee, own.fee);
-        sum.size = ceilinged_add(sum.size, own.size);
+        sum.weight = ceilinged_add(sum.weight, own.weight);
         sum.sigops = ceilinged_add(sum.sigops, own.sigops);
     }
 }

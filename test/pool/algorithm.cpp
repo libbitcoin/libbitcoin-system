@@ -930,18 +930,18 @@ BC_AUTO_TEST_CASE(pool_algorithm__cells__states__expected)
     BC_REQUIRE(!accessor::is_boundary(absent));
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__chargeable__size_or_sigops__maximum)
+BC_AUTO_TEST_CASE(pool_algorithm__chargeable__weight_or_sigops__maximum)
 {
     BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 1 }, 20), 100u);
-    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 24 }, 20), 120u);
-    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 21 }, 20), 105u);
+    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 24 }, 20), 480u);
+    BC_REQUIRE_EQUAL(accessor::chargeable({ 0, 100, 21 }, 20), 420u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__fee_rate__size_sigops_or_empty__per_chargeable_kilobyte)
+BC_AUTO_TEST_CASE(pool_algorithm__fee_rate__weight_sigops_or_empty__per_chargeable_kilobyte)
 {
-    BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 100, 1 }, 20), 10'000u);
+    BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 100, 1 }, 20), 40'000u);
     BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 100, 40 }, 20), 5'000u);
-    BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 0, 0 }, 20), 1'000'000u);
+    BC_REQUIRE_EQUAL(accessor::fee_rate({ 1'000, 0, 0 }, 20), 4'000'000u);
 }
 
 // initialize/propagate (columns)
@@ -1593,7 +1593,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__ancestry__component__totals_within_limit)
     const auto exceeds_sigops = accessor::ancestry(over_sigops, graph, out, { 0, 500, 4 });
     BC_REQUIRE(fits);
     BC_REQUIRE_EQUAL(sum.fee, 1'150u);
-    BC_REQUIRE_EQUAL(sum.size, 500u);
+    BC_REQUIRE_EQUAL(sum.weight, 500u);
     BC_REQUIRE_EQUAL(sum.sigops, 5u);
     BC_REQUIRE(!exceeds_size);
     BC_REQUIRE(!exceeds_sigops);
@@ -1611,7 +1611,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__ancestry__uncontested_ancestor__included)
     BC_REQUIRE_EQUAL(out.count, 2u);
     BC_REQUIRE(fits);
     BC_REQUIRE_EQUAL(sum.fee, 60u);
-    BC_REQUIRE_EQUAL(sum.size, 300u);
+    BC_REQUIRE_EQUAL(sum.weight, 300u);
     BC_REQUIRE_EQUAL(sum.sigops, 3u);
 }
 
@@ -1706,8 +1706,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__evaluate__extended__same_as_integral)
 
 BC_AUTO_TEST_CASE(pool_algorithm__covered__fee_at_rate__expected)
 {
-    BC_REQUIRE(accessor::covered(150, 100, 1'500));
-    BC_REQUIRE(!accessor::covered(150, 100, 1'501));
+    BC_REQUIRE(accessor::covered(150, 100, 6'000));
+    BC_REQUIRE(!accessor::covered(150, 100, 6'001));
     BC_REQUIRE(accessor::covered(0, 0, 1));
     BC_REQUIRE(!accessor::covered(0, 1, 1));
 }
@@ -1718,7 +1718,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__chargeable__component__sum_of_members)
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 20), 500u);
-    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 800), 1'000u);
+    BC_REQUIRE_EQUAL(accessor::chargeable(out, graph, 800), 4'000u);
 }
 
 // template
@@ -1774,14 +1774,14 @@ BC_AUTO_TEST_CASE(pool_algorithm__best__scenario__highest_fee_index)
     BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph, 0, 20), 2u);
 }
 
-// At two satoshis per vbyte the third row's 150 no longer pays for its 100.
+// At eight satoshis per vbyte the third row's 150 no longer pays for its 100 weight.
 BC_AUTO_TEST_CASE(pool_algorithm__best__scenario_at_rate__highest_net_index)
 {
     auto labeled = label<link_t>();
     const auto out = component(labeled);
     const graph_t graph{ labeled.columns() };
     const auto masks = outcomes_of(out);
-    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph, 2'000, 20), 0u);
+    BC_REQUIRE_EQUAL(accessor::best<uint64_t>(masks, out, graph, 8'000, 20), 0u);
 }
 
 // P (400) takes Q, so A loses and B is taken alone: rows 0, 2, 4 (650).
@@ -1838,12 +1838,12 @@ BC_AUTO_TEST_CASE(pool_algorithm__greedy__winner_with_ancestor__ancestor_rival_l
     BC_REQUIRE_EQUAL(accessor::greedy(out, graph, 0, 20), 0b0110u);
 }
 
-BC_AUTO_TEST_CASE(pool_algorithm__worth__fee_less_rate_on_size__expected)
+BC_AUTO_TEST_CASE(pool_algorithm__worth__fee_less_rate_on_weight__expected)
 {
-    BC_REQUIRE(accessor::worth(500, 200, 650, 300, 2'000));
-    BC_REQUIRE(!accessor::worth(650, 300, 500, 200, 2'000));
+    BC_REQUIRE(accessor::worth(500, 200, 650, 300, 8'000));
+    BC_REQUIRE(!accessor::worth(650, 300, 500, 200, 8'000));
     BC_REQUIRE(accessor::worth(650, 300, 500, 200, 0));
-    BC_REQUIRE(!accessor::worth(500, 200, 500, 200, 2'000));
+    BC_REQUIRE(!accessor::worth(500, 200, 500, 200, 8'000));
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__best__extended__same_as_integral)
@@ -2082,12 +2082,12 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__sigop_charged_child__takes_sized_by_r
     BC_REQUIRE_EQUAL(rows.size(), 3u);
     BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
     BC_REQUIRE_EQUAL(out.blocks[0].size(), 3u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 1'200u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].size, 1'000u);
-    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 1'000u);
-    BC_REQUIRE_EQUAL(out.blocks[0][1].size, 1'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 4'800u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].weight, 1'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 4'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].weight, 1'000u);
     BC_REQUIRE_EQUAL(out.blocks[0][2].rate, 500u);
-    BC_REQUIRE_EQUAL(out.blocks[0][2].size, 1'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][2].weight, 4'000u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__project__shared_parent__closure_then_row)
@@ -2100,10 +2100,10 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__shared_parent__closure_then_row)
     BC_REQUIRE_EQUAL(rows.size(), 4u);
     BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
     BC_REQUIRE_EQUAL(out.blocks[0].size(), 2u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 400u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].size, 300u);
-    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 350u);
-    BC_REQUIRE_EQUAL(out.blocks[0][1].size, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 1'600u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].weight, 300u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 1'400u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].weight, 100u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__pack__empty_budget__empty)
@@ -2123,10 +2123,10 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__first_block__full_not_exhausted)
     const auto out = projection_of(1);
     BC_REQUIRE_EQUAL(out.blocks.size(), 1u);
     BC_REQUIRE_EQUAL(out.blocks[0].size(), 2u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 100u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].size, 100u);
-    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 100u);
-    BC_REQUIRE_EQUAL(out.blocks[0][1].size, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 400u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].weight, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].rate, 400u);
+    BC_REQUIRE_EQUAL(out.blocks[0][1].weight, 100u);
     BC_REQUIRE(!out.exhausted);
 }
 
@@ -2135,8 +2135,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__second_block__remainder_exhausted)
     const auto out = projection_of(2);
     BC_REQUIRE_EQUAL(out.blocks.size(), 2u);
     BC_REQUIRE_EQUAL(out.blocks[1].size(), 1u);
-    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 4'000u);
-    BC_REQUIRE_EQUAL(out.blocks[1][0].size, 100u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 16'000u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].weight, 100u);
     BC_REQUIRE(out.exhausted);
 }
 
@@ -2179,10 +2179,10 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__blocks_of_one_row__cluster_row_by_row
     BC_REQUIRE_EQUAL(rows.size(), 1u);
     BC_REQUIRE_EQUAL(rows[0], 3u);
     BC_REQUIRE_EQUAL(out.blocks.size(), 4u);
-    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 5'000u);
-    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 100u);
-    BC_REQUIRE_EQUAL(out.blocks[2][0].rate, 100u);
-    BC_REQUIRE_EQUAL(out.blocks[3][0].rate, 4'000u);
+    BC_REQUIRE_EQUAL(out.blocks[0][0].rate, 20'000u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 400u);
+    BC_REQUIRE_EQUAL(out.blocks[2][0].rate, 400u);
+    BC_REQUIRE_EQUAL(out.blocks[3][0].rate, 16'000u);
     BC_REQUIRE(out.exhausted);
 }
 
@@ -2198,8 +2198,8 @@ BC_AUTO_TEST_CASE(pool_algorithm__project__budget_raised_between_blocks__whole_c
     BC_REQUIRE_EQUAL(rows.size(), 3u);
     BC_REQUIRE_EQUAL(out.blocks.size(), 2u);
     BC_REQUIRE_EQUAL(out.blocks[1].size(), 1u);
-    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 1'400u);
-    BC_REQUIRE_EQUAL(out.blocks[1][0].size, 300u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].rate, 5'600u);
+    BC_REQUIRE_EQUAL(out.blocks[1][0].weight, 300u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__project__unfit_row__exhausted)
@@ -2235,13 +2235,13 @@ BC_AUTO_TEST_CASE(pool_algorithm__estimate__empty_pool__zero)
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_block__above_lowest_take)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 401u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__full_last_block__above_lowest_take)
 {
     const auto projection = projection_of(1);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 1, 200, 1, no_arrivals), 401u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__takes_out_of_rate_order__above_lowest_take)
@@ -2272,7 +2272,7 @@ BC_AUTO_TEST_CASE(pool_algorithm__estimate__low_arrivals_fill_open_block__above_
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__high_arrivals_fill_open_block__above_first_block)
 {
     const auto projection = projection_of(2);
-    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, high_arrivals), 101u);
+    BC_REQUIRE_EQUAL(accessor::estimate(projection, 2, 200, 1, high_arrivals), 401u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__estimate__no_space__maximum)

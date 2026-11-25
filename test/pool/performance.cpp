@@ -268,7 +268,7 @@ struct pooled
         for (auto& total: totals)
         {
             total.fee = 100u + (payer() % 10'000u);
-            total.size = 100u + (payer() % 400u);
+            total.weight = 100u + (payer() % 400u);
         }
 
         cells = initial;
@@ -379,7 +379,7 @@ struct chained
             next.last = none;
             next.length = chains_length - draw(6);
             next.pays = rate();
-            next.size = 110u + draw(200);
+            next.weight = 110u + draw(200);
             next.varied = is_zero(draw(3));
         }
 
@@ -391,7 +391,7 @@ struct chained
                     continue;
 
                 const auto pays = next.pays + (next.varied ? draw(200) : 0u);
-                next.last = add(next.last, pays, next.size);
+                next.last = add(next.last, pays, next.weight);
             }
         }
 
@@ -903,7 +903,7 @@ static bool report_template(const std::string& name, table& columns,
     {
         size_t reached{};
         for (const auto target: template_targets)
-            if (algorithm::estimate(projection, target, template_budget.size,
+            if (algorithm::estimate(projection, target, template_budget.weight,
                 template_room, arrivals) != max_uint64)
                 ++reached;
 
