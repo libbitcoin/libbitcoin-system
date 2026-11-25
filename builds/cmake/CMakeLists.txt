@@ -88,6 +88,7 @@ if ( MSVC )
   add_compile_options(
     /W4
     /permissive-
+    /Zc:inline
     /bigobj
     /Zc:__cplusplus
     /Zc:preprocessor
