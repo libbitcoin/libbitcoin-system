@@ -25,6 +25,7 @@
       <WarningLevel>Level4</WarningLevel>
       <ExternalWarningLevel>Level4</ExternalWarningLevel>
       <ConformanceMode>true</ConformanceMode>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
       <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>

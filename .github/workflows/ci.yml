@@ -866,7 +866,7 @@ jobs:
 
   warnings:
     needs: [ gnu, cmake, presets, msvc ]
-    if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.action != 'closed') }}
+    if: ${{ success() && github.event_name == 'push' }}
     continue-on-error: true
     runs-on: ubuntu-latest
 
