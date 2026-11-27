@@ -154,7 +154,7 @@ jobs:
             libsecp256k1: ""
             options: "--enable-isystem"
 
-          - image: ubuntu-24.04
+          - image: ubuntu-26.04
             config: "release"
             link: "static"
             cc: "gcc-15"
@@ -223,15 +223,6 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
-             [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-15-multilib"* ]] ||
-             [[ "${{ matrix.package }}" == *"g++-15-multilib"* ]]; then
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-            sudo apt-get update
-          fi
           sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
           if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
               sudo apt-get install lcov
@@ -382,7 +373,7 @@ jobs:
             libsecp256k1: ""
             options: ""
 
-          - image: ubuntu-24.04
+          - image: ubuntu-26.04
             config: "debug"
             link: "dynamic"
             cc: "gcc-16"
@@ -426,15 +417,6 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
-             [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-15-multilib"* ]] ||
-             [[ "${{ matrix.package }}" == *"g++-15-multilib"* ]]; then
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-            sudo apt-get update
-          fi
           sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
           if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
               sudo apt-get install lcov
@@ -622,15 +604,6 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          if [[ "${{ matrix.package }}" == *"g++-15"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-15"* ]] ||
-             [[ "${{ matrix.package }}" == *"g++-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-16"* ]] ||
-             [[ "${{ matrix.package }}" == *"gcc-15-multilib"* ]] ||
-             [[ "${{ matrix.package }}" == *"g++-15-multilib"* ]]; then
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-            sudo apt-get update
-          fi
           sudo apt-get install git build-essential autoconf automake libtool pkg-config ${{ matrix.package || '' }}
           if [[ "${{ matrix.coverage }}" == "lcov" ]]; then
               sudo apt-get install lcov

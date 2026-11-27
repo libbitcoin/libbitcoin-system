@@ -79,7 +79,8 @@ obj
 
 # GitNexus tool.
 .gitnexus
-AI agent tooling
+
+# AI agent tooling
 .claude
 AGENTS.md
 CLAUDE.md
