@@ -208,6 +208,7 @@
     <ClCompile Include="..\..\..\..\test\config\base32.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base32b.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\base58check.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base64.cpp" />
     <ClCompile Include="..\..\..\..\test\config\base85.cpp" />
     <ClCompile Include="..\..\..\..\test\config\block.cpp">

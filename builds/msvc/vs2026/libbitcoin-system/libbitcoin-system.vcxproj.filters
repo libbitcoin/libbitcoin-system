@@ -525,6 +525,9 @@
     <ClCompile Include="..\..\..\..\src\config\base58.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\base58check.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\base64.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
@@ -1296,6 +1299,9 @@
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58.hpp">
+      <Filter>include\bitcoin\system\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base58check.hpp">
       <Filter>include\bitcoin\system\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\system\config\base64.hpp">
