@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace system {
 
-const std::string base58_chars =
+constexpr std::string_view base58_chars =
     "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 bool is_base58(char character) NOEXCEPT
@@ -171,7 +171,7 @@ bool decode_base58(data_chunk& out, const std::string& in) NOEXCEPT
     for (auto it = in.cbegin() + leading_zeros; it != in.cend(); ++it)
     {
         const auto carry = base58_chars.find(*it);
-        if (carry == std::string::npos)
+        if (carry == std::string_view::npos)
             return false;
 
         unpack_char(data, carry);
