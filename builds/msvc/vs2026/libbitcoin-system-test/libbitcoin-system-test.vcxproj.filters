@@ -324,6 +324,9 @@
     <ClCompile Include="..\..\..\..\test\config\base58.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\config\base58check.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\config\base64.cpp">
       <Filter>src\config</Filter>
     </ClCompile>

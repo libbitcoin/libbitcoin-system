@@ -102,6 +102,7 @@ src_libbitcoin_system_la_SOURCES = \
     ${srcdir}/../../src/config/base32.cpp \
     ${srcdir}/../../src/config/base32b.cpp \
     ${srcdir}/../../src/config/base58.cpp \
+    ${srcdir}/../../src/config/base58check.cpp \
     ${srcdir}/../../src/config/base64.cpp \
     ${srcdir}/../../src/config/base85.cpp \
     ${srcdir}/../../src/config/block.cpp \
@@ -434,6 +435,7 @@ include_bitcoin_system_config_HEADERS = \
     ${srcdir}/../../include/bitcoin/system/config/base32.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base32b.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base58.hpp \
+    ${srcdir}/../../include/bitcoin/system/config/base58check.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base64.hpp \
     ${srcdir}/../../include/bitcoin/system/config/base85.hpp \
     ${srcdir}/../../include/bitcoin/system/config/block.hpp \
@@ -1364,6 +1366,7 @@ test_libbitcoin_system_test_SOURCES = \
     ${srcdir}/../../test/config/base32.cpp \
     ${srcdir}/../../test/config/base32b.cpp \
     ${srcdir}/../../test/config/base58.cpp \
+    ${srcdir}/../../test/config/base58check.cpp \
     ${srcdir}/../../test/config/base64.cpp \
     ${srcdir}/../../test/config/base85.cpp \
     ${srcdir}/../../test/config/block.cpp \

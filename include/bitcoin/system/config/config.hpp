@@ -25,6 +25,7 @@
 #include <bitcoin/system/config/base32.hpp>
 #include <bitcoin/system/config/base32b.hpp>
 #include <bitcoin/system/config/base58.hpp>
+#include <bitcoin/system/config/base58check.hpp>
 #include <bitcoin/system/config/base64.hpp>
 #include <bitcoin/system/config/base85.hpp>
 #include <bitcoin/system/config/block.hpp>
