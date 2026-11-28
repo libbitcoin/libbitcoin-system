@@ -23,6 +23,7 @@
 #include <bitcoin/system/chain/enums/enums.hpp>
 #include <bitcoin/system/data/data.hpp>
 #include <bitcoin/system/define.hpp>
+#include <bitcoin/system/execution.hpp>
 #include <bitcoin/system/intrinsics/intrinsics.hpp>
 #include <bitcoin/system/math/math.hpp>
 
@@ -111,6 +112,9 @@ public:
         std::span<const uint32_t> flags{};
         std::span<const uint32_t> heights{};
         std::span<const uint32_t> medians{};
+
+        /// Row of each input (native), edges searched if empty.
+        std::span<const link_t> owners{};
     };
 
     /// The table columns with candidate columns and bridging edges appended.
@@ -158,7 +162,7 @@ public:
         bool complete{ true };
     };
 
-    /// Offer of chunk of row, or closure of its cluster (count from first).
+    /// Offer of chunk, closure (count from first), or cluster bound (none).
     struct offer_t
     {
         link_t row{};
@@ -322,7 +326,7 @@ public:
     static constexpr bool collect(component_t& out, const graph_t& graph,
         link_t row) NOEXCEPT;
 
-    /// Ancestor and clique masks of the rows, false if over maximum_members.
+    /// Ancestor and clique masks of the ascending rows, false if over maximum.
     static constexpr bool relate(component_t& out,
         const graph_t& graph) NOEXCEPT;
 
@@ -357,7 +361,7 @@ public:
     static constexpr uint64_t evaluate(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
 
-    /// Outcomes scored: first within limit, then greedy leaf past it.
+    /// Distinct outcomes within limit, then greedy leaf past it.
     static void leaves(std::vector<mask_t>& out, const component_t& component,
         const graph_t& graph, size_t limit, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;
@@ -397,6 +401,10 @@ public:
 
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
+
+    /// Row of each input, for columns owners.
+    static void owners(std::vector<link_t>& out,
+        const columns_t& columns) NOEXCEPT;
 
     /// Rows absent from best outcome of their component, by fee less rate on
     /// its size, marked excluded.
@@ -479,7 +487,7 @@ protected:
     static constexpr link_t child(const graph_t& graph, link_t row) NOEXCEPT;
     static constexpr link_t parent(const graph_t& graph, link_t input) NOEXCEPT;
 
-    /// The row of the input, by search of the edges (ordered by first input).
+    /// Row of input, by owners or by search of edges (ordered by first input).
     static constexpr link_t owner(const graph_t& graph, link_t input) NOEXCEPT;
     static constexpr link_t sibling(const graph_t& graph,
         link_t input) NOEXCEPT;
@@ -531,12 +539,12 @@ protected:
         uint64_t other_weight, uint64_t rate) NOEXCEPT;
 
     /// The row and its descendants marked excluded.
-    static void discard(std::span<mark> marks, const graph_t& graph,
-        link_t row) NOEXCEPT;
+    static void discard(std::vector<link_t>& pending, std::span<mark> marks,
+        const graph_t& graph, link_t row) NOEXCEPT;
 
     /// The component of the row and its descendants marked excluded.
-    static void forfeit(std::span<mark> marks, const graph_t& graph,
-        link_t row) NOEXCEPT;
+    static void forfeit(std::vector<link_t>& pending, std::span<mark> marks,
+        const graph_t& graph, link_t row) NOEXCEPT;
 
     /// As pack, with rate and chargeable size of each chunk taken.
     static void pack_(std::vector<link_t>& out, takes_t& takes,

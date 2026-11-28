@@ -193,14 +193,19 @@ constexpr bool algorithm::collect(component_t& out, const graph_t& graph,
     link_t row) NOEXCEPT
 {
     out = {};
+    std_array<link_t, maximum_members> sorted{};
     const auto add = [&](link_t found) NOEXCEPT
     {
-        if (index(out, found) != maximum_members)
+        const auto end = std::next(sorted.begin(), out.count);
+        const auto at = std::lower_bound(sorted.begin(), end, found);
+        if (at != end && *at == found)
             return true;
 
         if (out.count == maximum_members)
             return false;
 
+        std::move_backward(at, end, std::next(end));
+        *at = found;
         out.rows[out.count++] = found;
         return true;
     };
@@ -212,13 +217,22 @@ constexpr bool algorithm::collect(component_t& out, const graph_t& graph,
         if (!each_member(graph, out.rows[at], add))
             return false;
 
-    std::sort(out.rows.begin(), std::next(out.rows.begin(), out.count));
+    out.rows = sorted;
     return true;
 }
 
 constexpr bool algorithm::relate(component_t& out,
     const graph_t& graph) NOEXCEPT
 {
+    const auto first = out.rows.begin();
+    const auto last = std::next(first, out.count);
+    const auto locate = [&](link_t row) NOEXCEPT
+    {
+        const auto at = std::lower_bound(first, last, row);
+        return at != last && *at == row ?
+            to_unsigned(std::distance(first, at)) : maximum_members;
+    };
+
     out.contests = zero;
     for (size_t member{}; member < out.count; ++member)
     {
@@ -228,14 +242,14 @@ constexpr bool algorithm::relate(component_t& out,
         for (auto input = slice.first; input < slice.first + slice.count;
             ++input)
         {
-            const auto up = index(out, parent(graph, input));
+            const auto up = locate(parent(graph, input));
             if (up != maximum_members)
                 set_right_into(direct, up);
 
             auto clique = set_right(mask_t{}, member);
             each_rival(graph, input, [&](link_t other) NOEXCEPT
             {
-                const auto rival_member = index(out, owner(graph, other));
+                const auto rival_member = locate(owner(graph, other));
                 if (rival_member != maximum_members)
                     set_right_into(clique, rival_member);
             });
@@ -263,9 +277,8 @@ constexpr bool algorithm::relate(component_t& out,
         for (size_t member{}; member < out.count; ++member)
         {
             auto ancestors = out.ancestors[member];
-            for (size_t up{}; up < out.count; ++up)
-                if (get_right(ancestors, up))
-                    ancestors |= out.ancestors[up];
+            for (auto ups = ancestors; is_nonzero(ups); ups &= sub1(ups))
+                ancestors |= out.ancestors[right_zeros(ups)];
 
             if (ancestors != out.ancestors[member])
             {
@@ -463,14 +476,92 @@ inline void algorithm::leaves(std::vector<mask_t>& out,
     const component_t& component, const graph_t& graph, size_t limit,
     uint64_t rate, uint32_t bytes_per_sigop) NOEXCEPT
 {
-    const auto count = outcomes(component);
-    const auto total = std::min(count, limit);
-    out.resize(total);
-    for (size_t index{}; index < total; ++index)
-        out[index] = outcome(component, index);
+    out.clear();
+    if (is_zero(limit))
+        return;
 
-    if (is_nonzero(total) && count > total)
-        out.push_back(greedy(component, graph, rate, bytes_per_sigop));
+    const auto all = unmask_right<mask_t>(component.count);
+    const auto contests = component.contests;
+    if (is_zero(contests))
+    {
+        out.push_back(all);
+        return;
+    }
+
+    std_array<mask_t, maximum_members> below{};
+    for (size_t member{}; member < component.count; ++member)
+        for (size_t up{}; up < component.count; ++up)
+            if (get_right(component.ancestors[member], up))
+                set_right_into(below[up], member);
+
+    // Losers and their descendants join the dead.
+    const auto kill = [&](mask_t dead, mask_t losers) NOEXCEPT
+    {
+        dead |= losers;
+        for (; is_nonzero(losers); losers &= sub1(losers))
+            dead |= below[right_zeros(losers)];
+
+        return dead;
+    };
+
+    // Dead winners of a clique yield one outcome, so only the first is tried.
+    std_array<mask_t, add1(maximum_members)> deads{};
+    std_array<mask_t, add1(maximum_members)> rests{};
+    std_array<bool, add1(maximum_members)> spent{};
+    size_t level{};
+    rests[level] = component.cliques[level];
+    while (true)
+    {
+        if (level == contests)
+        {
+            if (out.size() == limit)
+            {
+                out.push_back(greedy(component, graph, rate, bytes_per_sigop));
+                return;
+            }
+
+            out.push_back(bit_and(all, bit_not(deads[level])));
+            --level;
+            continue;
+        }
+
+        const auto clique = component.cliques[level];
+        auto& rest = rests[level];
+        auto descend = false;
+        while (!descend && is_nonzero(rest))
+        {
+            const auto winner = bit_and(rest, twos_complement(rest));
+            rest &= sub1(rest);
+            if (is_nonzero(bit_and(winner, deads[level])))
+            {
+                if (spent[level])
+                    continue;
+
+                spent[level] = true;
+            }
+
+            deads[add1(level)] = kill(deads[level],
+                bit_and(clique, bit_not(winner)));
+            descend = true;
+        }
+
+        if (descend)
+        {
+            ++level;
+            if (level < contests)
+            {
+                rests[level] = component.cliques[level];
+                spent[level] = false;
+            }
+
+            continue;
+        }
+
+        if (is_zero(level))
+            return;
+
+        --level;
+    }
 }
 
 constexpr uint64_t algorithm::chargeable(const component_t& component,
@@ -563,46 +654,75 @@ inline bool algorithm::unconfirm(const columns_t& columns,
 // Template (frontier, table columns).
 // ----------------------------------------------------------------------------
 
+inline void algorithm::owners(std::vector<link_t>& out,
+    const columns_t& columns) NOEXCEPT
+{
+    out.resize(columns.rows.size());
+    for (size_t row{}; row < columns.edges.size(); ++row)
+    {
+        const auto slice = from_column(columns.edges[row]);
+        const auto first = std::min<size_t>(slice.first, out.size());
+        const auto last = std::min(first + slice.count, out.size());
+        std::fill(std::next(out.begin(), first), std::next(out.begin(), last),
+            possible_narrow_cast<link_t>(row));
+    }
+}
+
 template <typename Word>
 inline void algorithm::resolve(std::span<mark> marks,
     const columns_t& columns, size_t maximum_outcomes, uint64_t rate,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
+    constexpr auto policy = execution::par;
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
-    for (size_t row{}; row < count; ++row)
-    {
-        const auto present = is_present(from_column(columns.cells[row]));
-        marks[row] = present ? mark::unmarked : mark::excluded;
-    }
-
-    std::vector<mask_t> masks{};
-    for (size_t at{}; at < count; ++at)
-    {
-        // A component is resolved at its label, its lowest member row.
-        const auto row = possible_narrow_cast<link_t>(at);
-        const auto label = cell(graph, row);
-        if (!is_labeled(label) || label != row)
-            continue;
-
-        component_t component{};
-        const auto collected = collect(component, graph, row);
-        const auto related = collected && relate(component, graph);
-        const auto limit = related ? maximum_outcomes : zero;
-        leaves(masks, component, graph, limit, rate, bytes_per_sigop);
-        if (masks.empty())
+    std::transform(policy, columns.cells.begin(), columns.cells.end(),
+        marks.begin(), [](link_t value) NOEXCEPT
         {
-            forfeit(marks, graph, row);
-            continue;
-        }
+            return is_present(from_column(value)) ? mark::unmarked :
+                mark::excluded;
+        });
 
-        const auto chosen = masks[best<Word>(masks, component, graph, rate,
-            bytes_per_sigop)];
+    // Components and the descendants they discard are disjoint in rows.
+    const auto workers = execution::thread_pool::get().size();
+    const auto width = std::max(ceilinged_divide(count, workers), one);
+    std::vector<size_t> ranges(ceilinged_divide(count, width));
+    std::iota(ranges.begin(), ranges.end(), zero);
+    std::for_each(policy, ranges.cbegin(), ranges.cend(),
+        [&](size_t range) NOEXCEPT
+        {
+            std::vector<mask_t> masks{};
+            std::vector<link_t> pending{};
+            const auto first = range * width;
+            const auto last = std::min(first + width, count);
+            for (auto at = first; at < last; ++at)
+            {
+                // A component is resolved at its label, its lowest member row.
+                const auto row = possible_narrow_cast<link_t>(at);
+                const auto label = cell(graph, row);
+                if (!is_labeled(label) || label != row)
+                    continue;
 
-        for (size_t member{}; member < component.count; ++member)
-            if (!get_right(chosen, member))
-                discard(marks, graph, component.rows[member]);
-    }
+                component_t component{};
+                const auto collected = collect(component, graph, row);
+                const auto related = collected && relate(component, graph);
+                const auto limit = related ? maximum_outcomes : zero;
+                leaves(masks, component, graph, limit, rate, bytes_per_sigop);
+                if (masks.empty())
+                {
+                    forfeit(pending, marks, graph, row);
+                    continue;
+                }
+
+                const auto chosen = masks[best<Word>(masks, component, graph,
+                    rate, bytes_per_sigop)];
+
+                for (size_t member{}; member < component.count; ++member)
+                    if (!get_right(chosen, member))
+                        discard(pending, marks, graph,
+                            component.rows[member]);
+            }
+        });
 }
 
 inline void algorithm::pack(std::vector<link_t>& out, std::span<mark> marks,
@@ -747,8 +867,11 @@ constexpr algorithm::link_t algorithm::parent(const graph_t& graph,
 constexpr algorithm::link_t algorithm::owner(const graph_t& graph,
     link_t input) NOEXCEPT
 {
-    // The last row whose first input is not beyond the input.
     const auto count = graph.table.rows.size();
+    if (input < count && !graph.table.owners.empty())
+        return graph.table.owners[input];
+
+    // The last row whose first input is not beyond the input.
     const auto& edges = input < count ? graph.table.edges : graph.extra.edges;
     const auto after = std::upper_bound(edges.begin(), edges.end(), input,
         [](link_t at, const edges_t& edge) NOEXCEPT
@@ -1020,10 +1143,10 @@ constexpr bool algorithm::worth(uint64_t fee, uint64_t weight,
     return value > other;
 }
 
-inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
-    link_t row) NOEXCEPT
+inline void algorithm::discard(std::vector<link_t>& pending,
+    std::span<mark> marks, const graph_t& graph, link_t row) NOEXCEPT
 {
-    std::vector<link_t> pending{ row };
+    pending.assign(one, row);
     marks[row] = mark::excluded;
 
     while (!pending.empty())
@@ -1041,8 +1164,8 @@ inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
     }
 }
 
-inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
-    link_t row) NOEXCEPT
+inline void algorithm::forfeit(std::vector<link_t>& pending,
+    std::span<mark> marks, const graph_t& graph, link_t row) NOEXCEPT
 {
     std::vector<link_t> found{ row };
     const auto add = [&](link_t next) NOEXCEPT
@@ -1057,7 +1180,7 @@ inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
         each_member(graph, found[at], add);
 
     for (const auto member: found)
-        discard(marks, graph, member);
+        discard(pending, marks, graph, member);
 }
 
 inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
@@ -1168,12 +1291,17 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return !least.empty() && least.front().first <= value;
     };
 
-    // The highest rate is on top, the lowest row of equal rates, and the
-    // latest offer of the same row.
+    // The highest rate is on top, a bound over offers of equal rate, the
+    // lowest row of equal rates, and the latest offer of the same row.
     const auto lower = [](const offer_t& left, const offer_t& right) NOEXCEPT
     {
         if (left.rate != right.rate)
             return left.rate < right.rate;
+
+        const auto left_bound = left.count == none;
+        const auto right_bound = right.count == none;
+        if (left_bound != right_bound)
+            return right_bound;
 
         return left.row == right.row ? left.order < right.order :
             left.row > right.row;
@@ -1340,6 +1468,19 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return place;
     };
 
+    // Rows of the ring of the first place of a cluster.
+    const auto gather = [&](link_t place) NOEXCEPT
+    {
+        group.clear();
+        auto member = place;
+        do
+        {
+            group.push_back(open[member]);
+            member = ring[member];
+        }
+        while (member != place);
+    };
+
     // Each place is joined to an earlier place of its cluster (the first to
     // itself) and is in a ring of the places of its cluster, which is partial
     // (at its first place) if a row of it has an excluded parent. Each
@@ -1388,17 +1529,35 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             if (joined[place] != place)
                 continue;
 
-            group.clear();
-            auto member = place;
-            do
+            gather(place);
+            if (is_one(group.size()))
             {
-                group.push_back(open[member]);
-                member = ring[member];
+                propose(!partial[place], true);
+                continue;
             }
-            while (member != place);
 
-            propose(!partial[place] && group.size() <= maximum_members, true);
+            // No offer of cluster exceeds the rate of its best row.
+            uint64_t most{};
+            for (const auto member: group)
+            {
+                const auto own = totals(graph, member);
+                most = std::max(most, fee_rate(own.fee,
+                    chargeable(own, bytes_per_sigop)));
+            }
+
+            push({ group.front(), none, {}, {}, most, {} });
         }
+    };
+
+    // Cluster of bound proposes as when formed, with the whole budget.
+    const auto unfold = [&](link_t row) NOEXCEPT
+    {
+        const auto place = lowest(places[row - base]);
+        gather(place);
+        const auto spent = used;
+        used = {};
+        propose(!partial[place] && group.size() <= maximum_members, true);
+        used = spent;
     };
 
     if (!current)
@@ -1500,6 +1659,12 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             std::pop_heap(others.begin(), others.end(), lower);
             score = others.back();
             others.pop_back();
+        }
+
+        if (score.count == none)
+        {
+            unfold(score.row);
+            continue;
         }
 
         totals_t sum{};
