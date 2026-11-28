@@ -111,6 +111,9 @@ public:
         std::span<const uint32_t> flags{};
         std::span<const uint32_t> heights{};
         std::span<const uint32_t> medians{};
+
+        /// Row of each input (native), edges searched if empty.
+        std::span<const link_t> owners{};
     };
 
     /// The table columns with candidate columns and bridging edges appended.
@@ -398,6 +401,10 @@ public:
     /// Template (frontier, table columns).
     /// -----------------------------------------------------------------------
 
+    /// Row of each input, for columns owners.
+    static void owners(std::vector<link_t>& out,
+        const columns_t& columns) NOEXCEPT;
+
     /// Rows absent from best outcome of their component, by fee less rate on
     /// its size, marked excluded.
     template <typename Word = xint512_t>
@@ -479,7 +486,7 @@ protected:
     static constexpr link_t child(const graph_t& graph, link_t row) NOEXCEPT;
     static constexpr link_t parent(const graph_t& graph, link_t input) NOEXCEPT;
 
-    /// The row of the input, by search of the edges (ordered by first input).
+    /// Row of input, by owners or by search of edges (ordered by first input).
     static constexpr link_t owner(const graph_t& graph, link_t input) NOEXCEPT;
     static constexpr link_t sibling(const graph_t& graph,
         link_t input) NOEXCEPT;
@@ -531,12 +538,12 @@ protected:
         uint64_t other_weight, uint64_t rate) NOEXCEPT;
 
     /// The row and its descendants marked excluded.
-    static void discard(std::span<mark> marks, const graph_t& graph,
-        link_t row) NOEXCEPT;
+    static void discard(std::vector<link_t>& pending, std::span<mark> marks,
+        const graph_t& graph, link_t row) NOEXCEPT;
 
     /// The component of the row and its descendants marked excluded.
-    static void forfeit(std::span<mark> marks, const graph_t& graph,
-        link_t row) NOEXCEPT;
+    static void forfeit(std::vector<link_t>& pending, std::span<mark> marks,
+        const graph_t& graph, link_t row) NOEXCEPT;
 
     /// As pack, with rate and chargeable size of each chunk taken.
     static void pack_(std::vector<link_t>& out, takes_t& takes,

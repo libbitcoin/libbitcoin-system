@@ -31,6 +31,7 @@ public:
     using algorithm::greedy;
     using algorithm::index;
     using algorithm::losers;
+    using algorithm::owner;
     using algorithm::totals;
     using algorithm::worth;
 };
@@ -1913,6 +1914,52 @@ BC_AUTO_TEST_CASE(pool_algorithm__resolve__boundary_row__excluded)
     BC_REQUIRE(marks[0] == mark::excluded);
     BC_REQUIRE(marks[1] == mark::unmarked);
     BC_REQUIRE(marks[2] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__owners__multiple_inputs__row_of_each_input)
+{
+    descent_state descent{};
+    std::vector<link_t> owners{};
+    accessor::owners(owners, descent.columns());
+    BC_REQUIRE_EQUAL(owners.size(), 5u);
+    BC_REQUIRE_EQUAL(owners[0], 0u);
+    BC_REQUIRE_EQUAL(owners[1], 1u);
+    BC_REQUIRE_EQUAL(owners[2], 2u);
+    BC_REQUIRE_EQUAL(owners[3], 2u);
+    BC_REQUIRE_EQUAL(owners[4], 3u);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__owner__owners__same_as_search)
+{
+    descent_state descent{};
+    std::vector<link_t> owners{};
+    const auto searched = descent.columns();
+    auto owned = searched;
+    accessor::owners(owners, owned);
+    owned.owners = owners;
+    const graph_t by_owners{ owned };
+    const graph_t by_search{ searched };
+    BC_REQUIRE_EQUAL(accessor::owner(by_owners, 0), accessor::owner(by_search, 0));
+    BC_REQUIRE_EQUAL(accessor::owner(by_owners, 1), accessor::owner(by_search, 1));
+    BC_REQUIRE_EQUAL(accessor::owner(by_owners, 2), accessor::owner(by_search, 2));
+    BC_REQUIRE_EQUAL(accessor::owner(by_owners, 3), accessor::owner(by_search, 3));
+    BC_REQUIRE_EQUAL(accessor::owner(by_owners, 4), accessor::owner(by_search, 4));
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__resolve__owners__same_marks)
+{
+    auto labeled = label<link_t>();
+    std::vector<link_t> owners{};
+    auto columns = labeled.columns();
+    accessor::owners(owners, columns);
+    columns.owners = owners;
+    std_array<mark, rows> marks{};
+    accessor::resolve<link_t>(marks, columns, 1'024, 0, 20);
+    BC_REQUIRE(marks[0] == mark::unmarked);
+    BC_REQUIRE(marks[1] == mark::excluded);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+    BC_REQUIRE(marks[3] == mark::excluded);
+    BC_REQUIRE(marks[4] == mark::unmarked);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__pack__resolved_scenario__winners_ascending)

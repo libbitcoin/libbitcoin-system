@@ -563,6 +563,20 @@ inline bool algorithm::unconfirm(const columns_t& columns,
 // Template (frontier, table columns).
 // ----------------------------------------------------------------------------
 
+inline void algorithm::owners(std::vector<link_t>& out,
+    const columns_t& columns) NOEXCEPT
+{
+    out.resize(columns.rows.size());
+    for (size_t row{}; row < columns.edges.size(); ++row)
+    {
+        const auto slice = from_column(columns.edges[row]);
+        const auto first = std::min<size_t>(slice.first, out.size());
+        const auto last = std::min(first + slice.count, out.size());
+        std::fill(std::next(out.begin(), first), std::next(out.begin(), last),
+            possible_narrow_cast<link_t>(row));
+    }
+}
+
 template <typename Word>
 inline void algorithm::resolve(std::span<mark> marks,
     const columns_t& columns, size_t maximum_outcomes, uint64_t rate,
@@ -577,6 +591,7 @@ inline void algorithm::resolve(std::span<mark> marks,
     }
 
     std::vector<mask_t> masks{};
+    std::vector<link_t> pending{};
     for (size_t at{}; at < count; ++at)
     {
         // A component is resolved at its label, its lowest member row.
@@ -592,7 +607,7 @@ inline void algorithm::resolve(std::span<mark> marks,
         leaves(masks, component, graph, limit, rate, bytes_per_sigop);
         if (masks.empty())
         {
-            forfeit(marks, graph, row);
+            forfeit(pending, marks, graph, row);
             continue;
         }
 
@@ -601,7 +616,7 @@ inline void algorithm::resolve(std::span<mark> marks,
 
         for (size_t member{}; member < component.count; ++member)
             if (!get_right(chosen, member))
-                discard(marks, graph, component.rows[member]);
+                discard(pending, marks, graph, component.rows[member]);
     }
 }
 
@@ -747,8 +762,11 @@ constexpr algorithm::link_t algorithm::parent(const graph_t& graph,
 constexpr algorithm::link_t algorithm::owner(const graph_t& graph,
     link_t input) NOEXCEPT
 {
-    // The last row whose first input is not beyond the input.
     const auto count = graph.table.rows.size();
+    if (input < count && !graph.table.owners.empty())
+        return graph.table.owners[input];
+
+    // The last row whose first input is not beyond the input.
     const auto& edges = input < count ? graph.table.edges : graph.extra.edges;
     const auto after = std::upper_bound(edges.begin(), edges.end(), input,
         [](link_t at, const edges_t& edge) NOEXCEPT
@@ -1020,10 +1038,10 @@ constexpr bool algorithm::worth(uint64_t fee, uint64_t weight,
     return value > other;
 }
 
-inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
-    link_t row) NOEXCEPT
+inline void algorithm::discard(std::vector<link_t>& pending,
+    std::span<mark> marks, const graph_t& graph, link_t row) NOEXCEPT
 {
-    std::vector<link_t> pending{ row };
+    pending.assign(one, row);
     marks[row] = mark::excluded;
 
     while (!pending.empty())
@@ -1041,8 +1059,8 @@ inline void algorithm::discard(std::span<mark> marks, const graph_t& graph,
     }
 }
 
-inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
-    link_t row) NOEXCEPT
+inline void algorithm::forfeit(std::vector<link_t>& pending,
+    std::span<mark> marks, const graph_t& graph, link_t row) NOEXCEPT
 {
     std::vector<link_t> found{ row };
     const auto add = [&](link_t next) NOEXCEPT
@@ -1057,7 +1075,7 @@ inline void algorithm::forfeit(std::span<mark> marks, const graph_t& graph,
         each_member(graph, found[at], add);
 
     for (const auto member: found)
-        discard(marks, graph, member);
+        discard(pending, marks, graph, member);
 }
 
 inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
