@@ -360,7 +360,7 @@ public:
     static constexpr uint64_t evaluate(const std::span<const mask_t>& outcomes,
         const component_t& component, const graph_t& graph) NOEXCEPT;
 
-    /// Outcomes scored: first within limit, then greedy leaf past it.
+    /// Distinct outcomes within limit, then greedy leaf past it.
     static void leaves(std::vector<mask_t>& out, const component_t& component,
         const graph_t& graph, size_t limit, uint64_t rate,
         uint32_t bytes_per_sigop) NOEXCEPT;

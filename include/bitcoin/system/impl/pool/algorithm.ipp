@@ -463,14 +463,92 @@ inline void algorithm::leaves(std::vector<mask_t>& out,
     const component_t& component, const graph_t& graph, size_t limit,
     uint64_t rate, uint32_t bytes_per_sigop) NOEXCEPT
 {
-    const auto count = outcomes(component);
-    const auto total = std::min(count, limit);
-    out.resize(total);
-    for (size_t index{}; index < total; ++index)
-        out[index] = outcome(component, index);
+    out.clear();
+    if (is_zero(limit))
+        return;
 
-    if (is_nonzero(total) && count > total)
-        out.push_back(greedy(component, graph, rate, bytes_per_sigop));
+    const auto all = unmask_right<mask_t>(component.count);
+    const auto contests = component.contests;
+    if (is_zero(contests))
+    {
+        out.push_back(all);
+        return;
+    }
+
+    std_array<mask_t, maximum_members> below{};
+    for (size_t member{}; member < component.count; ++member)
+        for (size_t up{}; up < component.count; ++up)
+            if (get_right(component.ancestors[member], up))
+                set_right_into(below[up], member);
+
+    // Losers and their descendants join the dead.
+    const auto kill = [&](mask_t dead, mask_t losers) NOEXCEPT
+    {
+        dead |= losers;
+        for (; is_nonzero(losers); losers &= sub1(losers))
+            dead |= below[right_zeros(losers)];
+
+        return dead;
+    };
+
+    // Dead winners of a clique yield one outcome, so only the first is tried.
+    std_array<mask_t, add1(maximum_members)> deads{};
+    std_array<mask_t, add1(maximum_members)> rests{};
+    std_array<bool, add1(maximum_members)> spent{};
+    size_t level{};
+    rests[level] = component.cliques[level];
+    while (true)
+    {
+        if (level == contests)
+        {
+            if (out.size() == limit)
+            {
+                out.push_back(greedy(component, graph, rate, bytes_per_sigop));
+                return;
+            }
+
+            out.push_back(bit_and(all, bit_not(deads[level])));
+            --level;
+            continue;
+        }
+
+        const auto clique = component.cliques[level];
+        auto& rest = rests[level];
+        auto descend = false;
+        while (!descend && is_nonzero(rest))
+        {
+            const auto winner = bit_and(rest, twos_complement(rest));
+            rest &= sub1(rest);
+            if (is_nonzero(bit_and(winner, deads[level])))
+            {
+                if (spent[level])
+                    continue;
+
+                spent[level] = true;
+            }
+
+            deads[add1(level)] = kill(deads[level],
+                bit_and(clique, bit_not(winner)));
+            descend = true;
+        }
+
+        if (descend)
+        {
+            ++level;
+            if (level < contests)
+            {
+                rests[level] = component.cliques[level];
+                spent[level] = false;
+            }
+
+            continue;
+        }
+
+        if (is_zero(level))
+            return;
+
+        --level;
+    }
 }
 
 constexpr uint64_t algorithm::chargeable(const component_t& component,

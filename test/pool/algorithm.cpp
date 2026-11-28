@@ -1814,8 +1814,28 @@ BC_AUTO_TEST_CASE(pool_algorithm__leaves__past_limit__first_and_greedy)
     accessor::leaves(out, scenario, graph, 2, 0, 20);
     BC_REQUIRE_EQUAL(out.size(), 3u);
     BC_REQUIRE_EQUAL(out[0], accessor::outcome(scenario, 0));
-    BC_REQUIRE_EQUAL(out[1], accessor::outcome(scenario, 1));
+    BC_REQUIRE_EQUAL(out[1], accessor::outcome(scenario, 2));
     BC_REQUIRE_EQUAL(out[2], 0b10101u);
+}
+
+// 0, 1 rival; 2, 3 rival children of 0; 4 child of 1: 1 winning kills 2 and 3.
+BC_AUTO_TEST_CASE(pool_algorithm__leaves__nested_clique_dead__distinct_outcomes)
+{
+    component_t nested{};
+    nested.count = 5;
+    nested.ancestors[2] = 0b00001;
+    nested.ancestors[3] = 0b00001;
+    nested.ancestors[4] = 0b00010;
+    nested.cliques[0] = 0b00011;
+    nested.cliques[1] = 0b01100;
+    nested.contests = 2;
+    std::vector<mask_t> out{};
+    accessor::leaves(out, nested, graph_t{}, 1'024, 0, 20);
+    BC_REQUIRE_EQUAL(accessor::outcomes(nested), 4u);
+    BC_REQUIRE_EQUAL(out.size(), 3u);
+    BC_REQUIRE_EQUAL(out[0], 0b00101u);
+    BC_REQUIRE_EQUAL(out[1], 0b01001u);
+    BC_REQUIRE_EQUAL(out[2], 0b10010u);
 }
 
 BC_AUTO_TEST_CASE(pool_algorithm__leaves__zero_limit__empty)
