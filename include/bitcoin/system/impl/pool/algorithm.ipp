@@ -193,14 +193,19 @@ constexpr bool algorithm::collect(component_t& out, const graph_t& graph,
     link_t row) NOEXCEPT
 {
     out = {};
+    std_array<link_t, maximum_members> sorted{};
     const auto add = [&](link_t found) NOEXCEPT
     {
-        if (index(out, found) != maximum_members)
+        const auto end = std::next(sorted.begin(), out.count);
+        const auto at = std::lower_bound(sorted.begin(), end, found);
+        if (at != end && *at == found)
             return true;
 
         if (out.count == maximum_members)
             return false;
 
+        std::move_backward(at, end, std::next(end));
+        *at = found;
         out.rows[out.count++] = found;
         return true;
     };
@@ -212,13 +217,22 @@ constexpr bool algorithm::collect(component_t& out, const graph_t& graph,
         if (!each_member(graph, out.rows[at], add))
             return false;
 
-    std::sort(out.rows.begin(), std::next(out.rows.begin(), out.count));
+    out.rows = sorted;
     return true;
 }
 
 constexpr bool algorithm::relate(component_t& out,
     const graph_t& graph) NOEXCEPT
 {
+    const auto first = out.rows.begin();
+    const auto last = std::next(first, out.count);
+    const auto locate = [&](link_t row) NOEXCEPT
+    {
+        const auto at = std::lower_bound(first, last, row);
+        return at != last && *at == row ?
+            to_unsigned(std::distance(first, at)) : maximum_members;
+    };
+
     out.contests = zero;
     for (size_t member{}; member < out.count; ++member)
     {
@@ -228,14 +242,14 @@ constexpr bool algorithm::relate(component_t& out,
         for (auto input = slice.first; input < slice.first + slice.count;
             ++input)
         {
-            const auto up = index(out, parent(graph, input));
+            const auto up = locate(parent(graph, input));
             if (up != maximum_members)
                 set_right_into(direct, up);
 
             auto clique = set_right(mask_t{}, member);
             each_rival(graph, input, [&](link_t other) NOEXCEPT
             {
-                const auto rival_member = index(out, owner(graph, other));
+                const auto rival_member = locate(owner(graph, other));
                 if (rival_member != maximum_members)
                     set_right_into(clique, rival_member);
             });
@@ -263,9 +277,8 @@ constexpr bool algorithm::relate(component_t& out,
         for (size_t member{}; member < out.count; ++member)
         {
             auto ancestors = out.ancestors[member];
-            for (size_t up{}; up < out.count; ++up)
-                if (get_right(ancestors, up))
-                    ancestors |= out.ancestors[up];
+            for (auto ups = ancestors; is_nonzero(ups); ups &= sub1(ups))
+                ancestors |= out.ancestors[right_zeros(ups)];
 
             if (ancestors != out.ancestors[member])
             {

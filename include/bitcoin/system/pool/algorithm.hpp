@@ -325,7 +325,7 @@ public:
     static constexpr bool collect(component_t& out, const graph_t& graph,
         link_t row) NOEXCEPT;
 
-    /// Ancestor and clique masks of the rows, false if over maximum_members.
+    /// Ancestor and clique masks of the ascending rows, false if over maximum.
     static constexpr bool relate(component_t& out,
         const graph_t& graph) NOEXCEPT;
 
