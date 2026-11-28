@@ -673,42 +673,56 @@ inline void algorithm::resolve(std::span<mark> marks,
     const columns_t& columns, size_t maximum_outcomes, uint64_t rate,
     uint32_t bytes_per_sigop) NOEXCEPT
 {
+    constexpr auto policy = execution::par;
     const graph_t graph{ columns };
     const auto count = columns.cells.size();
-    for (size_t row{}; row < count; ++row)
-    {
-        const auto present = is_present(from_column(columns.cells[row]));
-        marks[row] = present ? mark::unmarked : mark::excluded;
-    }
-
-    std::vector<mask_t> masks{};
-    std::vector<link_t> pending{};
-    for (size_t at{}; at < count; ++at)
-    {
-        // A component is resolved at its label, its lowest member row.
-        const auto row = possible_narrow_cast<link_t>(at);
-        const auto label = cell(graph, row);
-        if (!is_labeled(label) || label != row)
-            continue;
-
-        component_t component{};
-        const auto collected = collect(component, graph, row);
-        const auto related = collected && relate(component, graph);
-        const auto limit = related ? maximum_outcomes : zero;
-        leaves(masks, component, graph, limit, rate, bytes_per_sigop);
-        if (masks.empty())
+    std::transform(policy, columns.cells.begin(), columns.cells.end(),
+        marks.begin(), [](link_t value) NOEXCEPT
         {
-            forfeit(pending, marks, graph, row);
-            continue;
-        }
+            return is_present(from_column(value)) ? mark::unmarked :
+                mark::excluded;
+        });
 
-        const auto chosen = masks[best<Word>(masks, component, graph, rate,
-            bytes_per_sigop)];
+    // Components and the descendants they discard are disjoint in rows.
+    const auto workers = execution::thread_pool::get().size();
+    const auto width = std::max(ceilinged_divide(count, workers), one);
+    std::vector<size_t> ranges(ceilinged_divide(count, width));
+    std::iota(ranges.begin(), ranges.end(), zero);
+    std::for_each(policy, ranges.cbegin(), ranges.cend(),
+        [&](size_t range) NOEXCEPT
+        {
+            std::vector<mask_t> masks{};
+            std::vector<link_t> pending{};
+            const auto first = range * width;
+            const auto last = std::min(first + width, count);
+            for (auto at = first; at < last; ++at)
+            {
+                // A component is resolved at its label, its lowest member row.
+                const auto row = possible_narrow_cast<link_t>(at);
+                const auto label = cell(graph, row);
+                if (!is_labeled(label) || label != row)
+                    continue;
 
-        for (size_t member{}; member < component.count; ++member)
-            if (!get_right(chosen, member))
-                discard(pending, marks, graph, component.rows[member]);
-    }
+                component_t component{};
+                const auto collected = collect(component, graph, row);
+                const auto related = collected && relate(component, graph);
+                const auto limit = related ? maximum_outcomes : zero;
+                leaves(masks, component, graph, limit, rate, bytes_per_sigop);
+                if (masks.empty())
+                {
+                    forfeit(pending, marks, graph, row);
+                    continue;
+                }
+
+                const auto chosen = masks[best<Word>(masks, component, graph,
+                    rate, bytes_per_sigop)];
+
+                for (size_t member{}; member < component.count; ++member)
+                    if (!get_right(chosen, member))
+                        discard(pending, marks, graph,
+                            component.rows[member]);
+            }
+        });
 }
 
 inline void algorithm::pack(std::vector<link_t>& out, std::span<mark> marks,
