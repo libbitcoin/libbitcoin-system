@@ -2090,6 +2090,35 @@ BC_AUTO_TEST_CASE(pool_algorithm__pack__closure_remainder__outrates_next_cluster
     BC_REQUIRE(marks[2] == mark::unmarked);
 }
 
+// Bound of B, C, D (400) yields to A (300) once the cluster offers (140).
+BC_AUTO_TEST_CASE(pool_algorithm__pack__cluster_bound_over_row__row_taken)
+{
+    apart_state apart{};
+    apart.totals[0] = accessor::to_column(totals_t{ 300, 100, 0 });
+    std_array<mark, 4> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, apart.columns(), { 0, 100, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 1u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE(marks[1] == mark::unmarked);
+    BC_REQUIRE(marks[2] == mark::unmarked);
+    BC_REQUIRE(marks[3] == mark::unmarked);
+}
+
+BC_AUTO_TEST_CASE(pool_algorithm__pack__cluster_bound_whole_budget__all_taken)
+{
+    apart_state apart{};
+    apart.totals[0] = accessor::to_column(totals_t{ 300, 100, 0 });
+    std_array<mark, 4> marks{};
+    std::vector<link_t> out{};
+    accessor::pack(out, marks, apart.columns(), { 0, 400, 100 }, 25, 20);
+    BC_REQUIRE_EQUAL(out.size(), 4u);
+    BC_REQUIRE_EQUAL(out[0], 0u);
+    BC_REQUIRE_EQUAL(out[1], 1u);
+    BC_REQUIRE_EQUAL(out[2], 2u);
+    BC_REQUIRE_EQUAL(out[3], 3u);
+}
+
 // The chunk of J with L (500) leaves K alone (700), which outrates Q (400).
 BC_AUTO_TEST_CASE(pool_algorithm__pack__chunk_descendant__outrates_next_cluster)
 {

@@ -161,7 +161,7 @@ public:
         bool complete{ true };
     };
 
-    /// Offer of chunk of row, or closure of its cluster (count from first).
+    /// Offer of chunk, closure (count from first), or cluster bound (none).
     struct offer_t
     {
         link_t row{};

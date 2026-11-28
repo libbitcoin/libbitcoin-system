@@ -1186,12 +1186,17 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return !least.empty() && least.front().first <= value;
     };
 
-    // The highest rate is on top, the lowest row of equal rates, and the
-    // latest offer of the same row.
+    // The highest rate is on top, a bound over offers of equal rate, the
+    // lowest row of equal rates, and the latest offer of the same row.
     const auto lower = [](const offer_t& left, const offer_t& right) NOEXCEPT
     {
         if (left.rate != right.rate)
             return left.rate < right.rate;
+
+        const auto left_bound = left.count == none;
+        const auto right_bound = right.count == none;
+        if (left_bound != right_bound)
+            return right_bound;
 
         return left.row == right.row ? left.order < right.order :
             left.row > right.row;
@@ -1358,6 +1363,19 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
         return place;
     };
 
+    // Rows of the ring of the first place of a cluster.
+    const auto gather = [&](link_t place) NOEXCEPT
+    {
+        group.clear();
+        auto member = place;
+        do
+        {
+            group.push_back(open[member]);
+            member = ring[member];
+        }
+        while (member != place);
+    };
+
     // Each place is joined to an earlier place of its cluster (the first to
     // itself) and is in a ring of the places of its cluster, which is partial
     // (at its first place) if a row of it has an excluded parent. Each
@@ -1406,17 +1424,35 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             if (joined[place] != place)
                 continue;
 
-            group.clear();
-            auto member = place;
-            do
+            gather(place);
+            if (is_one(group.size()))
             {
-                group.push_back(open[member]);
-                member = ring[member];
+                propose(!partial[place], true);
+                continue;
             }
-            while (member != place);
 
-            propose(!partial[place] && group.size() <= maximum_members, true);
+            // No offer of cluster exceeds the rate of its best row.
+            uint64_t most{};
+            for (const auto member: group)
+            {
+                const auto own = totals(graph, member);
+                most = std::max(most, fee_rate(own.fee,
+                    chargeable(own, bytes_per_sigop)));
+            }
+
+            push({ group.front(), none, {}, {}, most, {} });
         }
+    };
+
+    // Cluster of bound proposes as when formed, with the whole budget.
+    const auto unfold = [&](link_t row) NOEXCEPT
+    {
+        const auto place = lowest(places[row - base]);
+        gather(place);
+        const auto spent = used;
+        used = {};
+        propose(!partial[place] && group.size() <= maximum_members, true);
+        used = spent;
     };
 
     if (!current)
@@ -1518,6 +1554,12 @@ inline void algorithm::pack_(std::vector<link_t>& out, takes_t& takes,
             std::pop_heap(others.begin(), others.end(), lower);
             score = others.back();
             others.pop_back();
+        }
+
+        if (score.count == none)
+        {
+            unfold(score.row);
+            continue;
         }
 
         totals_t sum{};
